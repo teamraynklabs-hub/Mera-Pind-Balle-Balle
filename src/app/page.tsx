@@ -1,12 +1,12 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button"
+import Navbar from "@/components/navbar";
 
 
 export default function Main() {
   return (
     <div>
-      Welcome to Next.js!
-      <Button>Click me</Button>
+      <Navbar />
     </div>
   );
 }
