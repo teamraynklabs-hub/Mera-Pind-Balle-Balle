@@ -1,9 +1,87 @@
-import Image from "next/image";
+import axios from "axios";
+import { getBaseUrl } from "@/lib/getBaseUrl";
+import type { Metadata } from "next";
+import DistributorsForm from "./DistributorsForm";
 
-export default function Distributors() {
+export const metadata: Metadata = {
+  title: "Distributors — Mera Pind",
+  description:
+    "Become an official distributor for Mera Pind and promote rural-made products backed by training, quality, and sustainability.",
+};
+
+// GET data SSR
+async function getDistributorInfo() {
+  try {
+    const base = getBaseUrl();
+    const res = await axios.get(`${base}/api/distributors`);
+    return res.data;
+  } catch (err) {
+    console.error("DISTRIBUTOR GET ERROR:", err);
+    return null;
+  }
+}
+
+export default async function DistributorsPage() {
+  const info = await getDistributorInfo();
+
+  if (!info)
+    return (
+      <main className="container mx-auto px-4 py-16 text-center">
+        <p className="text-muted-foreground">
+          Unable to load distributor data.
+        </p>
+      </main>
+    );
+
   return (
-    <div>
-      Welcome to the Distributors page!
-    </div>
+    <main className="container mx-auto px-4 py-12">
+      {/* BANNER */}
+      <section className="mb-16">
+        <img
+          src={info.bannerImage}
+          alt="Distributors"
+          className="w-full h-72 object-cover rounded-xl shadow"
+        />
+      </section>
+
+      {/* INTRO */}
+      <section className="text-center mb-16">
+        <h1 className="text-4xl font-bold mb-4">Become a Distributor</h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Join us in bringing high-quality rural products to more cities while
+          creating meaningful economic impact.
+        </p>
+      </section>
+
+      {/* BENEFITS & REQUIREMENTS */}
+      <section className="grid md:grid-cols-2 gap-10 mb-20">
+        {/* Benefits */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Why Partner With Us?</h2>
+          <ul className="space-y-3 text-muted-foreground">
+            {info.benefits.map((b: string, i: number) => (
+              <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
+                • {b}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Requirements */}
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Distributor Requirements</h2>
+          <ul className="space-y-3 text-muted-foreground">
+            {info.requirements.map((r: string, i: number) => (
+              <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
+                • {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* FORM COMPONENT */}
+      <DistributorsForm />
+    </main>
   );
 }

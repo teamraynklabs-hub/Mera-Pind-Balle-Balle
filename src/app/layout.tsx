@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
+import Navbar from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: "Mera Pind Balle Balle – Rural Women Empowerment Web Application",
@@ -23,6 +24,8 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+
+          <Navbar />
           {children}
         </ThemeProvider>
       </body>
