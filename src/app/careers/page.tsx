@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 import CareersForm from "./CareersForm";
 
 export const metadata: Metadata = {
-  title: "Careers — Mera Pind",
+  title: "Careers — Mera Pind Balle Balle",
   description:
-    "Join Mera Pind to make a meaningful impact in rural development, empowerment, and sustainable community growth.",
+    "Join Mera Pind Balle Balle to make a meaningful impact in rural development, empowerment, and sustainable community growth.",
 };
 
 // SSR fetch

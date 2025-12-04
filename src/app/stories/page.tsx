@@ -3,9 +3,9 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Success Stories — Mera Pind",
+  title: "Success Stories — Mera Pind Balle Balle",
   description:
-    "Real stories from rural communities, artisans, farmers, and women entrepreneurs empowered by Mera Pind initiatives.",
+    "Real stories from rural communities, artisans, farmers, and women entrepreneurs empowered by Mera Pind Balle Balle initiatives.",
 };
 
 // Backend Fetch
@@ -80,7 +80,7 @@ export default async function StoriesPage() {
       <section className="py-12 text-center bg-accent rounded-xl shadow-sm">
         <h2 className="text-2xl font-semibold mb-3">Share Your Story</h2>
         <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-          Have you been a part of a Mera Pind initiative? Your story can inspire
+          Have you been a part of a Mera Pind Balle Balle initiative? Your story can inspire
           many others in the community.
         </p>
 

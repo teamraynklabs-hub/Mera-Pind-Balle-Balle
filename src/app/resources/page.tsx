@@ -3,9 +3,9 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Resources — Mera Pind",
+  title: "Resources — Mera Pind Balle Balle",
   description:
-    "Access downloadable brochures, reports, policies, and important documentation from Mera Pind.",
+    "Access downloadable brochures, reports, policies, and important documentation from Mera Pind Balle Balle.",
 };
 
 // SSR Fetch

@@ -1,29 +1,26 @@
 [
   {
-    "id": 1,
-    "slug": "rural-handicrafts-transforming-economies",
-    "title": "How Rural Handicrafts Are Transforming Local Economies",
-    "image": "https://placehold.co/1200x600?text=Blog+1",
-    "date": "2024-12-01",
-    "summary": "A detailed look at how handicraft training and marketplace support are helping villages generate sustainable income.",
-    "content": "Full long article content will be added here. This section represents how rural handicrafts are creating new opportunities, empowering artisans, and supporting sustainable village growth."
-  },
-  {
-    "id": 2,
-    "slug": "rise-of-organic-farming",
-    "title": "The Rise of Organic Farming in Punjab Villages",
-    "image": "https://placehold.co/1200x600?text=Blog+2",
-    "date": "2024-11-15",
-    "summary": "A remarkable shift from chemical farming to organic practices across many rural areas.",
-    "content": "Full blog content here explaining the advantages, challenges, and success stories of organic farming in villages."
-  },
-  {
-    "id": 3,
-    "slug": "women-empowerment-self-help-groups",
-    "title": "Empowering Women Through Self-Help Groups",
-    "image": "https://placehold.co/1200x600?text=Blog+3",
+    "slug": "rural-women-empowerment",
+    "title": "Rural Women Empowerment Through Skill Training",
+    "excerpt": "How women in villages are transforming their lives through skill development.",
+    "image": "https://via.placeholder.com/800x500",
     "date": "2024-10-10",
-    "summary": "A story of resilience and empowerment through collaborative growth and small-scale industries.",
-    "content": "Full detailed article describing how women are achieving financial independence through SHGs."
+    "content": "Full blog content goes here..."
+  },
+  {
+    "slug": "organic-farming-success",
+    "title": "Success Stories in Organic Farming",
+    "excerpt": "Farmers embracing sustainable organic farming techniques.",
+    "image": "https://via.placeholder.com/800x500",
+    "date": "2024-11-01",
+    "content": "Full blog content goes here..."
+  },
+  {
+    "slug": "self-help-groups",
+    "title": "The Growth of Self-Help Groups in Punjab Villages",
+    "excerpt": "How community-driven SHGs are driving rural progress.",
+    "image": "https://via.placeholder.com/800x500",
+    "date": "2024-07-25",
+    "content": "Full blog content goes here..."
   }
 ]

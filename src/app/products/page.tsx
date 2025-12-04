@@ -3,7 +3,7 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Products — Mera Pind",
+  title: "Products — Mera Pind Balle Balle",
   description:
     "Explore our authentic rural products including handcrafted items, organic food, natural produce and sustainable village-based goods.",
 };

@@ -3,9 +3,9 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Initiatives — Mera Pind",
+  title: "Initiatives — Mera Pind Balle Balle",
   description:
-    "Explore Mera Pind’s rural empowerment initiatives including skill training, women empowerment, sustainable farming and product innovation.",
+    "Explore Mera Pind Balle Balle’s rural empowerment initiatives including skill training, women empowerment, sustainable farming and product innovation.",
 };
 
 // Fetch backend data (SSR-safe)

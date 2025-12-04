@@ -3,9 +3,9 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About — Mera Pind | Empowering Rural Communities",
+  title: "About — Mera Pind Balle Balle | Empowering Rural Communities",
   description:
-    "Learn about Mera Pind’s mission, vision, values, rural empowerment approach, and the team behind sustainable change.",
+    "Learn about Mera Pind Balle Balle’s mission, vision, values, rural empowerment approach, and the team behind sustainable change.",
 };
 
 /* ------------------------
@@ -46,11 +46,11 @@ export default async function AboutPage() {
       <section className="grid md:grid-cols-2 gap-10 items-center mb-20">
         <div>
           <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
-            About Mera Pind
+            About Mera Pind Balle Balle
           </h1>
 
           <p className="text-lg text-muted-foreground max-w-prose">
-            Mera Pind is building sustainable village-level ecosystems by
+            Mera Pind Balle Balle is building sustainable village-level ecosystems by
             empowering artisans, farmers, and rural entrepreneurs with skills,
             market access, and fair compensation systems.
           </p>
@@ -59,7 +59,7 @@ export default async function AboutPage() {
         <div className="rounded-xl overflow-hidden shadow-lg">
           <img
             src={data.heroImage}
-            alt="About Mera Pind"
+            alt="About Mera Pind Balle Balle"
             className="w-full h-auto object-cover"
           />
         </div>

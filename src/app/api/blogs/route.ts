@@ -1,21 +1,36 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import blogs from "@/lib/dummy/blogs.json";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const jsonPath = path.join(
-      process.cwd(),
-      "src",
-      "lib",
-      "dummy",
-      "blogs.json"
-    );
+    const { searchParams } = new URL(req.url);
 
-    const raw = fs.readFileSync(jsonPath, "utf8");
-    return NextResponse.json(JSON.parse(raw));
-  } catch (err: any) {
-    console.error("BLOG API ERROR:", err.message);
-    return NextResponse.json({ error: "Failed to load blogs" }, { status: 500 });
+    const search = (searchParams.get("search") || "").toLowerCase();
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 6;
+
+    // SEARCH FILTER
+    let filteredBlogs = blogs;
+
+    if (search) {
+      filteredBlogs = blogs.filter((b) =>
+        b.title.toLowerCase().includes(search)
+      );
+    }
+
+    // PAGINATION
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginatedBlogs = filteredBlogs.slice(start, end);
+
+    return NextResponse.json({
+      blogs: paginatedBlogs,
+      total: filteredBlogs.length,
+      page,
+      limit,
+    });
+  } catch (error) {
+    console.error("BLOG API ERROR:", error);
+    return NextResponse.json({ message: "Server Error" }, { status: 500 });
   }
 }

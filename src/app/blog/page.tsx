@@ -3,42 +3,72 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Blog — Mera Pind",
+  title: "Blog — Mera Pind Balle Balle",
   description:
-    "Explore inspiring stories, updates, and insights about rural development, empowerment, and sustainable growth.",
+    "Read inspiring stories, updates, and news from rural communities.",
 };
 
-async function getBlogs() {
+// Fetch blogs (search + pagination)
+async function fetchBlogs(search: string, page: number, limit: number) {
   try {
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/blogs`);
+    const res = await axios.get(`${base}/api/blogs`, {
+      params: { search, page, limit },
+    });
+
     return res.data;
   } catch (error) {
     console.error("BLOG FETCH ERROR:", error);
-    return [];
+    return { blogs: [], total: 0 };
   }
 }
 
-export default async function BlogPage() {
-  const blogs = await getBlogs();
+export default async function BlogPage(props: any) {
+  // NEXT FIX — unwrap the promise first
+  const searchParams = await props.searchParams;
+
+  const search = searchParams?.search ?? "";
+  const page = Number(searchParams?.page ?? 1);
+  const limit = 6;
+
+  const { blogs, total } = await fetchBlogs(search, page, limit);
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <main className="container mx-auto px-4 py-12">
-
-      {/* PAGE HEADER */}
-      <section className="text-center mb-16">
+      {/* TITLE */}
+      <section className="mb-12 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Latest Blogs</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Read inspiring stories and updates from our community initiatives.
+          Explore real stories, updates and inspiring journeys from rural India.
         </p>
       </section>
 
+      {/* SEARCH BAR */}
+      <form className="max-w-md mx-auto mb-12" method="GET">
+        <input
+          type="text"
+          name="search"
+          placeholder="Search blogs..."
+          defaultValue={search}
+          className="w-full px-4 py-3 border rounded-lg bg-background shadow-sm"
+        />
+
+        <button
+          type="submit"
+          className="mt-3 w-full bg-primary text-white py-2 rounded-md"
+        >
+          Search
+        </button>
+      </form>
+
       {/* BLOG GRID */}
-      <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
+      <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">
         {blogs.map((blog: any) => (
-          <article
+          <a
             key={blog.slug}
-            className="bg-card border rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition"
+            href={`/blog/${blog.slug}`}
+            className="block bg-card border rounded-xl shadow-sm hover:shadow-lg transition"
           >
             <img
               src={blog.image}
@@ -47,26 +77,51 @@ export default async function BlogPage() {
             />
 
             <div className="p-6">
-              <p className="text-xs text-muted-foreground mb-2">
+              <h2 className="text-xl font-semibold mb-2">{blog.title}</h2>
+              <p className="text-sm text-muted-foreground line-clamp-3">
+                {blog.excerpt}
+              </p>
+
+              <p className="text-xs text-primary mt-3">
                 {new Date(blog.date).toDateString()}
               </p>
-
-              <h3 className="text-xl font-semibold mb-2">{blog.title}</h3>
-
-              <p className="text-sm text-muted-foreground mb-4">
-                {blog.summary}
-              </p>
-
-              <a
-                href={`/blog/${blog.slug}`}
-                className="text-primary text-sm font-medium hover:underline"
-              >
-                Read More →
-              </a>
             </div>
-          </article>
+          </a>
         ))}
       </section>
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <section className="flex justify-center items-center gap-4 mt-10">
+          {/* PREVIOUS */}
+          <a
+            href={`?search=${search}&page=${page - 1}`}
+            className={`px-4 py-2 border rounded-md ${
+              page <= 1
+                ? "opacity-40 pointer-events-none"
+                : "hover:bg-accent transition"
+            }`}
+          >
+            Previous
+          </a>
+
+          <span className="px-4 py-2 text-sm bg-accent rounded-md">
+            Page {page} / {totalPages}
+          </span>
+
+          {/* NEXT */}
+          <a
+            href={`?search=${search}&page=${page + 1}`}
+            className={`px-4 py-2 border rounded-md ${
+              page >= totalPages
+                ? "opacity-40 pointer-events-none"
+                : "hover:bg-accent transition"
+            }`}
+          >
+            Next
+          </a>
+        </section>
+      )}
     </main>
   );
 }

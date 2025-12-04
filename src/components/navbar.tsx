@@ -5,56 +5,69 @@ import Link from "next/link";
 import Image from "next/image";
 import { ModeToggle } from "@/components/ui/toggleBtn";
 import { Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname(); // <-- Detect current route
 
+  // NAV ITEMS
   const navItems = [
     { title: "Home", href: "/" },
     { title: "About Us", href: "/about" },
-    { title: "Initiatives", href: "/services" },
+    { title: "Services", href: "/services" },
     { title: "Products", href: "/products" },
+    { title: "Blog", href: "/blog" },
     { title: "Stories", href: "/stories" },
-    { title: "Resources", href: "/resources" },
-    { title: "Distributors", href: "/distributors" },
-    { title: "Careers", href: "/careers" },
     { title: "Contact", href: "/contact" },
   ];
 
   return (
-    <header className="w-full border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="w-full border-b bg-background/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
 
         {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.jpeg"
-            alt="Brand Logo"
-            width={40}
-            height={40}
-            className="h-10 w-10 object-contain"
-          />
-          <span className="font-semibold text-xl tracking-tight">
-            Mera Pind
-          </span>
+        <Link href="/" className="flex items-center gap-3">
+          <div className="h-11 w-11 rounded-full overflow-hidden border shadow-sm">
+            <Image
+              src="/logo.jpeg"
+              alt="Brand Logo"
+              width={44}
+              height={44}
+              className="object-cover h-full w-full"
+            />
+          </div><span className="font-semibold text-xl tracking-tight">Mera Pind</span>
         </Link>
 
         {/* DESKTOP MENU */}
         <nav className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.title}
-              href={item.href}
-              className="text-sm font-medium hover:text-primary transition-colors"
-            >
-              {item.title}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(item.href));
+
+            return (
+              <Link
+                key={item.title}
+                href={item.href}
+                className={`text-sm font-medium transition-colors relative 
+                  ${isActive ? "text-primary" : "hover:text-primary"}
+                `}
+              >
+                {item.title}
+
+                {/* UNDERLINE FOR ACTIVE TAB */}
+                {isActive && (
+                  <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-primary rounded-full"></span>
+                )}
+              </Link>
+            );
+          })}
 
           <ModeToggle />
         </nav>
 
-        {/* MOBILE MENU BUTTON */}
+        {/* MOBILE HAMBURGER */}
         <button
           className="md:hidden p-2 rounded-md hover:bg-accent"
           onClick={() => setOpen(!open)}
@@ -65,20 +78,28 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       {open && (
-        <div className="md:hidden bg-background border-t px-4 py-4">
+        <div className="md:hidden bg-background border-t px-4 py-4 shadow-md">
           <nav className="flex flex-col gap-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.title}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="text-sm py-2 font-medium hover:text-primary transition-colors"
-              >
-                {item.title}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(item.href));
 
-            <div className="flex justify-between items-center mt-4">
+              return (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`text-sm py-2 font-medium transition-colors 
+                    ${isActive ? "text-primary underline" : "hover:text-primary"}
+                  `}
+                >
+                  {item.title}
+                </Link>
+              );
+            })}
+
+            <div className="flex justify-start items-center mt-4">
               <ModeToggle />
             </div>
           </nav>

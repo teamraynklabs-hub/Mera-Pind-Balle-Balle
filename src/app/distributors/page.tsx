@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 import DistributorsForm from "./DistributorsForm";
 
 export const metadata: Metadata = {
-  title: "Distributors — Mera Pind",
+  title: "Distributors — Mera Pind Balle Balle",
   description:
-    "Become an official distributor for Mera Pind and promote rural-made products backed by training, quality, and sustainability.",
+    "Become an official distributor for Mera Pind Balle Balle and promote rural-made products backed by training, quality, and sustainability.",
 };
 
 // GET data SSR
