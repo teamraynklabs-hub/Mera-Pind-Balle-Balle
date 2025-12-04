@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About — Mera Pind Balle Balle | Empowering Rural Communities",
   description:
-    "Learn about Mera Pind Balle Balle’s mission, vision, values, rural empowerment approach, and the team behind sustainable change.",
+    "Learn about Mera Pind Balle Balle's mission, vision, values, rural empowerment approach, and the team behind sustainable change.",
 };
 
 /* ------------------------

@@ -9,7 +9,7 @@ export default function Footer() {
     <footer className="w-full bg-background border-t pt-12 mt-16">
       <div className="container mx-auto px-4">
 
-        {/* GRID — ALWAYS LEFT (NO CENTER ANYWHERE) */}
+        {/* GRID — ALWAYS LEFT */}
         <div
           className="
             grid 
@@ -25,7 +25,7 @@ export default function Footer() {
           {/* BRAND + DESCRIPTION */}
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-full overflow-hidden border shadow-sm bg-background">
+              <div className="h-12 w-12 rounded-full overflow-hidden border shadow-sm">
                 <Image
                   src="/logo.jpeg"
                   alt="Brand Logo"
@@ -72,38 +72,71 @@ export default function Footer() {
 
           {/* LEGAL + SOCIAL */}
           <div className="flex flex-col items-start">
-            <h3 className="text-lg font-semibold mb-4 tracking-wide">Legal & Social</h3>
+            <h3 className="text-lg font-semibold mb-4 tracking-wide">
+              Legal & Social
+            </h3>
 
             <ul className="space-y-3 text-sm">
               <li><Link href="/privacy-policy" className="footer-link">Privacy Policy</Link></li>
               <li><Link href="/terms-conditions" className="footer-link">Terms & Conditions</Link></li>
             </ul>
 
-            {/* Social Icons */}
+            {/* SOCIAL ICONS (Link ONLY) */}
             <div className="flex gap-4 mt-6">
-              <Link href="#" aria-label="Facebook">
-                <Facebook size={22} className="hover:text-primary transition-all duration-200 hover:-translate-y-1" />
+
+              <Link
+                href="https://www.facebook.com/profile.php?id=61583956350717"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                <Facebook size={22} className="social-icon" />
               </Link>
-              <Link href="#" aria-label="Instagram">
-                <Instagram size={22} className="hover:text-primary transition-all duration-200 hover:-translate-y-1" />
+
+              <Link
+                href="https://www.instagram.com/merapindballeballe/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                <Instagram size={22} className="social-icon" />
               </Link>
-              <Link href="#" aria-label="Twitter">
-                <Twitter size={22} className="hover:text-primary transition-all duration-200 hover:-translate-y-1" />
+
+              <Link
+                href="https://x.com/Merapindballe"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+              >
+                <Twitter size={22} className="social-icon" />
               </Link>
-              <Link href="#" aria-label="YouTube">
-                <Youtube size={22} className="hover:text-primary transition-all duration-200 hover:-translate-y-1" />
+
+              <Link
+                href="https://studio.youtube.com/channel/UCpo3DbXIwoN-vnx3kJjxgKA"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+              >
+                <Youtube size={22} className="social-icon" />
               </Link>
-              <Link href="#" aria-label="LinkedIn">
-                <Linkedin size={22} className="hover:text-primary transition-all duration-200 hover:-translate-y-1" />
+
+              <Link
+                href="https://www.linkedin.com/in/merapind-balleballe-7242aa392/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
+                <Linkedin size={22} className="social-icon" />
               </Link>
+
             </div>
           </div>
         </div>
 
         {/* COPYRIGHT */}
         <div className="border-t py-5 text-center text-xs md:text-sm text-muted-foreground tracking-wide">
-          &copy; {new Date().getFullYear()} <span className="font-medium">Mera Pind Balle Balle</span>.
-          &nbsp;All Rights Reserved.
+          © {new Date().getFullYear()}{" "}
+          <span className="font-medium">Mera Pind Balle Balle</span>. All Rights Reserved.
         </div>
       </div>
     </footer>
