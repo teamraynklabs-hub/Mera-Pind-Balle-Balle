@@ -6,10 +6,11 @@ import Image from "next/image";
 import { ModeToggle } from "@/components/ui/toggleBtn";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { IoSettingsSharp } from "react-icons/io5"; // ✅ ADMIN ICON
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const pathname = usePathname(); // <-- Detect current route
+  const pathname = usePathname();
 
   // NAV ITEMS
   const navItems = [
@@ -27,7 +28,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
 
         {/* LOGO */}
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/admin" className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-full overflow-hidden border shadow-sm">
             <Image
               src="/logo.jpeg"
@@ -36,7 +37,10 @@ export default function Navbar() {
               height={44}
               className="object-cover h-full w-full"
             />
-          </div><span className="font-semibold text-xl tracking-tight">Mera Pind</span>
+          </div>
+          <span className="font-semibold text-xl tracking-tight">
+            Mera Pind
+          </span>
         </Link>
 
         {/* DESKTOP MENU */}
@@ -56,13 +60,22 @@ export default function Navbar() {
               >
                 {item.title}
 
-                {/* UNDERLINE FOR ACTIVE TAB */}
+                {/* Underline for active tab */}
                 {isActive && (
                   <span className="absolute left-0 -bottom-1 w-full h-[2px] bg-primary rounded-full"></span>
                 )}
               </Link>
             );
           })}
+
+          {/* ✅ ADMIN ICON BUTTON */}
+          <Link
+            href="/admin"
+            className="hover:text-primary transition-colors"
+            title="Admin Panel"
+          >
+            <IoSettingsSharp size={22} className="cursor-pointer" />
+          </Link>
 
           <ModeToggle />
         </nav>
@@ -98,6 +111,16 @@ export default function Navbar() {
                 </Link>
               );
             })}
+
+            {/* ✅ MOBILE ADMIN BUTTON (ICON + TEXT) */}
+            {/* <Link
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 text-sm py-2 font-medium hover:text-primary"
+            >
+              <IoSettingsSharp size={20} />
+              Admin
+            </Link> */}
 
             <div className="flex justify-start items-center mt-4">
               <ModeToggle />
