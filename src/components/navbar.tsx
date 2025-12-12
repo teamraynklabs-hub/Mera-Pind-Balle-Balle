@@ -28,7 +28,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
 
         {/* LOGO */}
-        <Link href="/admin/dashboard" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-full overflow-hidden border shadow-sm">
             <Image
               src="/logo.jpeg"
@@ -68,15 +68,6 @@ export default function Navbar() {
             );
           })}
 
-          {/* ✅ ADMIN ICON BUTTON */}
-          <Link
-            href="/admin"
-            className="hover:text-primary transition-colors"
-            title="Admin Panel"
-          >
-            <IoSettingsSharp size={22} className="cursor-pointer" />
-          </Link>
-
           <ModeToggle />
         </nav>
 
@@ -111,16 +102,6 @@ export default function Navbar() {
                 </Link>
               );
             })}
-
-            {/* ✅ MOBILE ADMIN BUTTON (ICON + TEXT) */}
-            {/* <Link
-              href="/admin"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 text-sm py-2 font-medium hover:text-primary"
-            >
-              <IoSettingsSharp size={20} />
-              Admin
-            </Link> */}
 
             <div className="flex justify-start items-center mt-4">
               <ModeToggle />
