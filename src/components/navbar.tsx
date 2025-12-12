@@ -6,7 +6,7 @@ import Image from "next/image";
 import { ModeToggle } from "@/components/ui/toggleBtn";
 import { Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { IoSettingsSharp } from "react-icons/io5"; // ✅ ADMIN ICON
+import { IoSettingsSharp } from "react-icons/io5";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function Navbar() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
 
         {/* LOGO */}
-        <Link href="/admin" className="flex items-center gap-3">
+        <Link href="/admin/dashboard" className="flex items-center gap-3">
           <div className="h-11 w-11 rounded-full overflow-hidden border shadow-sm">
             <Image
               src="/logo.jpeg"
