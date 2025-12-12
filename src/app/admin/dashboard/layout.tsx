@@ -43,10 +43,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin");
-  }
+  // async function handleLogout() {
+  //   await fetch("/api/admin/logout", { method: "POST" });
+  //   router.push("/admin");
+  // }
 
   // All admin navigation links
   const menuItems = [
@@ -108,13 +108,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           ))}
 
           {/* Logout */}
-          <button
+          {/* <button
             onClick={handleLogout}
             className="mt-6 flex items-center gap-3 w-full p-3 rounded-md text-red-500 hover:bg-red-500/10 transition cursor-pointer"
           >
             <LogOut size={18} />
             Logout
-          </button>
+          </button> */}
         </nav>
       </aside>
 
