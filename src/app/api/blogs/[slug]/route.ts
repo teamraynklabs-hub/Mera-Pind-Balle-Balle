@@ -1,36 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Blog from "@/lib/models/Blog.model";
+import Story from "@/lib/models/Story.model";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
+
   try {
     await connectDB();
 
-    console.log("SLUG FROM URL:", slug);
-
-    const blog = await Blog.findOne({
+    const story = await Story.findOne({
       slug: slug.trim().toLowerCase(),
       isPublished: true,
     }).lean();
 
-
-
-    console.log("BLOG FOUND:", blog);
-
-    if (!blog) {
+    if (!story) {
       return NextResponse.json(
-        { success: false, error: "Blog not found" },
+        { success: false, error: "Story not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(blog);
+    return NextResponse.json({
+      success: true,
+      data: story,
+    });
   } catch (error) {
-    console.error("BLOG SLUG API ERROR:", error);
+    console.error("STORY SLUG API ERROR:", error);
     return NextResponse.json(
       { success: false, error: "Server error" },
       { status: 500 }

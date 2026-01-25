@@ -1,16 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Story from "@/lib/models/Story.model";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { slug: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await params;
+
   try {
     await connectDB();
 
     const story = await Story.findOne({
-      slug: params.slug,
+      slug: slug.trim().toLowerCase(),
       isPublished: true,
     }).lean();
 
