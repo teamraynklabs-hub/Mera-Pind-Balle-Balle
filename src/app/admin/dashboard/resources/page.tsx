@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,30 +16,41 @@ import {
 } from "lucide-react";
 
 export default function ResourcesManager() {
-  // Temporary resources list (Replace with backend API later)
-  const [resources, setResources] = useState<any[]>([
-    {
-      id: 1,
-      title: "Government Rural Development Scheme",
-      desc: "A complete guide to latest schemes available for rural communities.",
-      fileUrl: "",
-    },
-    {
-      id: 2,
-      title: "Women Empowerment Toolkit",
-      desc: "Training material and worksheets for self-help groups.",
-      fileUrl: "",
-    },
-  ]);
+  const [resources, setResources] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
     desc: "",
-    fileUrl: "",
+    fileUrl: null as File | null,
   });
+
+  // Load resources from API
+  useEffect(() => {
+    loadResources();
+  }, []);
+
+  async function loadResources() {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/admin/resources");
+      if (!response.ok) throw new Error("Failed to fetch resources");
+      const data = await response.json();
+      console.log("Fetched resources:", data);
+      setResources(Array.isArray(data) ? data : []);
+      setError("");
+    } catch (err: any) {
+      console.error("Error loading resources:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Input handling
   function handleChange(e: any) {
@@ -51,56 +62,98 @@ export default function ResourcesManager() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const tempUrl = URL.createObjectURL(file);
-    setFormData({ ...formData, fileUrl: tempUrl });
+    setFormData({ ...formData, fileUrl: file });
 
-    // TODO (BACKEND): Replace with file upload endpoint POST /api/upload
+    // Create preview URL for display
+    const tempUrl = URL.createObjectURL(file);
+    setPreviewUrl(tempUrl);
   }
 
   // Save (Add / Edit)
-  function saveResource() {
+  async function saveResource() {
     if (!formData.title.trim()) {
       alert("Title is required!");
       return;
     }
 
-    // EDIT MODE
-    if (editing) {
-      const updated = resources.map((item) =>
-        item.id === editing.id ? { ...editing, ...formData } : item
-      );
+    try {
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("desc", formData.desc);
+      if (formData.fileUrl) {
+        data.append("fileUrl", formData.fileUrl);
+      }
 
-      // TODO: PATCH /api/resources/:id
-      setResources(updated);
+      // EDIT MODE
+      if (editing) {
+        const response = await fetch(
+          `/api/admin/resources/${editing._id}`,
+          {
+            method: "PATCH",
+            body: data,
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(errorData.error || "Failed to update resource");
+          return;
+        }
+
+        await loadResources();
+        closeForm();
+        return;
+      }
+
+      // ADD MODE
+      const response = await fetch("/api/admin/resources", {
+        method: "POST",
+        body: data,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to create resource");
+        return;
+      }
+
+      await loadResources();
       closeForm();
-      return;
+    } catch (err: any) {
+      alert("Error saving resource: " + err.message);
     }
-
-    // ADD MODE
-    const newResource = {
-      id: Date.now(),
-      ...formData,
-    };
-
-    // TODO: POST /api/resources
-    setResources([newResource, ...resources]);
-    closeForm();
   }
 
   // Delete
-  function deleteResource(id: number) {
+  async function deleteResource(id: string) {
     if (!confirm("Are you sure you want to delete this resource?")) return;
 
-    const updated = resources.filter((item) => item.id !== id);
+    try {
+      const response = await fetch(`/api/admin/resources/${id}`, {
+        method: "DELETE",
+      });
 
-    // TODO: DELETE /api/resources/:id
-    setResources(updated);
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to delete resource");
+        return;
+      }
+
+      await loadResources();
+    } catch (err: any) {
+      alert("Error deleting resource: " + err.message);
+    }
   }
 
   // Edit
   function openEdit(item: any) {
     setEditing(item);
-    setFormData(item);
+    setFormData({
+      title: item.title,
+      desc: item.description,
+      fileUrl: null,
+    });
+    setPreviewUrl(item.link);
     setShowForm(true);
   }
 
@@ -111,8 +164,9 @@ export default function ResourcesManager() {
     setFormData({
       title: "",
       desc: "",
-      fileUrl: "",
+      fileUrl: null,
     });
+    setPreviewUrl("");
   }
 
   return (
@@ -132,53 +186,73 @@ export default function ResourcesManager() {
         Upload training material, guides, and resources for villagers.
       </p>
 
-      {/* RESOURCE LIST */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-        {resources.map((item, index) => (
-          <Card key={index} className="shadow-sm hover:shadow-md transition">
-            <CardContent className="p-4 space-y-3">
+      {/* ERROR DISPLAY */}
+      {error && (
+        <div className="p-4 bg-red-100 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
 
-              {/* File Preview */}
-              <div className="h-32 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-                {item.fileUrl ? (
-                  <iframe
-                    src={item.fileUrl}
-                    className="w-full h-full"
-                    title="resource-preview"
-                  ></iframe>
-                ) : (
-                  <FileText size={40} className="text-muted-foreground" />
-                )}
+      {/* LOADING STATE */}
+      {loading ? (
+        <div className="text-center py-8">Loading resources...</div>
+      ) : (
+        <>
+          {/* RESOURCE LIST */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+            {resources.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No resources yet. Add one to get started!
               </div>
+            ) : (
+              resources.map((item) => (
+                <Card key={item._id} className="shadow-sm hover:shadow-md transition">
+                  <CardContent className="p-4 space-y-3">
 
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <FileText size={18} /> {item.title}
-              </h2>
+                    {/* File Preview */}
+                    <div className="h-32 rounded-md bg-muted flex items-center justify-center overflow-hidden">
+                      {item.link ? (
+                        <iframe
+                          src={item.link}
+                          className="w-full h-full"
+                          title="resource-preview"
+                        ></iframe>
+                      ) : (
+                        <FileText size={40} className="text-muted-foreground" />
+                      )}
+                    </div>
 
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    <h2 className="text-xl font-semibold flex items-center gap-2">
+                      <FileText size={18} /> {item.title}
+                    </h2>
 
-              {/* ACTION BUTTONS */}
-              <div className="flex justify-between pt-2">
-                <Button
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => openEdit(item)}
-                >
-                  <Edit size={16} />
-                </Button>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
 
-                <Button
-                  variant="destructive"
-                  className="cursor-pointer"
-                  onClick={() => deleteResource(item.id)}
-                >
-                  <Trash2 size={16} />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                    {/* ACTION BUTTONS */}
+                    <div className="flex justify-between pt-2">
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer"
+                        onClick={() => openEdit(item)}
+                      >
+                        <Edit size={16} />
+                      </Button>
+
+                      <Button
+                        variant="destructive"
+                        className="cursor-pointer"
+                        onClick={() => deleteResource(item._id)}
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </>
+      )}
 
       {/* ADD/EDIT MODAL */}
       {showForm && (
@@ -224,9 +298,9 @@ export default function ResourcesManager() {
                   className="cursor-pointer"
                 />
 
-                {formData.fileUrl && (
+                {previewUrl && (
                   <iframe
-                    src={formData.fileUrl}
+                    src={previewUrl}
                     className="mt-3 w-full h-32 rounded-md border"
                   ></iframe>
                 )}

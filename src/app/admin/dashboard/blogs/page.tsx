@@ -8,143 +8,141 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-
 import { Pencil, Trash2, Plus } from "lucide-react";
 
-export default function BlogsManager() {
-  const [blogs, setBlogs] = useState<any[]>([]); // ALWAYS ARRAY
-  const [loading, setLoading] = useState(true);
 
+export default function BlogsManager() {
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<any>(null);
-
   const [previewImage, setPreviewImage] = useState<string>("");
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    title: string;
+    excerpt: string;
+    content: string;
+    image: File | null;
+  }>({
     title: "",
-    author: "",
-    description: "",
-    image: "",
+    excerpt: "",
+    content: "",
+    image: null,
   });
 
-  // ⭐ Temporary Frontend-Only Dummy Data (Backend will replace this)
-  const dummyBlogs = [
-    {
-      id: 1,
-      title: "First Blog Post",
-      author: "Admin",
-      description: "Short description about the blog...",
-      image: "/placeholder-blog.jpg",
-    },
-  ];
+  // ================= LOAD BLOGS =================
+async function loadBlogs() {
+  try {
+    const res = await fetch("/api/admin/blogs", {
+      credentials: "include",
+      cache: "no-store",
+    });
 
-  // LOAD BLOGS (Frontend only)
-  async function loadBlogs() {
-    try {
-      // ⭐ When backend ready → replace this with fetch("/api/blogs")
-      setBlogs(dummyBlogs);
-    } catch (err) {
-      console.error("BLOG LOAD ERROR:", err);
-      setBlogs([]); // fallback
+    if (!res.ok) {
+      setBlogs([]);
+      return;
     }
+
+    const data = await res.json();
+    setBlogs(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error("BLOG LOAD ERROR:", err);
+    setBlogs([]);
+  } finally {
     setLoading(false);
   }
+}
+
 
   useEffect(() => {
     loadBlogs();
   }, []);
 
-  // INPUT HANDLER
+  // ================= HANDLERS =================
   function handleChange(e: any) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // FILE UPLOAD HANDLER
   function handleFileChange(e: any) {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const url = URL.createObjectURL(file);
-    setPreviewImage(url);
-
-    // ⭐ When backend ready → upload file to server/cloud
-    setForm({ ...form, image: url });
+    setForm({ ...form, image: file });
+    setPreviewImage(URL.createObjectURL(file));
   }
 
-  // START EDIT
-  function startEdit(item: any) {
-    setEditingBlog(item);
+  function startEdit(blog: any) {
+    setEditingBlog(blog);
     setForm({
-      title: item.title,
-      author: item.author,
-      description: item.description,
-      image: item.image,
+      title: blog.title,
+      excerpt: blog.excerpt,
+      content: blog.content,
+      image: null,
     });
-    setPreviewImage(item.image);
+    setPreviewImage(blog.image);
     setOpen(true);
   }
 
-  // RESET FORM
   function resetForm() {
     setEditingBlog(null);
     setForm({
       title: "",
-      author: "",
-      description: "",
-      image: "",
+      excerpt: "",
+      content: "",
+      image: null,
     });
     setPreviewImage("");
   }
 
-  // SUBMIT ADD / EDIT
+  // ================= CREATE / UPDATE =================
   async function handleSubmit() {
-    if (!form.title) {
-      alert("Title is required");
+    if (!form.title || !form.excerpt || !form.content) {
+      alert("Title, excerpt and content are required");
       return;
     }
 
-    // ⭐ When backend is ready:
-    // const method = editingBlog ? "PUT" : "POST";
+    const fd = new FormData();
+    fd.append("title", form.title);
+    fd.append("excerpt", form.excerpt);
+    fd.append("content", form.content);
+    if (form.image) fd.append("image", form.image);
 
-    if (editingBlog) {
-      // UPDATE LOCAL ARRAY (Frontend-only)
-      const updated = blogs.map((b) =>
-        b.id === editingBlog.id ? { ...editingBlog, ...form } : b
-      );
-      setBlogs(updated);
-    } else {
-      // ADD NEW BLOG LOCAL ONLY
-      setBlogs([
-        ...blogs,
-        {
-          id: Date.now(),
-          ...form,
-        },
-      ]);
-    }
+    const url = editingBlog
+      ? `/api/admin/blogs/${editingBlog._id}`
+      : "/api/admin/blogs";
+
+    const method = editingBlog ? "PUT" : "POST";
+
+    await fetch(url, {
+      method,
+      credentials: "include",
+      body: fd,
+    });
 
     setOpen(false);
     resetForm();
+    loadBlogs();
   }
 
-  // DELETE BLOG
-  async function deleteBlog(id: any) {
+  // ================= DELETE =================
+  async function deleteBlog(id: string) {
     if (!confirm("Delete this blog?")) return;
 
-    // ⭐ When backend ready → call DELETE API
-    setBlogs(blogs.filter((b) => b.id !== id));
+    await fetch(`/api/admin/blogs/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    loadBlogs();
   }
 
+  // ================= UI =================
   return (
-    <div className="space-y-8 animate-fadeUp">
-
-      {/* HEADER */}
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">Blogs Manager</h1>
 
@@ -156,7 +154,7 @@ export default function BlogsManager() {
           }}
         >
           <DialogTrigger asChild>
-            <Button className="flex gap-2 cursor-pointer">
+            <Button>
               <Plus size={18} /> Add Blog
             </Button>
           </DialogTrigger>
@@ -164,117 +162,78 @@ export default function BlogsManager() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {editingBlog ? "Edit Blog" : "Add New Blog"}
+                {editingBlog ? "Edit Blog" : "Add Blog"}
               </DialogTitle>
             </DialogHeader>
 
-            <div className="grid gap-4 py-2">
-
-              {/* IMAGE UPLOAD */}
-              <div className="grid gap-2">
-                <Label>Upload Image</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="cursor-pointer"
-                />
-              </div>
+            <div className="space-y-4">
+              <Label>Image</Label>
+              <Input type="file" accept="image/*" onChange={handleFileChange} />
 
               {previewImage && (
                 <img
                   src={previewImage}
-                  className="w-full h-40 object-cover rounded-md border"
+                  className="w-full h-40 object-cover rounded"
                 />
               )}
 
-              <div className="grid gap-2">
-                <Label>Title</Label>
-                <Input
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder="Blog Title"
-                />
-              </div>
+              <Label>Title</Label>
+              <Input name="title" value={form.title} onChange={handleChange} />
 
-              <div className="grid gap-2">
-                <Label>Author</Label>
-                <Input
-                  name="author"
-                  value={form.author}
-                  onChange={handleChange}
-                  placeholder="Author Name"
-                />
-              </div>
+              <Label>Excerpt (short summary)</Label>
+              <Textarea
+                name="excerpt"
+                rows={2}
+                value={form.excerpt}
+                onChange={handleChange}
+              />
 
-              <div className="grid gap-2">
-                <Label>Description</Label>
-                <Textarea
-                  name="description"
-                  rows={3}
-                  value={form.description}
-                  onChange={handleChange}
-                  placeholder="Blog description..."
-                />
-              </div>
+              <Label>Content (full blog)</Label>
+              <Textarea
+                name="content"
+                rows={6}
+                value={form.content}
+                onChange={handleChange}
+              />
 
-              <Button className="mt-3 cursor-pointer" onClick={handleSubmit}>
-                {editingBlog ? "Save Changes" : "Add Blog"}
+              <Button onClick={handleSubmit}>
+                {editingBlog ? "Save Changes" : "Create Blog"}
               </Button>
-
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* BLOG LIST */}
       {loading ? (
-        <p className="text-muted-foreground">Loading blogs...</p>
+        <p>Loading...</p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-          {(Array.isArray(blogs) ? blogs : []).map((blog, index) => (
-            <Card key={index} className="shadow-sm hover:shadow-md transition">
-              <CardContent className="p-4 space-y-3">
-
-                <div className="rounded-md overflow-hidden h-40 bg-muted">
-                  <img
-                    src={blog.image}
-                    alt={blog.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <h3 className="text-lg font-semibold">{blog.title}</h3>
-                <p className="text-sm text-primary">By {blog.author || "Admin"}</p>
-
+          {blogs.map((blog) => (
+            <Card key={blog._id}>
+              <CardContent className="space-y-3">
+                <img
+                  src={blog.image}
+                  className="h-40 w-full object-cover rounded"
+                />
+                <h3 className="font-semibold">{blog.title}</h3>
                 <p className="text-sm text-muted-foreground line-clamp-2">
-                  {blog.description}
+                  {blog.excerpt}
                 </p>
 
-                <div className="flex justify-between pt-2">
-                  <Button
-                    variant="outline"
-                    className="flex gap-1 cursor-pointer"
-                    onClick={() => startEdit(blog)}
-                  >
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => startEdit(blog)}>
                     <Pencil size={16} /> Edit
                   </Button>
-
                   <Button
                     variant="destructive"
-                    className="flex gap-1 cursor-pointer"
-                    onClick={() => deleteBlog(blog.id)}
+                    onClick={() => deleteBlog(blog._id)}
                   >
                     <Trash2 size={16} /> Delete
                   </Button>
                 </div>
-
               </CardContent>
             </Card>
           ))}
-
         </div>
       )}
     </div>

@@ -23,22 +23,45 @@ export default function ProductsManager() {
 
   const [open, setOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [previewImage, setPreviewImage] = useState<string>("");
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    price: string;
+    description: string;
+    // can be an existing image URL (string) or a new File selected by the user
+    image: string | File | null;
+  }>({
     name: "",
     price: "",
     description: "",
-    image: "",
+    image: null,
   });
 
   // LOAD PRODUCTS
   async function loadProducts() {
     try {
-      const res = await fetch("/api/products");
-      const data = await res.json();
-      setProducts(data);
+      const res = await fetch("/api/admin/products", {
+        credentials: "include",
+      });
+
+      const json = await res.json();
+
+      // Normalize response to ALWAYS be an array
+      const list = Array.isArray(json)
+        ? json
+        : Array.isArray(json.data)
+          ? json.data
+          : Array.isArray(json.products)
+            ? json.products
+            : Array.isArray(json.data?.products)
+              ? json.data.products
+              : [];
+
+      setProducts(list);
+
     } catch (err) {
       console.error("PRODUCT LOAD ERROR:", err);
     }
@@ -55,16 +78,16 @@ export default function ProductsManager() {
   }
 
   // FILE UPLOAD HANDLER
-  function handleFileChange(e: any) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+ function handleFileChange(e: any) {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    setPreviewImage(url);
+  console.log("Selected file:", file); // 👈 TEMP debug
 
-    // When real backend is connected -> upload file & save URL
-    setForm({ ...form, image: url });
-  }
+  setPreviewImage(URL.createObjectURL(file));
+  setForm({ ...form, image: file });
+}
+
 
   // START EDIT
   function startEdit(item: any) {
@@ -91,42 +114,89 @@ export default function ProductsManager() {
     setPreviewImage("");
   }
 
-  // SUBMIT ADD / EDIT
-  async function handleSubmit() {
-    if (!form.name || !form.price) {
-      alert("Name & Price are required");
+async function handleSubmit() {
+  if (!form.name || !form.price) {
+    alert("Name & Price are required");
+    return;
+  }
+
+  const isEdit = Boolean(editingProduct);
+  
+  // 🚨 FOR CREATE, IMAGE IS REQUIRED
+  if (!isEdit && !(form.image instanceof File)) {
+    alert("Image is required");
+    return;
+  }
+
+  setSubmitting(true);
+
+  try {
+    const url = isEdit
+      ? `/api/admin/products/${editingProduct._id}`
+      : "/api/admin/products";
+
+    const method = isEdit ? "PUT" : "POST";
+
+    const fd = new FormData();
+    fd.append("name", form.name);
+    fd.append("price", form.price);
+    fd.append("description", form.description || "");
+
+    // Append image only if it's a File
+    if (form.image instanceof File) {
+      fd.append("image", form.image);
+    }
+
+    const res = await fetch(url, {
+      method,
+      body: fd,
+      credentials: "include", // 🔑 REQUIRED
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      alert(`Error: ${error.error || "Failed to save product"}`);
+      setSubmitting(false);
       return;
     }
 
-    const method = editingProduct ? "PUT" : "POST";
-
-    const url = editingProduct
-      ? `/api/admin/products?id=${editingProduct.id}`
-      : "/api/admin/products";
-
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        price: Number(form.price),
-      }),
-    });
-
     setOpen(false);
     resetForm();
-    loadProducts();
+    await loadProducts();
+  } catch (err) {
+    console.error("SUBMIT ERROR:", err);
+    alert("Failed to save product");
+  } finally {
+    setSubmitting(false);
   }
+}
+
+
 
   // DELETE PRODUCT
   async function deleteProduct(id: any) {
     if (!confirm("Delete this product?")) return;
 
-    await fetch(`/api/admin/products?id=${id}`, {
-      method: "DELETE",
-    });
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-    loadProducts();
+      console.log("DELETE RESPONSE STATUS:", res.status);
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(`Error: ${error.error || "Failed to delete product"}`);
+        return;
+      }
+
+      console.log("DELETE SUCCESS - Reloading products");
+      await loadProducts();
+    } catch (err) {
+      console.error("DELETE ERROR:", err);
+      alert("Failed to delete product");
+    }
   }
 
   return (
@@ -212,8 +282,9 @@ export default function ProductsManager() {
               <Button
                 className="mt-3 cursor-pointer"
                 onClick={handleSubmit}
+                disabled={submitting}
               >
-                {editingProduct ? "Save Changes" : "Add Product"}
+                {submitting ? "Processing..." : (editingProduct ? "Save Changes" : "Add Product")}
               </Button>
             </div>
 
@@ -227,7 +298,7 @@ export default function ProductsManager() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {products.map((item, index) => (
+          {Array.isArray(products) && products.map((item, index) => (
             <Card key={index} className="shadow-sm hover:shadow-md transition">
               <CardContent className="p-4 space-y-4">
 
@@ -259,7 +330,7 @@ export default function ProductsManager() {
                   <Button
                     variant="destructive"
                     className="flex gap-1 cursor-pointer"
-                    onClick={() => deleteProduct(item.id)}
+                    onClick={() => deleteProduct(item._id)}
                   >
                     <Trash2 size={16} /> Delete
                   </Button>

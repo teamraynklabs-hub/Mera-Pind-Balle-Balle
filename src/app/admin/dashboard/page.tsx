@@ -5,6 +5,11 @@ import Link from "next/link";
 export default function AdminDashboardHome() {
   const cards = [
     {
+      title: "Homepage Manager",
+      desc: "Manage and upload all home page content and data.",
+      href: "/admin/dashboard/home",
+    },
+    {
       title: "Products Manager",
       desc: "Add, edit and delete products.",
       href: "/admin/dashboard/products",

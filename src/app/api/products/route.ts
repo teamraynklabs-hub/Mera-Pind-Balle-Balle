@@ -1,25 +1,27 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { connectDB } from "@/lib/db";
+import Product from "@/lib/models/Product.model";
 
 export async function GET() {
   try {
-    const jsonPath = path.join(
-      process.cwd(),
-      "src",
-      "lib",
-      "dummy",
-      "products.json"
-    );
+    await connectDB();
 
-    const raw = fs.readFileSync(jsonPath, "utf8");
-    const data = JSON.parse(raw);
+    const products = await Product.find({})
+      .select("name price description image isActive")
+      .lean();
 
-    return NextResponse.json(data);
+    return NextResponse.json({
+      success: true,
+      data: products,
+    });
   } catch (error: any) {
-    console.error("PRODUCTS API ERROR:", error.message);
+    console.error(" PRODUCTS API ERROR (REAL):", error);
+
     return NextResponse.json(
-      { error: "Failed to load products" },
+      {
+        success: false,
+        error: error.message || "Internal Server Error",
+      },
       { status: 500 }
     );
   }

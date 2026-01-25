@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
 import Footer from "./footer";
 
-export default function LayoutWrapper({ children }: any) {
+export default function LayoutWrapper({ children, footer }: any) {
   const pathname = usePathname();
 
   // hide navbar + footer inside admin pages
@@ -16,7 +16,7 @@ export default function LayoutWrapper({ children }: any) {
 
       {children}
 
-      {!isAdmin && <Footer />}
+      {!isAdmin && <Footer footer={footer} />}
     </>
   );
 }

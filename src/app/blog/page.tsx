@@ -16,12 +16,19 @@ async function fetchBlogs(search: string, page: number, limit: number) {
       params: { search, page, limit },
     });
 
-    return res.data;
+    const data = res.data;
+
+    return {
+      blogs: Array.isArray(data.blogs) ? data.blogs : [],
+      total: typeof data.total === "number" ? data.total : 0,
+    };
   } catch (error) {
     console.error("BLOG FETCH ERROR:", error);
     return { blogs: [], total: 0 };
   }
 }
+
+
 
 export default async function BlogPage(props: any) {
   // NEXT FIX — unwrap the promise first
@@ -31,7 +38,8 @@ export default async function BlogPage(props: any) {
   const page = Number(searchParams?.page ?? 1);
   const limit = 6;
 
-  const { blogs, total } = await fetchBlogs(search, page, limit);
+  const { blogs = [], total = 0 } = await fetchBlogs(search, page, limit);
+
   const totalPages = Math.ceil(total / limit);
 
   return (

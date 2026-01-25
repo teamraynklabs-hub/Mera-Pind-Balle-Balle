@@ -1,130 +1,178 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { Loader2, Plus, X, Edit, Trash2, Settings } from "lucide-react";
 
-import {
-  Plus,
-  X,
-  Settings,
-  Edit,
-  Trash2,
-  Image as ImageIcon,
-} from "lucide-react";
+interface Service {
+  _id: string;
+  title: string;
+  description: string;
+  icon: string;
+  isActive: boolean;
+  createdAt?: string;
+}
 
 export default function ServicesManager() {
-  // TEMP SERVICES (Replace when backend connected)
-  const [services, setServices] = useState<any[]>([
-    {
-      id: 1,
-      title: "Skill Development Program",
-      desc: "Training villagers in handicrafts, digital literacy, and entrepreneurship.",
-      imageUrl: "",
-    },
-    {
-      id: 2,
-      title: "Women Empowerment Workshops",
-      desc: "Providing tools and guidance for self-help groups.",
-      imageUrl: "",
-    },
-  ]);
-
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<Service | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
-    desc: "",
-    imageUrl: "",
+    description: "",
+    icon: "",
   });
 
-  // Input Handler
-  function handleChange(e: any) {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  async function fetchServices() {
+    try {
+      const res = await fetch("/api/services", { next: { tags: ["services"] } });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+      }
+
+      const data = await res.json();
+
+      // Handle both formats: array or object with data property
+      const services = Array.isArray(data) ? data : data?.data;
+
+      if (!Array.isArray(services)) {
+        console.warn("Services API returned non-array:", data);
+        toast.error("Server returned unexpected format");
+        setServices([]);
+        return;
+      }
+
+      setServices(services);
+    } catch (err: any) {
+      console.error("Failed to fetch services:", err?.message || err);
+      toast.error("Could not load services. Please try again.");
+      setServices([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // Image Upload
-  function handleImageUpload(e: any) {
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const tempUrl = URL.createObjectURL(file);
+    const uploadData = new FormData();
+    uploadData.append("file", file);
 
-    setFormData({ ...formData, imageUrl: tempUrl });
+    try {
+      setSubmitting(true);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "x-admin-key": process.env.NEXT_PUBLIC_ADMIN_API_KEY || "",
+        },
+        body: uploadData,
+      });
 
-    // TODO: Upload image to backend → POST /api/upload
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Upload failed");
+      }
+
+      const data = await res.json();
+      if (data.url || data.secure_url) {
+        const imageUrl = data.url || data.secure_url;
+        setFormData((prev) => ({ ...prev, icon: imageUrl }));
+        toast.success("Image uploaded successfully");
+      } else {
+        throw new Error("No URL in response");
+      }
+    } catch (err: any) {
+      console.error("Image upload error:", err?.message || err);
+      toast.error(err?.message || "Failed to upload image");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  // Save New or Update Existing
-  function saveService() {
-    if (!formData.title.trim()) {
-      alert("Service title is required!");
+  async function saveService() {
+    if (!formData.title.trim() || !formData.description.trim()) {
+      toast.error("Title and description are required");
       return;
     }
 
-    // EDIT MODE
-    if (editing) {
-      const updated = services.map((item) =>
-        item.id === editing.id ? { ...editing, ...formData } : item
-      );
+    setSubmitting(true);
 
-      // TODO: PATCH /api/services/:id
-      setServices(updated);
+    try {
+      const url = editing ? `/api/services/${editing._id}` : "/api/services";
+      const method = editing ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => "");
+        throw new Error(`Save failed: ${res.status} ${errText}`);
+      }
+
+      toast.success(editing ? "Service updated" : "Service added");
+      fetchServices();
       closeForm();
-      return;
+    } catch (err: any) {
+      console.error("Save service error:", err);
+      toast.error("Failed to save service");
+    } finally {
+      setSubmitting(false);
     }
-
-    // ADD MODE
-    const newService = {
-      id: Date.now(),
-      ...formData,
-    };
-
-    // TODO: POST /api/services
-    setServices([newService, ...services]);
-    closeForm();
   }
 
-  // Delete Service
-  function deleteService(id: number) {
-    if (!confirm("Are you sure you want to delete this service?")) return;
+  async function deleteService(id: string) {
+    if (!confirm("Delete this service permanently?")) return;
 
-    // TODO: DELETE /api/services/:id
-    const updated = services.filter((item) => item.id !== id);
-    setServices(updated);
+    try {
+      const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+
+      if (!res.ok) throw new Error(`Delete failed: ${res.status}`);
+
+      toast.success("Service deleted");
+      fetchServices();
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete service");
+    }
   }
 
-  // Edit Mode
-  function openEdit(item: any) {
-    setEditing(item);
-    setFormData(item);
+  function openEdit(service: Service) {
+    setEditing(service);
+    setFormData({
+      title: service.title,
+      description: service.description,
+      icon: service.icon,
+    });
     setShowForm(true);
   }
 
-  // Reset Form
   function closeForm() {
-    setEditing(null);
     setShowForm(false);
-    setFormData({
-      title: "",
-      desc: "",
-      imageUrl: "",
-    });
+    setEditing(null);
+    setFormData({ title: "", description: "", icon: "" });
   }
 
   return (
     <div className="space-y-6 animate-fadeUp">
-      {/* HEADER */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Services Manager</h1>
-
-        <Button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 cursor-pointer"
-        >
+        <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
           <Plus size={18} /> Add Service
         </Button>
       </div>
@@ -133,117 +181,142 @@ export default function ServicesManager() {
         Manage your village initiatives, programs, and support services.
       </p>
 
-      {/* SERVICE LIST */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
-        {services.map((service, index) => (
-          <Card key={index} className="shadow-sm hover:shadow-md transition">
-            <CardContent className="p-4 space-y-3">
+      {loading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4">
+                <div className="h-32 bg-muted rounded-md mb-4" />
+                <div className="h-6 bg-muted rounded mb-2" />
+                <div className="h-16 bg-muted rounded" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {!Array.isArray(services) || services.length === 0 ? (
+            <p className="text-muted-foreground col-span-full text-center py-10">
+              No services yet. Click "Add Service" to create one.
+            </p>
+          ) : (
+            services.map((service) => (
+              <Card key={service._id} className="shadow-sm hover:shadow-md transition">
+                <CardContent className="p-4 space-y-3">
+                  <div className="h-32 bg-muted rounded-md overflow-hidden flex items-center justify-center">
+                    {service.icon ? (
+                      <img
+                        src={service.icon}
+                        alt={service.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Settings size={40} className="text-muted-foreground" />
+                    )}
+                  </div>
 
-              {/* IMAGE / ICON */}
-              <div className="h-32 bg-muted rounded-md overflow-hidden flex items-center justify-center">
-                {service.imageUrl ? (
-                  <img
-                    src={service.imageUrl}
-                    className="w-full h-full object-cover"
-                    alt="Service Image"
-                  />
-                ) : (
-                  <Settings size={40} className="text-muted-foreground" />
-                )}
-              </div>
+                  <h2 className="text-xl font-semibold line-clamp-2">{service.title}</h2>
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {service.description}
+                  </p>
 
-              {/* TITLE */}
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Settings size={18} />
-                {service.title}
-              </h2>
+                  <div className="flex justify-between pt-2">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(service)}>
+                      <Edit size={16} />
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => deleteService(service._id)}>
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      )}
 
-              {/* DESC */}
-              <p className="text-sm text-muted-foreground">{service.desc}</p>
-
-              {/* ACTION BUTTONS */}
-              <div className="flex justify-between pt-2">
-                <Button
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => openEdit(service)}
-                >
-                  <Edit size={16} />
-                </Button>
-
-                <Button
-                  variant="destructive"
-                  className="cursor-pointer"
-                  onClick={() => deleteService(service.id)}
-                >
-                  <Trash2 size={16} />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* ADD/EDIT MODAL */}
       {showForm && (
-        <div
-          className="
-          fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50
-          animate-fadeIn
-        "
-        >
-          <Card className="max-w-lg w-full shadow-xl">
-            <CardContent className="p-6 space-y-4">
-
-              {/* HEADER */}
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <Card className="max-w-lg w-full shadow-2xl">
+            <CardContent className="p-6 space-y-5">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold">
-                  {editing ? "Edit Service" : "Add Service"}
+                <h2 className="text-2xl font-bold">
+                  {editing ? "Edit Service" : "Add New Service"}
                 </h2>
-
-                <button onClick={closeForm}>
-                  <X size={22} className="hover:text-primary cursor-pointer" />
+                <button onClick={closeForm} className="hover:text-primary transition">
+                  <X size={24} />
                 </button>
               </div>
 
-              {/* TITLE INPUT */}
-              <Input
-                name="title"
-                placeholder="Service Title"
-                value={formData.title}
-                onChange={handleChange}
-              />
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Title</label>
+                  <Input
+                    name="title"
+                    placeholder="e.g. Women Empowerment Workshop"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  />
+                </div>
 
-              {/* DESCRIPTION INPUT */}
-              <Textarea
-                name="desc"
-                placeholder="Short Description"
-                rows={3}
-                value={formData.desc}
-                onChange={handleChange}
-              />
+                <div>
+                  <label className="text-sm font-medium">Description</label>
+                  <Textarea
+                    name="description"
+                    placeholder="Brief description of the service..."
+                    rows={4}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
 
-              {/* IMAGE UPLOAD */}
-              <div>
-                <label className="text-sm font-medium">Upload Image</label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  className="cursor-pointer mt-1"
-                  onChange={handleImageUpload}
-                />
+                <div>
+                  <label className="text-sm font-medium">Service Image / Icon</label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={submitting}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Or paste direct image URL after upload
+                  </p>
 
-                {formData.imageUrl && (
-                  <img
-                    src={formData.imageUrl}
-                    className="mt-3 h-32 w-full object-cover rounded-md border"
+                  {formData.icon && (
+                    <div className="mt-3">
+                      <img
+                        src={formData.icon}
+                        alt="Preview"
+                        className="w-full h-40 object-cover rounded-lg border"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {formData.icon === "" && (
+                  <Input
+                    placeholder="Or paste direct image URL[](https://...)"
+                    value={formData.icon}
+                    onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   />
                 )}
               </div>
 
-              {/* SAVE BUTTON */}
-              <Button className="w-full cursor-pointer" onClick={saveService}>
-                {editing ? "Save Changes" : "Add Service"}
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={saveService}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>{editing ? "Update Service" : "Add Service"}</>
+                )}
               </Button>
             </CardContent>
           </Card>

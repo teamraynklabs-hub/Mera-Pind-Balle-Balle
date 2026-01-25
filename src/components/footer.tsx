@@ -2,141 +2,106 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Facebook, Instagram, Twitter, Youtube, Linkedin } from "lucide-react";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Linkedin,
+} from "lucide-react";
 
-export default function Footer() {
+export default function Footer({ footer }: { footer?: any }) {
+  const supportLinks = footer?.supportLinks ?? [];
+  const quickLinks = footer?.quickLinks ?? [];
+  const legalLinks = footer?.legalLinks ?? [];
+  const socialLinks = footer?.socialLinks ?? [];
+
   return (
     <footer className="w-full bg-background border-t pt-12 mt-16">
       <div className="container mx-auto px-4">
 
-        {/* GRID — ALWAYS LEFT */}
-        <div
-          className="
-            grid 
-            grid-cols-1 
-            sm:grid-cols-2 
-            md:grid-cols-4 
-            gap-12 
-            pb-12
-            text-left
-          "
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 pb-12 text-left">
 
-          {/* BRAND + DESCRIPTION */}
+          {/* BRAND */}
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-3 mb-4">
               <div className="h-12 w-12 rounded-full overflow-hidden border shadow-sm">
-                <Image
-                  src="/logo.jpeg"
-                  alt="Brand Logo"
-                  width={48}
-                  height={48}
-                  className="object-cover h-full w-full"
-                />
+                <Image src="/logo.jpeg" alt="Brand Logo" width={48} height={48} />
               </div>
-
-              <span className="font-bold text-2xl leading-none">
-                Mera Pind Balle Balle
-              </span>
+              <span className="font-bold text-2xl">Mera Pind Balle Balle</span>
             </div>
-
-            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
+            <p className="text-sm text-muted-foreground max-w-xs">
               Empowering rural India with resources, inspiring stories,
               and sustainable development initiatives.
             </p>
           </div>
 
-          {/* SUPPORT LINKS */}
-          <div className="flex flex-col items-start">
-            <h3 className="text-lg font-semibold mb-4 tracking-wide">Support</h3>
-
+          {/* SUPPORT */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Support</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/resources" className="footer-link">Resources</Link></li>
-              <li><Link href="/distributors" className="footer-link">Distributors</Link></li>
-              <li><Link href="/careers" className="footer-link">Careers</Link></li>
-              <li><Link href="/contact" className="footer-link">Contact</Link></li>
+              {supportLinks.map((item: any) => (
+                <li key={item.label}>
+                  <Link href={item.link} className="footer-link">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* QUICK LINKS */}
-          <div className="flex flex-col items-start">
-            <h3 className="text-lg font-semibold mb-4 tracking-wide">Quick Links</h3>
-
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/about" className="footer-link">About Us</Link></li>
-              <li><Link href="/services" className="footer-link">Services</Link></li>
-              <li><Link href="/products" className="footer-link">Products</Link></li>
-              <li><Link href="/blog" className="footer-link">Blog</Link></li>
+              {quickLinks.map((item: any) => (
+                <li key={item.label}>
+                  <Link href={item.link} className="footer-link">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* LEGAL + SOCIAL */}
-          <div className="flex flex-col items-start">
-            <h3 className="text-lg font-semibold mb-4 tracking-wide">
-              Legal & Social
-            </h3>
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Legal & Social</h3>
 
             <ul className="space-y-3 text-sm">
-              <li><Link href="/privacy-policy" className="footer-link">Privacy Policy</Link></li>
-              <li><Link href="/terms-conditions" className="footer-link">Terms & Conditions</Link></li>
+              {legalLinks.map((item: any) => (
+                <li key={item.label}>
+                  <Link href={item.link} className="footer-link">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
 
-            {/* SOCIAL ICONS (Link ONLY) */}
             <div className="flex gap-4 mt-6">
-
-              <Link
-                href="https://www.facebook.com/profile.php?id=61583956350717"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-              >
-                <Facebook size={22} className="social-icon" />
-              </Link>
-
-              <Link
-                href="https://www.instagram.com/merapindballeballe/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-              >
-                <Instagram size={22} className="social-icon" />
-              </Link>
-
-              <Link
-                href="https://x.com/Merapindballe"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Twitter"
-              >
-                <Twitter size={22} className="social-icon" />
-              </Link>
-
-              <Link
-                href="https://studio.youtube.com/channel/UCpo3DbXIwoN-vnx3kJjxgKA"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-              >
-                <Youtube size={22} className="social-icon" />
-              </Link>
-
-              <Link
-                href="https://www.linkedin.com/in/merapind-balleballe-7242aa392/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={22} className="social-icon" />
-              </Link>
-
+              {socialLinks.map((item: any) => {
+                const icons: any = {
+                  facebook: Facebook,
+                  instagram: Instagram,
+                  twitter: Twitter,
+                  youtube: Youtube,
+                  linkedin: Linkedin,
+                };
+                const Icon = icons[item.platform];
+                return (
+                  Icon && (
+                    <Link key={item.platform} href={item.link} target="_blank">
+                      <Icon size={22} className="social-icon" />
+                    </Link>
+                  )
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* COPYRIGHT */}
-        <div className="border-t py-5 text-center text-xs md:text-sm text-muted-foreground tracking-wide">
-          © {new Date().getFullYear()}{" "}
-          <span className="font-medium">Mera Pind Balle Balle</span>. All Rights Reserved.
+        <div className="border-t py-5 text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Mera Pind Balle Balle. All Rights Reserved.
         </div>
       </div>
     </footer>

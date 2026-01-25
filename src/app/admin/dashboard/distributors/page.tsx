@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import DistributorsPageManager from "./page-manager";
 
 import {
   Plus,
@@ -19,37 +20,52 @@ import {
 } from "lucide-react";
 
 export default function DistributorsManager() {
-  // TEMPORARY DATA – backend developer will replace later
-  const [distributors, setDistributors] = useState<any[]>([
-    {
-      id: 1,
-      name: "Punjab Agro Distributors",
-      email: "punjabdistributors@gmail.com",
-      phone: "9876543210",
-      website: "https://punjabagro.com",
-      image: "",
-    },
-    {
-      id: 2,
-      name: "North India Supplies",
-      email: "northsupplies@gmail.com",
-      phone: "9123456700",
-      website: "",
-      image: "",
-    },
-  ]);
-
+  const [activeTab, setActiveTab] = useState<"submissions" | "page">("submissions");
+  const [distributors, setDistributors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [previewImage, setPreviewImage] = useState<string>("");
 
   // FORM STATE
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    website: string;
+    image: File | string | null;
+  }>({
     name: "",
     email: "",
     phone: "",
     website: "",
-    image: "",
+    image: null,
   });
+
+  // LOAD DISTRIBUTORS FROM BACKEND
+  async function loadDistributors() {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/admin/distributors", {
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Failed to load distributors");
+
+      const data = await res.json();
+      setDistributors(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Load error:", error);
+      alert("Failed to load distributors");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadDistributors();
+  }, []);
 
   // HANDLE INPUT CHANGE
   function handleChange(e: any) {
@@ -62,57 +78,106 @@ export default function DistributorsManager() {
     if (!file) return;
 
     const url = URL.createObjectURL(file);
-    setFormData({ ...formData, image: url });
-
-    // TODO: Replace with real backend file upload (POST /upload)
+    setPreviewImage(url);
+    setFormData({ ...formData, image: file });
   }
 
   // SAVE DISTRIBUTOR (ADD OR EDIT)
-  function saveDistributor() {
+  async function saveDistributor() {
     if (!formData.name.trim()) {
       alert("Distributor name is required.");
       return;
     }
 
-    // EDIT MODE
-    if (editing) {
-      const updated = distributors.map((item) =>
-        item.id === editing.id ? { ...editing, ...formData } : item
-      );
-
-      // TODO: Backend update (PATCH /api/distributors/:id)
-      setDistributors(updated);
-      setEditing(null);
-      setShowForm(false);
+    if (!formData.email.trim()) {
+      alert("Email is required.");
       return;
     }
 
-    // ADD NEW MODE
-    const newDistributor = {
-      id: Date.now(),
-      ...formData,
-    };
+    if (!formData.phone.trim()) {
+      alert("Phone number is required.");
+      return;
+    }
 
-    // TODO: Backend save (POST /api/distributors)
-    setDistributors([newDistributor, ...distributors]);
+    // For new distributors, image is required
+    if (!editing && !(formData.image instanceof File)) {
+      alert("Image is required for new distributors.");
+      return;
+    }
 
-    setShowForm(false);
+    setSubmitting(true);
+
+    try {
+      const url = editing
+        ? `/api/admin/distributors/${editing._id}`
+        : "/api/admin/distributors";
+
+      const method = editing ? "PATCH" : "POST";
+
+      const fd = new FormData();
+      fd.append("name", formData.name.trim());
+      fd.append("email", formData.email.trim());
+      fd.append("phone", formData.phone.trim());
+      fd.append("website", formData.website.trim());
+
+      // Append image only if it's a File object
+      if (formData.image instanceof File) {
+        fd.append("image", formData.image);
+      }
+
+      const res = await fetch(url, {
+        method,
+        credentials: "include",
+        body: fd,
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to save");
+      }
+
+      // Reload all distributors from backend
+      await loadDistributors();
+      closeForm();
+    } catch (error) {
+      console.error("Save error:", error);
+      alert(`Error: ${error instanceof Error ? error.message : "Failed to save"}`);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // DELETE DISTRIBUTOR
-  function deleteDistributor(id: number) {
+  async function deleteDistributor(id: string) {
     if (!confirm("Are you sure you want to delete this distributor?")) return;
 
-    const updated = distributors.filter((item) => item.id !== id);
+    try {
+      const res = await fetch(`/api/admin/distributors/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-    // TODO: Backend delete (DELETE /api/distributors/:id)
-    setDistributors(updated);
+      if (!res.ok) throw new Error("Failed to delete");
+
+      // Reload all distributors from backend
+      await loadDistributors();
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete distributor");
+    }
   }
 
   // OPEN EDIT FORM
   function openEdit(item: any) {
     setEditing(item);
-    setFormData(item);
+    setFormData({
+      name: item.name,
+      email: item.email,
+      phone: item.phone,
+      website: item.website || "",
+      image: item.image || "",
+    });
+    setPreviewImage(item.image || "");
     setShowForm(true);
   }
 
@@ -125,8 +190,9 @@ export default function DistributorsManager() {
       email: "",
       phone: "",
       website: "",
-      image: "",
+      image: null,
     });
+    setPreviewImage("");
   }
 
   return (
@@ -134,88 +200,131 @@ export default function DistributorsManager() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Distributors Manager</h1>
 
+        {activeTab === "submissions" && (
+          <Button
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <Plus size={18} /> Add Distributor
+          </Button>
+        )}
+      </div>
+
+      {/* TAB NAVIGATION */}
+      <div className="flex gap-2 border-b">
         <Button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 cursor-pointer"
+          variant={activeTab === "submissions" ? "default" : "ghost"}
+          onClick={() => setActiveTab("submissions")}
+          className="cursor-pointer"
         >
-          <Plus size={18} /> Add Distributor
+          Distributor Submissions
+        </Button>
+        <Button
+          variant={activeTab === "page" ? "default" : "ghost"}
+          onClick={() => setActiveTab("page")}
+          className="cursor-pointer"
+        >
+          Page Configuration
         </Button>
       </div>
 
-      <p className="text-muted-foreground">
-        Manage all distributors from across India.
-      </p>
+      {/* SUBMISSIONS TAB */}
+      {activeTab === "submissions" && (
+        <div className="space-y-6">
+          <p className="text-muted-foreground">
+            Manage all distributors from across India.
+          </p>
 
       {/* LIST OF DISTRIBUTORS */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-        {distributors.map((item, index) => (
-          <Card key={index} className="shadow-sm hover:shadow-md transition">
-            <CardContent className="p-4 space-y-3">
+      {loading ? (
+        <div className="flex justify-center items-center py-12">
+          <p className="text-muted-foreground text-lg">Loading distributors...</p>
+        </div>
+      ) : distributors.length === 0 ? (
+        <div className="flex justify-center items-center py-12">
+          <p className="text-muted-foreground text-lg">No distributors yet. Add one to get started!</p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+          {distributors.map((item, index) => (
+            <Card key={index} className="shadow-sm hover:shadow-md transition">
+              <CardContent className="p-4 space-y-3">
 
-              {/* IMAGE */}
-              <div className="h-32 rounded-md overflow-hidden bg-muted flex items-center justify-center">
-                {item.image ? (
-                  <img
-                    src={item.image}
-                    className="object-cover w-full h-full"
-                    alt="Distributor"
-                  />
-                ) : (
-                  <ImageIcon size={40} className="text-muted-foreground" />
-                )}
-              </div>
+                {/* IMAGE */}
+                <div className="h-32 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                  {item.image && item.image.trim() ? (
+                    <img
+                      src={item.image}
+                      className="object-cover w-full h-full"
+                      alt={item.name}
+                      onError={(e) => {
+                        // If image fails to load, show placeholder
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <ImageIcon size={40} className="text-muted-foreground" />
+                  )}
+                </div>
 
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <Building size={18} /> {item.name}
-              </h2>
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Building size={18} /> {item.name}
+                </h2>
 
-              <p className="text-sm flex items-center gap-2">
-                <Mail size={16} /> {item.email}
-              </p>
-
-              <p className="text-sm flex items-center gap-2">
-                <Phone size={16} /> {item.phone}
-              </p>
-
-              {item.website && (
                 <p className="text-sm flex items-center gap-2">
-                  <Globe size={16} />
-                  <a
-                    href={item.website}
-                    target="_blank"
-                    className="text-primary underline"
-                  >
-                    Visit Website
-                  </a>
+                  <Mail size={16} /> {item.email}
                 </p>
-              )}
 
-              {/* ACTION BUTTONS */}
-              <div className="flex justify-between pt-2">
-                <Button
-                  variant="outline"
-                  className="cursor-pointer"
-                  onClick={() => openEdit(item)}
-                >
-                  <Edit size={16} />
-                </Button>
+                <p className="text-sm flex items-center gap-2">
+                  <Phone size={16} /> {item.phone}
+                </p>
 
-                <Button
-                  variant="destructive"
-                  className="cursor-pointer"
-                  onClick={() => deleteDistributor(item.id)}
-                >
-                  <Trash2 size={16} />
-                </Button>
-              </div>
+                {item.website && item.website.trim() && (
+                  <p className="text-sm flex items-center gap-2">
+                    <Globe size={16} />
+                    <a
+                      href={item.website.startsWith("http") ? item.website : `https://${item.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline hover:no-underline"
+                    >
+                      Visit Website
+                    </a>
+                  </p>
+                )}
 
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                {/* ACTION BUTTONS */}
+                <div className="flex justify-between pt-2">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => openEdit(item)}
+                  >
+                    <Edit size={16} />
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    className="cursor-pointer"
+                    onClick={() => deleteDistributor(item._id)}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </div>
+
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+        </div>
+      )}
+
+      {/* PAGE CONFIGURATION TAB */}
+      {activeTab === "page" && <DistributorsPageManager />}
 
       {/* ADD / EDIT FORM MODAL */}
-      {showForm && (
+      {showForm && activeTab === "submissions" && (
         <div className="
           fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50
           animate-fadeIn
@@ -274,9 +383,9 @@ export default function DistributorsManager() {
                   className="cursor-pointer"
                 />
 
-                {formData.image && (
+                {previewImage && (
                   <img
-                    src={formData.image}
+                    src={previewImage}
                     alt="Preview"
                     className="mt-3 h-28 w-full object-cover rounded-md border"
                   />
@@ -287,8 +396,9 @@ export default function DistributorsManager() {
               <Button
                 className="w-full cursor-pointer"
                 onClick={saveDistributor}
+                disabled={submitting}
               >
-                {editing ? "Save Changes" : "Add Distributor"}
+                {submitting ? "Saving..." : (editing ? "Save Changes" : "Add Distributor")}
               </Button>
 
             </CardContent>

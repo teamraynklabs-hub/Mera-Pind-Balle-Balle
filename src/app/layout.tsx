@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
 import LayoutWrapper from "@/components/LayoutWrapper";
+import { AuthSessionProvider } from "@/components/AuthSessionProvider";
+import { getDashboardData } from "@/lib/api/dashboard";
+
+const dashboard = await getDashboardData();
 
 export const metadata: Metadata = {
   title: "Mera Pind Balle Balle - Rural Women Empowerment Web Application",
@@ -15,7 +17,6 @@ export const metadata: Metadata = {
 };
 
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,16 +24,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-
-          <LayoutWrapper>{children}</LayoutWrapper>
-        </ThemeProvider>
+        <AuthSessionProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <LayoutWrapper footer={dashboard?.footer}>{children}</LayoutWrapper>
+          </ThemeProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );

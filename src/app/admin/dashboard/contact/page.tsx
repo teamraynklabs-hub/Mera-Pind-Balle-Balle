@@ -1,55 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X, CheckCircle, Mail, User, Phone, Trash2 } from "lucide-react";
 
 export default function ContactLeadsManager() {
-  // Temporary dummy data before backend connection
-  const [leads, setLeads] = useState<any[]>([
-    {
-      id: 1,
-      name: "Rohit Kumar",
-      email: "rohit@example.com",
-      phone: "9876543210",
-      message: "I want to become a distributor. Please contact.",
-      resolved: false,
-    },
-    {
-      id: 2,
-      name: "Anita Sharma",
-      email: "anita@example.com",
-      phone: "9123456780",
-      message: "Need information about organic jaggery bulk purchase.",
-      resolved: true,
-    },
-  ]);
-
+  const [leads, setLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedLead, setSelectedLead] = useState<any | null>(null);
 
-  // MARK LEAD AS RESOLVED
-  function markResolved(id: number) {
-    const updated = leads.map((lead) =>
-      lead.id === id ? { ...lead, resolved: true } : lead
-    );
+  // ✅ LOAD LEADS FROM BACKEND
+  async function loadLeads() {
+    try {
+      const res = await fetch("/api/admin/contact-leads", {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-    // TODO: Backend update (PATCH /api/contact/:id)
-
-    setLeads(updated);
+      const data = await res.json();
+      setLeads(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("CONTACT LEADS LOAD ERROR:", err);
+      setLeads([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // DELETE LEAD
-  function deleteLead(id: number) {
+  useEffect(() => {
+    loadLeads();
+  }, []);
+
+  // ✅ MARK LEAD AS RESOLVED
+  async function markResolved(id: string) {
+    await fetch(`/api/admin/contact-leads/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ isResolved: true }),
+    });
+
+    setSelectedLead(null);
+    loadLeads();
+  }
+
+  // ✅ DELETE LEAD (HARD DELETE)
+  async function deleteLead(id: string) {
     if (!confirm("Are you sure you want to delete this lead?")) return;
 
-    const updated = leads.filter((lead) => lead.id !== id);
+    await fetch(`/api/admin/contact-leads/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
 
-    // TODO: Backend delete (DELETE /api/contact/:id)
-
-    setLeads(updated);
     setSelectedLead(null);
+    loadLeads();
+  }
+
+  if (loading) {
+    return <p className="text-muted-foreground">Loading contact leads...</p>;
   }
 
   return (
@@ -61,20 +72,19 @@ export default function ContactLeadsManager() {
 
       {/* LEADS LIST */}
       <div className="grid md:grid-cols-2 gap-6">
-        {leads.map((lead, index) => (
+        {leads.map((lead) => (
           <Card
-            key={index}
+            key={lead._id}
             className="shadow-sm hover:shadow-md transition cursor-pointer"
             onClick={() => setSelectedLead(lead)}
           >
             <CardContent className="p-4 space-y-2">
-
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <User size={18} /> {lead.name}
                 </h2>
 
-                {lead.resolved ? (
+                {lead.isResolved ? (
                   <Badge className="bg-green-600">Resolved</Badge>
                 ) : (
                   <Badge variant="secondary">Pending</Badge>
@@ -85,30 +95,29 @@ export default function ContactLeadsManager() {
                 <Mail size={16} /> {lead.email}
               </p>
 
-              <p className="text-sm flex items-center gap-2">
-                <Phone size={16} /> {lead.phone}
-              </p>
+              {lead.phone && (
+                <p className="text-sm flex items-center gap-2">
+                  <Phone size={16} /> {lead.phone}
+                </p>
+              )}
 
               <p className="text-muted-foreground text-sm line-clamp-2">
                 {lead.message}
               </p>
-
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* SELECTED LEAD POPUP */}
+      {/* SELECTED LEAD MODAL */}
       {selectedLead && (
-        <div className="
-          fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50
-          animate-fadeIn
-        ">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
           <Card className="max-w-lg w-full shadow-xl">
             <CardContent className="p-6 space-y-4">
-
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold">{selectedLead.name}</h2>
+                <h2 className="text-2xl font-semibold">
+                  {selectedLead.name}
+                </h2>
 
                 <button onClick={() => setSelectedLead(null)}>
                   <X size={22} className="hover:text-primary cursor-pointer" />
@@ -119,9 +128,11 @@ export default function ContactLeadsManager() {
                 <Mail size={16} /> {selectedLead.email}
               </p>
 
-              <p className="text-sm flex items-center gap-2">
-                <Phone size={16} /> {selectedLead.phone}
-              </p>
+              {selectedLead.phone && (
+                <p className="text-sm flex items-center gap-2">
+                  <Phone size={16} /> {selectedLead.phone}
+                </p>
+              )}
 
               <p className="text-muted-foreground text-sm pt-2">
                 {selectedLead.message}
@@ -129,11 +140,10 @@ export default function ContactLeadsManager() {
 
               {/* ACTIONS */}
               <div className="flex gap-4 pt-4">
-
-                {!selectedLead.resolved && (
+                {!selectedLead.isResolved && (
                   <Button
                     className="cursor-pointer"
-                    onClick={() => markResolved(selectedLead.id)}
+                    onClick={() => markResolved(selectedLead._id)}
                   >
                     <CheckCircle size={18} className="mr-2" />
                     Mark as Resolved
@@ -143,14 +153,12 @@ export default function ContactLeadsManager() {
                 <Button
                   variant="destructive"
                   className="cursor-pointer"
-                  onClick={() => deleteLead(selectedLead.id)}
+                  onClick={() => deleteLead(selectedLead._id)}
                 >
                   <Trash2 size={18} className="mr-2" />
                   Delete Lead
                 </Button>
-
               </div>
-
             </CardContent>
           </Card>
         </div>

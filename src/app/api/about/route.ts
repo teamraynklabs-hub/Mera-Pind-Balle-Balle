@@ -1,14 +1,35 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import About from "@/lib/models/About.model";
+import { connectDB } from "@/lib/db";
 
+// DB fetch helper
+async function getAbout() {
+  await connectDB();
+  return About.findOne({ isActive: true }).lean();
+}
+
+// GET /api/about
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), "src/lib/dummy/about.json");
-    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const about = await getAbout();
 
-    return NextResponse.json(data);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!about) {
+      return NextResponse.json(
+        { success: false, message: "About data not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: about,
+    });
+  } catch (error) {
+    console.error("ABOUT API ERROR:", error);
+
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch About data" },
+      { status: 500 }
+    );
   }
 }

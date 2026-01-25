@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Success Stories — Mera Pind Balle Balle",
@@ -11,14 +12,20 @@ export const metadata: Metadata = {
 // Backend Fetch
 async function getStories() {
   try {
-    const base = getBaseUrl(); // SSR-safe URL
-    const res = await axios.get(`${base}/api/stories`);
-    return res.data;
+    const base = getBaseUrl();
+    const res = await fetch(`${base}/api/stories`, {
+      cache: "no-store",
+    });
+
+    const json = await res.json();
+
+    return Array.isArray(json.data) ? json.data : [];
   } catch (error) {
-    console.error("STORIES API ERROR:", error);
-    return null;
+    console.error("STORIES FETCH ERROR:", error);
+    return [];
   }
 }
+
 
 export default async function StoriesPage() {
   const stories = await getStories();
@@ -66,7 +73,7 @@ export default async function StoriesPage() {
               </p>
 
               <a
-                href="#"
+                href={`/stories/${story.slug}`}
                 className="text-primary text-sm font-medium mt-4 inline-block hover:underline"
               >
                 Read Full Story →

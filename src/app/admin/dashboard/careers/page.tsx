@@ -1,232 +1,345 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, Edit3, Save, X } from "lucide-react";
+import { PlusCircle, Trash2, Edit3, Save, X, Upload } from "lucide-react";
+import axios from "axios";
+import { getBaseUrl } from "@/lib/getBaseUrl"; // ← assuming you have this
+
+interface Job {
+  _id?: string;
+  title: string;
+  location?: string;
+  type?: string;
+  description: string;
+  salary?: string;
+  image?: string;
+}
 
 export default function CareersManager() {
-  // Dummy state before backend is connected
-  const [careers, setCareers] = useState<any[]>([]);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Job & { file?: File }>({
     title: "",
     location: "",
     description: "",
     salary: "",
-    image: null as File | null,
+    image: "",
+    file: undefined,
   });
 
-  // Handle input changes
-  function handleChange(e: any) {
+  // Load jobs on mount
+  useEffect(() => {
+    loadJobs();
+  }, []);
+
+async function loadJobs() {
+  try {
+    setLoading(true);
+    setError(null);
+    const base = getBaseUrl();
+    const res = await axios.get(`${base}/api/admin/careers`, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const data = res.data.data || res.data;
+    const jobsArray = Array.isArray(data.jobs) ? data.jobs : [];
+    setJobs(jobsArray);
+  } catch (err: any) {
+    console.error("Load jobs failed:", err);
+    setError(
+      err.response?.data?.error || "Could not load job listings. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+}
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  // Handle file uploads (Image / PDF)
-  function handleFileUpload(e: any) {
-    const file = e.target.files[0];
-    setForm((prev) => ({ ...prev, image: file }));
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setForm((prev) => ({ ...prev, file }));
+    }
   }
 
-  // Add new job
-  function handleAdd() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     if (!form.title.trim() || !form.description.trim()) {
-      alert("Please fill required fields.");
+      setError("Title and description are required");
       return;
     }
 
-    const newCareer = { ...form, id: Date.now() };
+    setLoading(true);
+    setError(null);
 
-    // Backend will require API POST here
-    setCareers((prev) => [...prev, newCareer]);
+    try {
+      const base = getBaseUrl();
+      const isEdit = !!editingId;
 
-    resetForm();
+      let imageUrl = form.image && typeof form.image === "string" ? form.image : undefined;
+
+      // Upload file if it's a new File object
+      if (form.file instanceof File) {
+        const uploadForm = new FormData();
+        uploadForm.append("file", form.file);
+
+        try {
+          const uploadRes = await axios.post(`${base}/api/upload`, uploadForm, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          imageUrl = uploadRes.data.url;
+        } catch (uploadErr) {
+          console.error("Upload error:", uploadErr);
+          setError("Failed to upload image. Continuing without image.");
+        }
+      }
+
+      const payload = {
+        title: form.title.trim(),
+        location: form.location?.trim() || "",
+        description: form.description.trim(),
+        salary: form.salary?.trim() || "",
+        type: "Full-time",
+        ...(imageUrl && { image: imageUrl }),
+      };
+
+      if (isEdit) {
+        // UPDATE
+        await axios.put(`${base}/api/admin/careers/${editingId}`, payload);
+      } else {
+        // CREATE
+        await axios.post(`${base}/api/admin/careers`, payload);
+      }
+
+      resetForm();
+      await loadJobs(); // refresh list
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || "Operation failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // Edit job
-  function handleEdit(index: number) {
-    setEditingIndex(index);
-    setForm(careers[index]);
+  function handleEdit(job: Job) {
+    setEditingId(job._id || null);
+    setForm({
+      _id: job._id,
+      title: job.title,
+      location: job.location || "",
+      type: job.type,
+      description: job.description,
+      salary: job.salary || "",
+      image: job.image || "",
+      file: undefined,
+    });
   }
 
-  // Save edited job
-  function handleSave() {
-    if (editingIndex === null) return;
+  async function handleDelete(id?: string) {
+    if (!id || !confirm("Delete this job permanently?")) return;
 
-    const updatedList = [...careers];
-    updatedList[editingIndex] = form;
-
-    // Backend will require API PUT here
-    setCareers(updatedList);
-
-    resetForm();
-    setEditingIndex(null);
+    try {
+      setLoading(true);
+      const base = getBaseUrl();
+      await axios.delete(`${base}/api/careers/${id}`);
+      await loadJobs();
+    } catch (err) {
+      setError("Failed to delete job");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // Delete job
-  function handleDelete(index: number) {
-    if (!confirm("Are you sure?")) return;
-
-    const updatedList = careers.filter((_, i) => i !== index);
-
-    // Backend will require API DELETE here
-    setCareers(updatedList);
-  }
-
-  // Reset form
   function resetForm() {
     setForm({
       title: "",
       location: "",
       description: "",
       salary: "",
-      image: null,
+      image: "",
+      file: undefined,
     });
+    setEditingId(null);
+    setError(null);
   }
 
   return (
-    <div className="space-y-6 animate-fadeUp">
-      <h1 className="text-3xl font-bold">Careers Manager</h1>
-      <p className="text-muted-foreground">Add, edit, and manage all job openings.</p>
+    <div className="space-y-8 pb-12">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Careers Manager</h1>
+        <p className="text-muted-foreground mt-1">
+          Create, update and manage job openings shown on the Careers page
+        </p>
+      </div>
 
-      {/* Form Card */}
-      <Card className="shadow-sm">
-        <CardContent className="p-6 space-y-4">
+      {/* Error message */}
+      {error && (
+        <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md border border-destructive/30">
+          {error}
+        </div>
+      )}
 
-          <div>
-            <label className="font-medium">Job Title *</label>
-            <Input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Software Engineer"
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Location</label>
-            <Input
-              name="location"
-              value={form.location}
-              onChange={handleChange}
-              placeholder="Bengaluru, India"
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Salary</label>
-            <Input
-              name="salary"
-              value={form.salary}
-              onChange={handleChange}
-              placeholder="₹40,000 / month"
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Description *</label>
-            <Textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Job responsibilities, required skills..."
-              className="mt-1"
-              rows={4}
-            />
-          </div>
-
-          <div>
-            <label className="font-medium">Upload Image / PDF</label>
-            <Input
-              type="file"
-              accept="image/*,.pdf"
-              onChange={handleFileUpload}
-              className="cursor-pointer mt-1"
-            />
-          </div>
-
-          {/* Action Button */}
-          {editingIndex === null ? (
-            <Button
-              className="mt-2 cursor-pointer"
-              onClick={handleAdd}
-            >
-              <PlusCircle size={18} className="mr-2" /> Add Job
-            </Button>
-          ) : (
-            <div className="flex gap-4">
-              <Button className="cursor-pointer" onClick={handleSave}>
-                <Save size={18} className="mr-2" /> Save Changes
-              </Button>
-
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  resetForm();
-                  setEditingIndex(null);
-                }}
-                className="cursor-pointer"
-              >
-                <X size={18} className="mr-2" /> Cancel
-              </Button>
+      {/* Form */}
+      <Card className="border shadow-sm">
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid gap-2">
+              <label className="font-medium">Job Title *</label>
+              <Input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="e.g. Field Sales Executive"
+                required
+              />
             </div>
-          )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid gap-2">
+                <label className="font-medium">Location</label>
+                <Input
+                  name="location"
+                  value={form.location}
+                  onChange={handleChange}
+                  placeholder="Ludhiana / Remote / Punjab"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <label className="font-medium">Salary (optional)</label>
+                <Input
+                  name="salary"
+                  value={form.salary}
+                  onChange={handleChange}
+                  placeholder="₹25,000 – ₹40,000 / month"
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <label className="font-medium">Job Description *</label>
+              <Textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Responsibilities, qualifications, what we offer..."
+                rows={6}
+                required
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label className="font-medium">Job Image / Banner (optional)</label>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="cursor-pointer"
+                />
+                {form.file && (
+                  <span className="text-sm text-muted-foreground truncate max-w-[180px]">
+                    {form.file.name}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Recommended: 1200×600 px banner or logo
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-4">
+              <Button type="submit" disabled={loading}>
+                {loading ? (
+                  "Saving..."
+                ) : editingId ? (
+                  <>
+                    <Save className="mr-2 h-4 w-4" /> Update Job
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add New Job
+                  </>
+                )}
+              </Button>
+
+              {editingId && (
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  <X className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+              )}
+            </div>
+          </form>
         </CardContent>
       </Card>
 
-      {/* Careers List */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {careers.map((career, index) => (
-          <Card key={index} className="shadow-sm hover:shadow-md transition">
-            <CardContent className="p-4 space-y-3">
+      {/* Job List */}
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">Current Openings</h2>
 
-              <h2 className="text-xl font-semibold">{career.title}</h2>
+        {loading && jobs.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">Loading jobs...</div>
+        ) : jobs.length === 0 ? (
+          <div className="text-center py-12 border rounded-lg bg-muted/40">
+            No jobs added yet.
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jobs.map((job) => (
+              <Card key={job._id} className="overflow-hidden hover:shadow-md transition-shadow">
+                {job.image && (
+                  <div className="h-40 bg-muted relative">
+                    <img
+                      src={job.image}
+                      alt={job.title}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                )}
+                <CardContent className="p-5 space-y-3">
+                  <h3 className="font-semibold text-lg line-clamp-2">{job.title}</h3>
+                  {job.location && (
+                    <p className="text-sm text-muted-foreground">📍 {job.location}</p>
+                  )}
+                  {job.salary && (
+                    <p className="text-sm font-medium text-primary">{job.salary}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {job.description}
+                  </p>
 
-              <p className="text-sm text-muted-foreground">
-                {career.location || "No location provided"}
-              </p>
-
-              <p className="text-sm">{career.description}</p>
-
-              {career.salary && (
-                <p className="text-primary font-medium">{career.salary}</p>
-              )}
-
-              {career.image && (
-                <p className="text-xs text-muted-foreground">
-                  File attached: {career.image?.name}
-                </p>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <Button
-                  size="sm"
-                  onClick={() => handleEdit(index)}
-                  className="cursor-pointer"
-                >
-                  <Edit3 size={16} className="mr-1" /> Edit
-                </Button>
-
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => handleDelete(index)}
-                  className="cursor-pointer"
-                >
-                  <Trash2 size={16} className="mr-1" /> Delete
-                </Button>
-              </div>
-
-            </CardContent>
-          </Card>
-        ))}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEdit(job)}
+                    >
+                      <Edit3 className="h-4 w-4 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(job._id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

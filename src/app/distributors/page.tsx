@@ -14,10 +14,27 @@ async function getDistributorInfo() {
   try {
     const base = getBaseUrl();
     const res = await axios.get(`${base}/api/distributors`);
+    console.log("Distributor page data:", res.data);
     return res.data;
   } catch (err) {
     console.error("DISTRIBUTOR GET ERROR:", err);
-    return null;
+    // Return default fallback data
+    return {
+      bannerImage: "",
+      benefits: [
+        "Competitive commission structure",
+        "Marketing support and training",
+        "Quality products with guaranteed profits",
+        "Dedicated distributor support team",
+      ],
+      requirements: [
+        "Registered business entity",
+        "Minimum investment capacity",
+        "Valid GST registration",
+        "Willingness to maintain quality standards",
+      ],
+      isActive: true,
+    };
   }
 }
 
@@ -36,13 +53,15 @@ export default async function DistributorsPage() {
   return (
     <main className="container mx-auto px-4 py-12">
       {/* BANNER */}
-      <section className="mb-16">
-        <img
-          src={info.bannerImage}
-          alt="Distributors"
-          className="w-full h-72 object-cover rounded-xl shadow"
-        />
-      </section>
+      {info.bannerImage && info.bannerImage.trim() && (
+        <section className="mb-16">
+          <img
+            src={info.bannerImage}
+            alt="Distributors"
+            className="w-full h-72 object-cover rounded-xl shadow"
+          />
+        </section>
+      )}
 
       {/* INTRO */}
       <section className="text-center mb-16">

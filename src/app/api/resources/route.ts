@@ -1,24 +1,21 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { connectDB } from "@/lib/db";
+import ResourcesPage from "@/lib/models/Resource.model";
 
 export async function GET() {
   try {
-    const filePath = path.join(
-      process.cwd(),
-      "src",
-      "lib",
-      "dummy",
-      "resources.json"
-    );
+    await connectDB();
 
-    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    const data = await ResourcesPage.findOne({ isActive: true }).lean();
+
+    if (!data) {
+      return NextResponse.json(null, { status: 404 });
+    }
+
+    // 🔥 RETURN RAW DATA
     return NextResponse.json(data);
-  } catch (error: any) {
-    console.error("RESOURCES API ERROR:", error.message);
-    return NextResponse.json(
-      { error: "Failed to load resources" },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("RESOURCES API ERROR:", error);
+    return NextResponse.json(null, { status: 500 });
   }
 }

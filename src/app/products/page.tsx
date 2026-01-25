@@ -13,24 +13,18 @@ async function getProducts() {
   try {
     const base = getBaseUrl(); // SSR safe
     const res = await axios.get(`${base}/api/products`);
-    return res.data;
+
+    //  IMPORTANT: extract array
+    return res.data.data ?? [];
   } catch (error) {
     console.error("PRODUCT API ERROR:", error);
-    return null;
+    return [];
   }
 }
 
+
 export default async function ProductsPage() {
   const products = await getProducts();
-
-  if (!products)
-    return (
-      <main className="container mx-auto px-4 py-12">
-        <p className="text-center text-muted-foreground">
-          Unable to load product data from backend.
-        </p>
-      </main>
-    );
 
   return (
     <main className="container mx-auto px-4 py-12">
@@ -45,36 +39,42 @@ export default async function ProductsPage() {
 
       {/* PRODUCT GRID */}
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
-        {products.map((item: any) => (
-          <div
-            key={item.name}
-            className="bg-card border rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition"
-          >
-            <img
-              src={item.image}
-              alt={item.name}
-              className="w-full h-56 object-cover"
-            />
+        {products.length === 0 ? (
+          <p className="col-span-full text-center text-muted-foreground">
+            No products available at the moment.
+          </p>
+        ) : (
+          products.map((item: any) => (
+            <div
+              key={item.name}
+              className="bg-card border rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition"
+            >
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-56 object-cover"
+              />
 
-            <div className="p-6">
-              <h3 className="text-xl font-semibold mb-1">{item.name}</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {item.description}
-              </p>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold mb-1">{item.name}</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {item.description}
+                </p>
 
-              <div className="flex items-center justify-between">
-                <p className="text-lg font-bold text-primary">₹{item.price}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-lg font-bold text-primary">₹{item.price}</p>
 
-                <a
-                  href="/contact"
-                  className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:opacity-90 transition"
-                >
-                  Inquire
-                </a>
+                  <a
+                    href="/contact"
+                    className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:opacity-90 transition"
+                  >
+                    Inquire
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </section>
 
       {/* CTA SECTION */}

@@ -1,36 +1,41 @@
 import { NextResponse } from "next/server";
-import blogs from "@/lib/dummy/blogs.json";
+import { connectDB } from "@/lib/db";
+import Blog from "@/lib/models/Blog.model";
 
 export async function GET(req: Request) {
   try {
+    await connectDB();
+
     const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search") || "";
+    const page = Number(searchParams.get("page") || 1);
+    const limit = Number(searchParams.get("limit") || 6);
 
-    const search = (searchParams.get("search") || "").toLowerCase();
-    const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 6;
-
-    // SEARCH FILTER
-    let filteredBlogs = blogs;
+    const query: any = { isPublished: true };
 
     if (search) {
-      filteredBlogs = blogs.filter((b) =>
-        b.title.toLowerCase().includes(search)
-      );
+      query.title = { $regex: search, $options: "i" };
     }
 
-    // PAGINATION
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const paginatedBlogs = filteredBlogs.slice(start, end);
+    const total = await Blog.countDocuments(query);
+
+    const blogs = await Blog.find(query)
+      .sort({ date: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
 
     return NextResponse.json({
-      blogs: paginatedBlogs,
-      total: filteredBlogs.length,
+      blogs,
+      total,
       page,
       limit,
     });
   } catch (error) {
     console.error("BLOG API ERROR:", error);
-    return NextResponse.json({ message: "Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { blogs: [], total: 0 },
+      { status: 500 }
+    );
   }
 }

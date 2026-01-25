@@ -9,14 +9,13 @@ export const metadata: Metadata = {
     "Join Mera Pind Balle Balle to make a meaningful impact in rural development, empowerment, and sustainable community growth.",
 };
 
-// SSR fetch
 async function getCareerData() {
   try {
     const base = getBaseUrl();
     const res = await axios.get(`${base}/api/careers`);
-    return res.data;
+    return res.data?.data || null;
   } catch (err) {
-    console.error("CAREERS API ERROR:", err);
+    console.error("CAREERS PAGE DATA ERROR:", err);
     return null;
   }
 }
@@ -26,58 +25,71 @@ export default async function CareersPage() {
 
   if (!data) {
     return (
-      <main className="container mx-auto px-4 py-12 text-center">
-        <p className="text-muted-foreground">Unable to load careers data.</p>
+      <main className="container mx-auto px-4 py-16 text-center">
+        <p className="text-muted-foreground text-lg">
+          Unable to load careers information at the moment.
+        </p>
       </main>
     );
   }
 
   return (
     <main className="container mx-auto px-4 py-12">
-
       {/* BANNER */}
       <section className="mb-16">
         <img
           src={data.bannerImage}
-          alt="Careers"
-          className="w-full h-72 object-cover rounded-xl shadow"
+          alt="Careers at Mera Pind Balle Balle"
+          className="w-full h-72 md:h-96 object-cover rounded-xl shadow-lg"
         />
       </section>
 
-      {/* PAGE HEADER */}
+      {/* HEADER */}
       <section className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Join Our Mission</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          We are looking for passionate individuals who want to help transform
-          rural communities through skill development, empowerment, and meaningful work.
+        <h1 className="text-4xl md:text-5xl font-bold mb-5">Join Our Mission</h1>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+          We're looking for passionate people who want to help transform rural communities
+          through skill development, women's empowerment, and sustainable opportunities.
         </p>
       </section>
 
-      {/* JOB LISTINGS */}
+      {/* OPEN POSITIONS */}
       <section className="mb-20">
-        <h2 className="text-3xl font-semibold mb-6">Open Positions</h2>
+        <h2 className="text-3xl md:text-4xl font-semibold mb-8 text-center md:text-left">
+          Open Positions
+        </h2>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {data.jobs.map((job: any, index: number) => (
-            <div
-              key={index}
-              className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition"
-            >
-              <h3 className="text-xl font-semibold">{job.title}</h3>
-              <p className="text-sm text-primary mb-1">{job.type}</p>
-              <p className="text-sm text-muted-foreground mb-3">
-                Location: {job.location}
-              </p>
-
-              <p className="text-muted-foreground mb-4">{job.description}</p>
-            </div>
-          ))}
-        </div>
+        {data.jobs?.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
+            {data.jobs.map((job: any, index: number) => (
+              <div
+                key={index}
+                className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-lg transition-all duration-200"
+              >
+                <h3 className="text-xl font-semibold mb-2">{job.title}</h3>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="text-sm px-3 py-1 bg-primary/10 text-primary rounded-full">
+                    {job.type || "Full-time"}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    📍 {job.location || "Remote / Punjab"}
+                  </span>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  {job.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground py-12">
+            No open positions at the moment. Check back soon!
+          </p>
+        )}
       </section>
 
-      {/* FORM */}
+      {/* APPLICATION FORM */}
       <CareersForm />
-
     </main>
   );
 }

@@ -30,119 +30,126 @@ export default function StoriesManager() {
     title: "",
     author: "",
     content: "",
-    image: "",
+    image: null as File | null,
   });
 
-  // ⭐ Dummy data (use until backend is connected)
-  const dummyStories = [
-    {
-      id: 1,
-      title: "Empowering Women in Rural Punjab",
-      author: "Admin",
-      content: "A story of transformation and empowerment in rural India.",
-      image: "/placeholder-story.jpg",
-    },
-  ];
-
-  // LOAD STORIES
+  /* =========================
+     LOAD STORIES (BACKEND)
+  ========================== */
   async function loadStories() {
     try {
-      // ⭐ Replace with -> const res = await fetch("/api/stories")
-      setStories(dummyStories);
+      const res = await fetch("/api/admin/stories", {
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+      setStories(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("STORIES LOAD ERROR:", err);
       setStories([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {
     loadStories();
   }, []);
 
-  // FORM INPUT HANDLER
+  /* =========================
+     FORM HANDLERS
+  ========================== */
   function handleChange(e: any) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  // FILE UPLOAD HANDLER
   function handleFileChange(e: any) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    setPreviewImage(url);
-
-    setForm({ ...form, image: url }); // Backend will replace this
+    setPreviewImage(URL.createObjectURL(file));
+    setForm({ ...form, image: file });
   }
 
-  // START EDIT
   function startEdit(item: any) {
     setEditingStory(item);
     setForm({
       title: item.title,
-      author: item.author,
+      author: item.author || "",
       content: item.content,
-      image: item.image,
+      image: null,
     });
     setPreviewImage(item.image);
     setOpen(true);
   }
 
-  // RESET FORM
   function resetForm() {
     setEditingStory(null);
     setForm({
       title: "",
       author: "",
       content: "",
-      image: "",
+      image: null,
     });
     setPreviewImage("");
   }
 
-  // SUBMIT (ADD + EDIT)
+  /* =========================
+     CREATE / UPDATE (BACKEND)
+  ========================== */
   async function handleSubmit() {
-    if (!form.title) {
-      alert("Title is required");
+    if (!form.title || !form.content) {
+      alert("Title and content are required");
       return;
     }
 
-    // ⭐ Backend integration (POST / PUT) will be added later
+    const fd = new FormData();
+    fd.append("title", form.title);
+    fd.append("author", form.author || "Admin");
+    fd.append("content", form.content);
+    fd.append("excerpt", form.content.slice(0,60));
 
-    if (editingStory) {
-      // UPDATE LOCAL
-      const updated = stories.map((s) =>
-        s.id === editingStory.id ? { ...editingStory, ...form } : s
-      );
-      setStories(updated);
-    } else {
-      // ADD NEW LOCAL
-      setStories([
-        ...stories,
-        {
-          id: Date.now(),
-          ...form,
-        },
-      ]);
+    if (form.image) {
+      fd.append("image", form.image);
     }
+
+    const url = editingStory
+      ? `/api/admin/stories/${editingStory._id}`
+      : "/api/admin/stories";
+
+    const method = editingStory ? "PUT" : "POST";
+
+    await fetch(url, {
+      method,
+      body: fd,
+      credentials: "include",
+    });
 
     setOpen(false);
     resetForm();
+    await loadStories(); // 🔑 backend truth
   }
 
-  // DELETE STORY
-  async function deleteStory(id: number) {
+  /* =========================
+     DELETE (DB + CLOUDINARY)
+  ========================== */
+  async function deleteStory(id: string) {
     if (!confirm("Delete this story?")) return;
 
-    // ⭐ Replace with backend DELETE later
-    setStories(stories.filter((s) => s.id !== id));
+    await fetch(`/api/admin/stories/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    await loadStories();
   }
 
+  /* =========================
+     UI (UNCHANGED)
+  ========================== */
   return (
     <div className="space-y-8 animate-fadeUp">
-
-      {/* HEADER */}
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-semibold">Stories Manager</h1>
 
@@ -167,8 +174,6 @@ export default function StoriesManager() {
             </DialogHeader>
 
             <div className="grid gap-4 py-2">
-
-              {/* IMAGE UPLOAD */}
               <div className="grid gap-2">
                 <Label>Upload Image</Label>
                 <Input
@@ -220,22 +225,18 @@ export default function StoriesManager() {
               <Button className="mt-3 cursor-pointer" onClick={handleSubmit}>
                 {editingStory ? "Save Changes" : "Add Story"}
               </Button>
-
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* STORIES LIST */}
       {loading ? (
         <p className="text-muted-foreground">Loading stories...</p>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
           {(Array.isArray(stories) ? stories : []).map((story, index) => (
             <Card key={index} className="shadow-sm hover:shadow-md transition">
               <CardContent className="p-4 space-y-3">
-
                 <div className="rounded-md overflow-hidden h-40 bg-muted">
                   <img
                     src={story.image}
@@ -245,10 +246,10 @@ export default function StoriesManager() {
                 </div>
 
                 <h3 className="text-lg font-semibold">{story.title}</h3>
-                <p className="text-sm text-primary">By {story.author || "Admin"}</p>
+            
 
                 <p className="text-sm text-muted-foreground line-clamp-2">
-                  {story.content}
+                  {story.excerpt}...
                 </p>
 
                 <div className="flex justify-between pt-2">
@@ -263,16 +264,14 @@ export default function StoriesManager() {
                   <Button
                     variant="destructive"
                     className="flex gap-1 cursor-pointer"
-                    onClick={() => deleteStory(story.id)}
+                    onClick={() => deleteStory(story._id)}
                   >
                     <Trash2 size={16} /> Delete
                   </Button>
                 </div>
-
               </CardContent>
             </Card>
           ))}
-
         </div>
       )}
     </div>
