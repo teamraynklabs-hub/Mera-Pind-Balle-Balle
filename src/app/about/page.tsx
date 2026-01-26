@@ -14,8 +14,7 @@ async function getAboutData() {
   try {
     const base = getBaseUrl();
     const res = await fetch(`${base}/api/about`, {
-      cache: "force-cache",
-      next: { revalidate: 7200 },
+      cache: "no-store",
     });
 
     if (!res.ok) throw new Error("Fetch failed");
