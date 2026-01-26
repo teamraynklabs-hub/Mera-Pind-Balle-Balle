@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 import { connectDB } from "@/lib/db";
 import Blog from "@/lib/models/Blog.model";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://merapind.com";
 
 async function fetchBlogBySlug(slug: string) {
   await connectDB();
@@ -13,7 +16,12 @@ async function fetchBlogBySlug(slug: string) {
   }).lean();
 }
 
-
+// === GENERATE STATIC PARAMS FOR PERFORMANCE ===
+export async function generateStaticParams() {
+  await connectDB();
+  const blogs = await Blog.find({ isPublished: true }, { slug: 1 }).lean();
+  return blogs.map((blog: any) => ({ slug: blog.slug }));
+}
 
 // === METADATA ===
 export async function generateMetadata(
@@ -30,9 +38,41 @@ export async function generateMetadata(
     };
   }
 
+  const url = `${BASE_URL}/blog/${blog.slug}`;
+
   return {
-    title: `${blog.title} — Mera Pind Balle Balle`,
+    title: blog.title,
     description: blog.excerpt,
+    keywords: blog.tags || [],
+    authors: [{ name: "Mera Pind Balle Balle" }],
+    openGraph: {
+      type: "article",
+      url,
+      title: blog.title,
+      description: blog.excerpt,
+      images: [
+        {
+          url: blog.image,
+          width: 1200,
+          height: 630,
+          alt: blog.title,
+          type: "image/jpeg",
+        },
+      ],
+      publishedTime: blog.createdAt ? new Date(blog.createdAt).toISOString() : undefined,
+      modifiedTime: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
+      authors: ["Mera Pind Balle Balle"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.title,
+      description: blog.excerpt,
+      images: [blog.image],
+      creator: "@MeraPindBalleBalle",
+    },
+    alternates: {
+      canonical: url,
+    },
   };
 }
 
@@ -48,32 +88,74 @@ export default async function BlogDetailPage(
     notFound();
   }
 
+  const url = `${BASE_URL}/blog/${blog.slug}`;
+  const createdDate = blog.createdAt ? new Date(blog.createdAt) : new Date();
+  const updatedDate = blog.updatedAt ? new Date(blog.updatedAt) : new Date();
+
+  // Validate dates are valid
+  const createdISO = !isNaN(createdDate.getTime()) ? createdDate.toISOString() : new Date().toISOString();
+  const updatedISO = !isNaN(updatedDate.getTime()) ? updatedDate.toISOString() : new Date().toISOString();
 
   return (
-    <main className="container mx-auto px-4 py-12 max-w-3xl">
-      <section className="mb-10">
-        <img
+    <article className="container mx-auto px-4 py-12 max-w-3xl">
+      <header className="mb-10">
+        <Image
           src={blog.image}
           alt={blog.title}
-          className="w-full h-80 object-cover rounded-xl"
+          width={1200}
+          height={630}
+          priority
+          className="w-full h-auto rounded-xl"
         />
-      </section>
+      </header>
 
-      <h1 className="text-4xl font-bold mb-4">{blog.title}</h1>
+      <div className="mb-8">
+        <h1 className="text-5xl font-bold mb-4">{blog.title}</h1>
 
-      <p className="text-muted-foreground text-sm mb-8">
-        {new Date(blog.date).toDateString()}
-      </p>
+        <time
+          dateTime={createdISO}
+          className="text-muted-foreground text-sm"
+        >
+          {createdDate.toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </time>
+      </div>
 
-      <article className="prose prose-invert max-w-none">
-        {blog.content}
-      </article>
+      <div className="prose prose-lg max-w-none mb-10">
+        <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+      </div>
 
-      <section className="mt-10">
-        <a href="/blog" className="text-primary underline">
-          ← Back to Blogs
+      <nav className="mt-10 border-t pt-6">
+        <a href="/blog" className="text-primary hover:underline">
+          ← Back to All Blogs
         </a>
-      </section>
-    </main>
+      </nav>
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: blog.title,
+            description: blog.excerpt,
+            image: blog.image,
+            datePublished: createdISO,
+            dateModified: updatedISO,
+            author: {
+              "@type": "Organization",
+              name: "Mera Pind Balle Balle",
+              url: BASE_URL,
+            },
+            articleBody: blog.content,
+            url,
+          }),
+        }}
+      />
+    </article>
   );
 }

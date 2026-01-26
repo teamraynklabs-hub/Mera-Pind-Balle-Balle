@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#fef3c7"/>
+  <text x="200" y="150" font-size="24" text-anchor="middle" fill="#d97706" dominant-baseline="middle">
+    Handcrafted Baskets
+  </text>
+  <text x="200" y="180" font-size="14" text-anchor="middle" fill="#fbbf24">
+    Product Image
+  </text>
+</svg>

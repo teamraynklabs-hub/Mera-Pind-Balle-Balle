@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#fce7f3"/>
+  <text x="200" y="150" font-size="24" text-anchor="middle" fill="#ec4899" dominant-baseline="middle">
+    Organic Honey
+  </text>
+  <text x="200" y="180" font-size="14" text-anchor="middle" fill="#f472b6">
+    Product Image
+  </text>
+</svg>

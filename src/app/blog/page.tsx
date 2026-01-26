@@ -1,4 +1,3 @@
-import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
@@ -12,11 +11,22 @@ export const metadata: Metadata = {
 async function fetchBlogs(search: string, page: number, limit: number) {
   try {
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/blogs`, {
-      params: { search, page, limit },
+    const params = new URLSearchParams({
+      search: search || "",
+      page: page.toString(),
+      limit: limit.toString(),
     });
 
-    const data = res.data;
+    const res = await fetch(`${base}/api/blogs?${params}`, {
+      cache: "force-cache",
+      next: { revalidate: 300 }, // 5 minutes
+    });
+
+    if (!res.ok) {
+      throw new Error(`Blog fetch failed: ${res.status}`);
+    }
+
+    const data = await res.json();
 
     return {
       blogs: Array.isArray(data.blogs) ? data.blogs : [],

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#f3e8ff"/>
+  <text x="200" y="150" font-size="24" text-anchor="middle" fill="#7c3aed" dominant-baseline="middle">
+    Organic Jaggery
+  </text>
+  <text x="200" y="180" font-size="14" text-anchor="middle" fill="#a78bfa">
+    Product Image
+  </text>
+</svg>

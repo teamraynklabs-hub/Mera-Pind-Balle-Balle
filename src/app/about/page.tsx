@@ -1,11 +1,10 @@
-import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "About — Mera Pind Balle Balle | Empowering Rural Communities",
   description:
-    "Learn about Mera Pind Balle Balle's mission, vision, values, rural empowerment approach, and the team behind sustainable change.",
+    "Learn about Mera Pind Balle Balle's mission, vision, values, and rural empowerment approach.",
 };
 
 /* ------------------------
@@ -14,159 +13,159 @@ export const metadata: Metadata = {
 async function getAboutData() {
   try {
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/about`, {
-      timeout: 10000, // 10 second timeout
+    const res = await fetch(`${base}/api/about`, {
+      cache: "force-cache",
+      next: { revalidate: 7200 },
     });
 
-    // Handle both { success: true, data: {...} } and direct {...} response formats
-    if (res.data?.success) {
-      return res.data.data;
-    }
+    if (!res.ok) throw new Error("Fetch failed");
+    const json = await res.json();
 
-    // If data is returned directly
-    if (res.data?._id) {
-      return res.data;
-    }
+    if (json?.success) return json.data;
+    if (json?._id) return json;
 
     return null;
-  } catch (error) {
-    console.error("ABOUT PAGE ERROR:", error);
+  } catch (err) {
+    console.error("ABOUT PAGE ERROR:", err);
     return null;
   }
 }
 
-
 /* ------------------------
-      ABOUT PAGE VIEW
+      ABOUT PAGE
 ------------------------ */
 export default async function AboutPage() {
   const data = await getAboutData();
 
   if (!data) {
     return (
-      <main className="container mx-auto px-4 py-16 text-center">
+      <main className="container mx-auto px-4 py-20 text-center">
         <p className="text-muted-foreground text-lg">
-          Unable to load About page data. Please try again later.
+          Unable to load About page data.
         </p>
       </main>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-12">
+    <main className="container mx-auto px-4 py-12 space-y-20">
+
       {/* HERO SECTION */}
-      <section className="grid md:grid-cols-2 gap-10 items-center mb-20">
-        <div>
-          <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+      <section className="grid lg:grid-cols-2 gap-10 items-center">
+        {/* TEXT */}
+        <div className="text-center lg:text-left">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
             {data.hero?.title || "About Mera Pind Balle Balle"}
           </h1>
 
-          <p className="text-lg text-muted-foreground max-w-prose">
-            {data.hero?.description || 
-              "Mera Pind Balle Balle is building sustainable village-level ecosystems by empowering artisans, farmers, and rural entrepreneurs with skills, market access, and fair compensation systems."}
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto lg:mx-0">
+            {data.hero?.description}
           </p>
         </div>
 
+        {/* IMAGE */}
         {data.hero?.image && (
-          <div className="rounded-xl overflow-hidden shadow-lg bg-muted animate-fade-in">
+          <div className="w-full max-w-lg mx-auto rounded-xl overflow-hidden shadow-md bg-muted">
             <img
               src={data.hero.image}
-              alt={data.hero?.title || "About Mera Pind Balle Balle"}
-              className="w-full h-auto object-cover"
+              alt={data.hero?.title}
+              className="
+                w-full
+                h-[220px]
+                sm:h-[280px]
+                md:h-[320px]
+                object-cover
+              "
               loading="lazy"
             />
           </div>
         )}
       </section>
 
-      {/* MISSION, VISION, VALUES */}
-      <section className="grid md:grid-cols-3 gap-8 mb-20">
-        {/* MISSION */}
-        {data.mission && (
-          <div className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition">
-            <h3 className="text-xl font-semibold mb-2">
-              {data.mission.title || "Our Mission"}
-            </h3>
-            <p className="text-muted-foreground">
-              {data.mission.description}
-            </p>
-          </div>
-        )}
-
-        {/* VISION */}
-        {data.vision && (
-          <div className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition">
-            <h3 className="text-xl font-semibold mb-2">
-              {data.vision.title || "Our Vision"}
-            </h3>
-            <p className="text-muted-foreground">
-              {data.vision.description}
-            </p>
-          </div>
-        )}
-
-        {/* VALUES */}
-        {data.values && (
-          <div className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition">
-            <h3 className="text-xl font-semibold mb-2">
-              {data.values.title || "Our Values"}
-            </h3>
-            <p className="text-muted-foreground">
-              {data.values.description}
-            </p>
-          </div>
+      {/* MISSION / VISION / VALUES */}
+      <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[data.mission, data.vision, data.values].map(
+          (item: any, idx: number) =>
+            item && (
+              <div
+                key={idx}
+                className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition"
+              >
+                <h3 className="text-xl font-semibold mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {item.description}
+                </p>
+              </div>
+            )
         )}
       </section>
 
       {/* WHY WE EXIST */}
       {data.whyWeExist && (
-        <section className="mb-20">
-          <h2 className="text-3xl font-semibold mb-6">Why We Exist</h2>
-          <p className="text-muted-foreground max-w-3xl leading-relaxed">
+        <section className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-semibold mb-4">
+            Why We Exist
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
             {data.whyWeExist.description}
           </p>
         </section>
       )}
 
       {/* FOCUS AREAS */}
-      {data.focusAreas && data.focusAreas.length > 0 && (
-        <section className="grid md:grid-cols-3 gap-8 mb-20">
+      {data.focusAreas?.length > 0 && (
+        <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {data.focusAreas.map((area: any, idx: number) => (
             <div
               key={idx}
               className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition"
             >
-              <h3 className="text-xl font-semibold mb-2">{area.title}</h3>
-              <p className="text-muted-foreground">{area.description}</p>
+              <h3 className="text-lg font-semibold mb-2">
+                {area.title}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {area.description}
+              </p>
             </div>
           ))}
         </section>
       )}
 
       {/* CORE TEAM */}
-      {data.coreTeam && data.coreTeam.length > 0 && (
-        <section className="mb-20">
-          <h2 className="text-3xl font-semibold mb-6">Our Core Team</h2>
+      {data.coreTeam?.length > 0 && (
+        <section>
+          <h2 className="text-2xl md:text-3xl font-semibold mb-8 text-center">
+            Our Core Team
+          </h2>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.coreTeam.map((member: any, idx: number) => (
               <div
                 key={idx}
-                className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition animate-fade-in"
+                className="p-5 bg-card border rounded-xl shadow-sm hover:shadow-md transition"
               >
-                {/* TEAM IMAGE */}
                 {member.image && (
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-48 object-cover rounded-lg mb-4 bg-muted"
-                    loading="lazy"
-                  />
+                  <div className="rounded-lg overflow-hidden mb-4 bg-muted">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="
+                        w-full
+                        h-[180px]
+                        object-cover
+                      "
+                      loading="lazy"
+                    />
+                  </div>
                 )}
 
-                <h3 className="text-lg font-semibold">{member.name}</h3>
-                <p className="text-sm text-primary font-medium">{member.role}</p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <h3 className="font-semibold text-lg">{member.name}</h3>
+                <p className="text-primary text-sm font-medium">
+                  {member.role}
+                </p>
+                <p className="text-muted-foreground text-sm mt-2">
                   {member.description}
                 </p>
               </div>
@@ -175,20 +174,18 @@ export default async function AboutPage() {
         </section>
       )}
 
-      {/* CTA SECTION */}
+      {/* CTA */}
       {data.cta && (
-        <section className="py-12 px-8 text-center bg-accent rounded-xl shadow-sm">
-          <h3 className="text-2xl font-semibold mb-2">
-            {data.cta.title || "Partner With Us"}
+        <section className="text-center bg-accent rounded-xl py-12 px-6">
+          <h3 className="text-2xl font-semibold mb-3">
+            {data.cta.title}
           </h3>
           <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-            {data.cta.description || 
-              "Whether you are an NGO, distributor, educator, or a passionate volunteer—your support can transform lives and fuel rural progress."}
+            {data.cta.description}
           </p>
-
           <a
             href="/contact"
-            className="inline-block px-8 py-3 bg-primary text-white rounded-md text-sm shadow-md hover:opacity-90 transition"
+            className="inline-block px-8 py-3 bg-primary text-white rounded-md text-sm hover:opacity-90 transition"
           >
             {data.cta.buttonText || "Contact Us"}
           </a>

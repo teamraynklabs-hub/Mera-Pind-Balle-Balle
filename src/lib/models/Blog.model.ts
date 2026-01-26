@@ -35,9 +35,15 @@ const BlogSchema = new Schema(
     isPublished: {
       type: Boolean,
       default: true,
+      index: true,
     },
   },
   { timestamps: true }
 );
 
+// Compound indexes for common queries
+BlogSchema.index({ isPublished: 1, date: -1 });
+BlogSchema.index({ isPublished: 1, createdAt: -1 });
+
 export default models.Blog || model("Blog", BlogSchema);
+

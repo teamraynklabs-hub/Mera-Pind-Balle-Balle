@@ -1,4 +1,3 @@
-import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 import CareersForm from "./CareersForm";
@@ -12,8 +11,13 @@ export const metadata: Metadata = {
 async function getCareerData() {
   try {
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/careers`);
-    return res.data?.data || null;
+    const res = await fetch(`${base}/api/careers`, {
+      cache: "force-cache",
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error(`Careers fetch failed: ${res.status}`);
+    const data = await res.json();
+    return data?.data || null;
   } catch (err) {
     console.error("CAREERS PAGE DATA ERROR:", err);
     return null;

@@ -1,4 +1,3 @@
-import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
@@ -12,8 +11,12 @@ export const metadata: Metadata = {
 async function getResources() {
   try {
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/resources`);
-    return res.data;
+    const res = await fetch(`${base}/api/resources`, {
+      cache: "force-cache",
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error(`Resources fetch failed: ${res.status}`);
+    return await res.json();
   } catch (error) {
     console.error("RESOURCES FETCH ERROR:", error);
     return null;

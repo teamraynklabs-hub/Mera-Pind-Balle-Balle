@@ -57,4 +57,8 @@ const StorySchema = new Schema(
   { timestamps: true }
 );
 
+// Compound indexes for common queries
+StorySchema.index({ isPublished: 1, createdAt: -1 });
+StorySchema.index({ isPublished: 1, updatedAt: -1 });
+
 export default models.Story || mongoose.model("Story", StorySchema);

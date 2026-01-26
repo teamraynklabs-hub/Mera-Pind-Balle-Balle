@@ -1,12 +1,20 @@
-import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 
 export async function getDashboardData() {
   try {
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/dashboard`);
+    const res = await fetch(`${base}/api/dashboard`, {
+      cache: "force-cache",
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
 
-    return res.data?.success ? res.data.data : null;
+    if (!res.ok) {
+      console.error("Dashboard fetch failed with status:", res.status);
+      return null;
+    }
+
+    const data = await res.json();
+    return data?.success ? data.data : null;
   } catch (error) {
     console.error("DASHBOARD FETCH ERROR:", error);
     return null;

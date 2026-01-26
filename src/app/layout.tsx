@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import LayoutWrapper from "@/components/LayoutWrapper";
@@ -6,14 +6,74 @@ import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { getDashboardData } from "@/lib/api/dashboard";
 
 const dashboard = await getDashboardData();
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapind.com";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#ffffff",
+};
 
 export const metadata: Metadata = {
-  title: "Mera Pind Balle Balle - Rural Women Empowerment Web Application",
-  icons: {
-    icon: "/favicon.svg",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "Mera Pind Balle Balle - Rural Women Empowerment",
+    template: "%s | Mera Pind Balle Balle",
   },
   description:
     "A digital web application designed to support rural women entrepreneurs with training, production tracking, sales management, finance monitoring, and community development. It helps villages grow faster with real-time insights, easy navigation, and scalable digital tools.",
+  keywords: [
+    "rural empowerment",
+    "women entrepreneurs",
+    "village development",
+    "sustainable development",
+    "India",
+  ],
+  authors: [{ name: "Mera Pind Balle Balle", url: baseUrl }],
+  creator: "Mera Pind Balle Balle",
+  publisher: "Mera Pind Balle Balle",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: baseUrl,
+    title: "Mera Pind Balle Balle - Rural Women Empowerment",
+    description:
+      "A digital web application designed to support rural women entrepreneurs with training, production tracking, sales management, finance monitoring, and community development.",
+    siteName: "Mera Pind Balle Balle",
+    images: [
+      {
+        url: `${baseUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "Mera Pind Balle Balle",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mera Pind Balle Balle - Rural Women Empowerment",
+    description:
+      "A digital web application designed to support rural women entrepreneurs with training, production tracking, sales management, finance monitoring, and community development.",
+    images: [`${baseUrl}/og-image.png`],
+    creator: "@MeraPindBalleBalle",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+    "max-video-preview": -1,
+  },
+  alternates: {
+    canonical: baseUrl,
+  },
 };
 
 

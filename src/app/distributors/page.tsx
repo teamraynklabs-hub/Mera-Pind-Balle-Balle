@@ -1,4 +1,3 @@
-import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 import DistributorsForm from "./DistributorsForm";
@@ -13,9 +12,14 @@ export const metadata: Metadata = {
 async function getDistributorInfo() {
   try {
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/distributors`);
-    console.log("Distributor page data:", res.data);
-    return res.data;
+    const res = await fetch(`${base}/api/distributors`, {
+      cache: "force-cache",
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error(`Distributors fetch failed: ${res.status}`);
+    const data = await res.json();
+    console.log("Distributor page data:", data);
+    return data;
   } catch (err) {
     console.error("DISTRIBUTOR GET ERROR:", err);
     // Return default fallback data

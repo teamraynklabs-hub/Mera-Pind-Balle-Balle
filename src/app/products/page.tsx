@@ -1,4 +1,3 @@
-import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 
@@ -12,10 +11,14 @@ export const metadata: Metadata = {
 async function getProducts() {
   try {
     const base = getBaseUrl(); // SSR safe
-    const res = await axios.get(`${base}/api/products`);
+    const res = await fetch(`${base}/api/products`, {
+      cache: "force-cache",
+      next: { revalidate: 3600 },
+    });
 
-    //  IMPORTANT: extract array
-    return res.data.data ?? [];
+    if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
+    const data = await res.json();
+    return data.data ?? [];
   } catch (error) {
     console.error("PRODUCT API ERROR:", error);
     return [];
