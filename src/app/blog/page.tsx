@@ -17,7 +17,7 @@ async function fetchBlogs(search: string, page: number, limit: number) {
       limit: limit.toString(),
     });
 
-    const res = await fetch(`/api/blogs?${params}`, {
+    const res = await fetch(`${base}/api/blogs?${params}`, {
       cache: "force-cache",
       next: { revalidate: 300 }, // 5 minutes
     });

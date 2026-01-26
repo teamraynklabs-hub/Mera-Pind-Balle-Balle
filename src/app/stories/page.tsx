@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 async function getStories() {
   try {
     const base = getBaseUrl();
-    const res = await fetch(`/api/stories`, {
+    const res = await fetch(`${base}/api/stories`, {
       cache: "no-store",
     });
 

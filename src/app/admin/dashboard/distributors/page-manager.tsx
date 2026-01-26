@@ -69,7 +69,7 @@ export default function DistributorsPageManager() {
 
     try {
       const base = getBaseUrl();
-      const res = await axios.post(`/api/upload`, formData, {
+      const res = await axios.post(`${base}/api/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

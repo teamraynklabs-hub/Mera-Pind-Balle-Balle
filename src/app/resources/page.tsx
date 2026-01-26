@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 async function getResources() {
   try {
     const base = getBaseUrl();
-    const res = await fetch(`/api/resources`, {
+    const res = await fetch(`${base}/api/resources`, {
       cache: "force-cache",
       next: { revalidate: 3600 },
     });

@@ -33,7 +33,7 @@ export default function CareersForm() {
         message: form.message.trim() || undefined,
       };
 
-      await axios.post(`/api/careers`, payload, {
+      await axios.post(`${base}/api/careers`, payload, {
         headers: { "Content-Type": "application/json" },
       });
 
