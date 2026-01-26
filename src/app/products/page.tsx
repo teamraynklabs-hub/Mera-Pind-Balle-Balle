@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 async function getProducts() {
   try {
     const base = getBaseUrl(); // SSR safe
-    const res = await fetch(`${base}/api/products`, {
+    const res = await fetch(`/api/products`, {
       cache: "force-cache",
       next: { revalidate: 3600 },
     });

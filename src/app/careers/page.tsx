@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 async function getCareerData() {
   try {
     const base = getBaseUrl();
-    const res = await fetch(`${base}/api/careers`, {
+    const res = await fetch(`/api/careers`, {
       cache: "force-cache",
       next: { revalidate: 3600 },
     });

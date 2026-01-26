@@ -44,7 +44,7 @@ async function loadJobs() {
     setLoading(true);
     setError(null);
     const base = getBaseUrl();
-    const res = await axios.get(`${base}/api/admin/careers`, {
+    const res = await axios.get(`/api/admin/careers`, {
       headers: { "Content-Type": "application/json" },
     });
 
@@ -95,7 +95,7 @@ async function loadJobs() {
         uploadForm.append("file", form.file);
 
         try {
-          const uploadRes = await axios.post(`${base}/api/upload`, uploadForm, {
+          const uploadRes = await axios.post(`/api/upload`, uploadForm, {
             headers: { "Content-Type": "multipart/form-data" },
           });
           imageUrl = uploadRes.data.url;
@@ -116,10 +116,10 @@ async function loadJobs() {
 
       if (isEdit) {
         // UPDATE
-        await axios.put(`${base}/api/admin/careers/${editingId}`, payload);
+        await axios.put(`/api/admin/careers/${editingId}`, payload);
       } else {
         // CREATE
-        await axios.post(`${base}/api/admin/careers`, payload);
+        await axios.post(`/api/admin/careers`, payload);
       }
 
       resetForm();
@@ -152,7 +152,7 @@ async function loadJobs() {
     try {
       setLoading(true);
       const base = getBaseUrl();
-      await axios.delete(`${base}/api/careers/${id}`);
+      await axios.delete(`/api/careers/${id}`);
       await loadJobs();
     } catch (err) {
       setError("Failed to delete job");

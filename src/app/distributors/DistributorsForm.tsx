@@ -34,7 +34,7 @@ export default function DistributorsForm() {
         // message → ignored / or store elsewhere (see alternatives below)
       };
 
-      await axios.post(`${base}/api/distributors`, payload);
+      await axios.post(`/api/distributors`, payload);
 
       setSubmitted(true);
       setForm({ name: "", email: "", phone: "", website: "", message: "" });

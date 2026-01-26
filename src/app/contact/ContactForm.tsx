@@ -21,7 +21,7 @@ export default function ContactForm() {
 
     try {
       const base = getBaseUrl();
-      await axios.post(`${base}/api/contact`, form);
+      await axios.post(`/api/contact`, form);
 
       setSent(true);
 
