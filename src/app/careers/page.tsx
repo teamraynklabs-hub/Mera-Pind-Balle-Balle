@@ -40,13 +40,13 @@ export default async function CareersPage() {
   return (
     <main className="container mx-auto px-4 py-12">
       {/* BANNER */}
-      <section className="mb-16">
+      {/* <section className="mb-16">
         <img
           src={data.bannerImage}
           alt="Careers at Mera Pind Balle Balle"
           className="w-full h-72 md:h-96 object-cover rounded-xl shadow-lg"
         />
-      </section>
+      </section> */}
 
       {/* HEADER */}
       <section className="text-center mb-16">

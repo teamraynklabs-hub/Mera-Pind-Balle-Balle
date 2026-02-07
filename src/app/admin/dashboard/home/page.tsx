@@ -94,15 +94,15 @@ export default function HomepageManagerPage() {
   ) => {
     const { value } = e.target;
     const keys = path.split('.');
-    
+
     setFormData(prev => {
       const newData = JSON.parse(JSON.stringify(prev));
       let current = newData;
-      
+
       for (let i = 0; i < keys.length - 1; i++) {
         current = current[keys[i]];
       }
-      
+
       current[keys[keys.length - 1]] = value;
       return newData;
     });
@@ -118,11 +118,11 @@ export default function HomepageManagerPage() {
       const newData = JSON.parse(JSON.stringify(prev));
       const keys = arrayPath.split('.');
       let current = newData;
-      
+
       for (const key of keys) {
         current = current[key];
       }
-      
+
       current[index][field] = value;
       return newData;
     });
@@ -133,11 +133,11 @@ export default function HomepageManagerPage() {
       const newData = JSON.parse(JSON.stringify(prev));
       const keys = arrayPath.split('.');
       let current = newData;
-      
+
       for (const key of keys) {
         current = current[key];
       }
-      
+
       current.push(JSON.parse(JSON.stringify(template)));
       return newData;
     });
@@ -148,16 +148,15 @@ export default function HomepageManagerPage() {
       const newData = JSON.parse(JSON.stringify(prev));
       const keys = arrayPath.split('.');
       let current = newData;
-      
+
       for (const key of keys) {
         current = current[key];
       }
-      
+
       current.splice(index, 1);
       return newData;
     });
   };
-
   const handleFileUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     path: string
@@ -167,41 +166,53 @@ export default function HomepageManagerPage() {
 
     try {
       setLoading(true);
-      const formDataToSend = new FormData();
-      formDataToSend.append('file', file);
 
-      const uploadResponse = await axios.post('/api/upload', formDataToSend, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const formDataToSend = new FormData();
+      formDataToSend.append("file", file);
+
+      const uploadResponse = await axios.post("/api/upload", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       const imageUrl = uploadResponse.data.url;
-      const keys = path.split('.');
-      
+
       setFormData(prev => {
         const newData = JSON.parse(JSON.stringify(prev));
-        let current = newData;
-        
+        const keys = path.split(".");
+        let current: any = newData;
+
         for (let i = 0; i < keys.length - 1; i++) {
-          current = current[keys[i]];
+          const key = keys[i];
+
+          // handle array index properly
+          if (!isNaN(Number(key))) {
+            current = current[Number(key)];
+          } else {
+            current = current[key];
+          }
         }
-        
-        current[keys[keys.length - 1]] = imageUrl;
+
+        const lastKey = keys[keys.length - 1];
+        current[lastKey] = imageUrl;
+
         return newData;
       });
 
-      setSuccess('Image uploaded successfully');
+      setSuccess("Image uploaded successfully");
       setTimeout(() => setSuccess(null), 3000);
+
     } catch (err) {
-      setError('Failed to upload image');
       console.error(err);
+      setError("Failed to upload image");
     } finally {
       setLoading(false);
     }
   };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -285,11 +296,10 @@ export default function HomepageManagerPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 font-medium transition-colors ${
-                activeTab === tab
+              className={`px-4 py-3 font-medium transition-colors ${activeTab === tab
                   ? 'border-b-2 border-blue-600 text-blue-600'
                   : 'text-muted-foreground hover:text-foreground'
-              }`}
+                }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -477,7 +487,15 @@ export default function HomepageManagerPage() {
                     />
                     <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
                       <Upload className="w-4 h-4" />
-                      <input type="file" accept="image/*" className="hidden" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          handleFileUpload(e, `popularProducts.${index}.image`)
+                        }
+                      />
+
                     </label>
                   </div>
                 </div>

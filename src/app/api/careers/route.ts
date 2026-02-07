@@ -64,3 +64,38 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
+export async function DELETE(req: Request) {
+  try {
+    await connectDB();
+
+    const { jobId } = await req.json();
+
+    const page = await CareersPage.findOne({ isActive: true });
+
+    if (!page) {
+      return NextResponse.json(
+        { success: false, message: "Careers page not found" },
+        { status: 404 }
+      );
+    }
+
+    page.jobs = page.jobs.filter(
+      (job: any) => job._id.toString() !== jobId
+    );
+
+    await page.save();
+
+    return NextResponse.json({
+      success: true,
+      message: "Job deleted successfully",
+    });
+  } catch (error) {
+    console.error("DELETE ERROR:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to delete job" },
+      { status: 500 }
+    );
+  }
+}

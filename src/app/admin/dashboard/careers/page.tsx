@@ -152,7 +152,8 @@ async function loadJobs() {
     try {
       setLoading(true);
       const base = getBaseUrl();
-      await axios.delete(`${base}/api/careers/${id}`);
+      await axios.delete(`${base}/api/admin/careers/${id}`);
+
       await loadJobs();
     } catch (err) {
       setError("Failed to delete job");
