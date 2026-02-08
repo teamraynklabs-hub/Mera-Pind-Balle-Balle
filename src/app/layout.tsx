@@ -6,8 +6,7 @@ import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { connectDB } from "@/lib/db";
 import Dashboard from "@/lib/models/Dashboard.model";
 
-await connectDB();
-const dashboard = await Dashboard.findOne({ isActive: true }).lean();
+
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const viewport: Viewport = {
@@ -79,14 +78,18 @@ export const metadata: Metadata = {
 };
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  await connectDB();
+  const dashboard = await Dashboard.findOne({ isActive: true }).lean();
+
   return (
     <html lang="en" suppressHydrationWarning>
-      
+
       <body>
         <AuthSessionProvider>
           <ThemeProvider

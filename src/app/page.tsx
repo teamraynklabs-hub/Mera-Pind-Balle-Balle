@@ -1,9 +1,10 @@
 "use server";
 
-import { getDashboardData } from "@/lib/api/dashboard";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ClientImage from "@/components/ClientImage";
+import { connectDB } from "@/lib/db";
+import Dashboard from "@/lib/models/Dashboard.model";
 
 const fadeUp =
   "opacity-0 translate-y-6 animate-[fadeUp_0.8s_ease-out_forwards]";
@@ -13,7 +14,8 @@ const scaleUp =
   "hover:scale-[1.02] transition-transform duration-300 ease-out";
 
 export default async function HomePage() {
-  const dashboard = await getDashboardData();
+  await connectDB();
+  const dashboard = await Dashboard.findOne({ isActive: true }).lean();
 
   if (!dashboard) {
     return (
