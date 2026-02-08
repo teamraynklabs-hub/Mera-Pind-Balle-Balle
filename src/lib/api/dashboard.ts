@@ -3,10 +3,11 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 export async function getDashboardData() {
   try {
     const base = getBaseUrl();
-    const res = await fetch(`${base}/api/dashboard`, {
-      cache: "force-cache",
-      next: { revalidate: 3600 }, // Revalidate every hour
+    const res = await fetch("/api/dashboard", {
+      cache: "no-store",
     });
+
+
 
     if (!res.ok) {
       console.error("Dashboard fetch failed with status:", res.status);

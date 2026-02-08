@@ -6,7 +6,7 @@ import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { getDashboardData } from "@/lib/api/dashboard";
 
 const dashboard = await getDashboardData();
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapind.com";
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const viewport: Viewport = {
   width: "device-width",
