@@ -3,9 +3,11 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import LayoutWrapper from "@/components/LayoutWrapper";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
-import { getDashboardData } from "@/lib/api/dashboard";
+import { connectDB } from "@/lib/db";
+import Dashboard from "@/lib/models/Dashboard.model";
 
-const dashboard = await getDashboardData();
+await connectDB();
+const dashboard = await Dashboard.findOne({ isActive: true }).lean();
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const viewport: Viewport = {
