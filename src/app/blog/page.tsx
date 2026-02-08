@@ -7,6 +7,10 @@ export const metadata: Metadata = {
     "Read inspiring stories, updates, and news from rural communities.",
 };
 
+// Disable caching completely for real-time data
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // Fetch blogs (search + pagination)
 async function fetchBlogs(search: string, page: number, limit: number) {
   try {
@@ -114,11 +118,10 @@ export default async function BlogPage(props: any) {
           {/* PREVIOUS */}
           <a
             href={`?search=${search}&page=${page - 1}`}
-            className={`px-4 py-2 border rounded-md ${
-              page <= 1
+            className={`px-4 py-2 border rounded-md ${page <= 1
                 ? "opacity-40 pointer-events-none"
                 : "hover:bg-accent transition"
-            }`}
+              }`}
           >
             Previous
           </a>
@@ -130,11 +133,10 @@ export default async function BlogPage(props: any) {
           {/* NEXT */}
           <a
             href={`?search=${search}&page=${page + 1}`}
-            className={`px-4 py-2 border rounded-md ${
-              page >= totalPages
+            className={`px-4 py-2 border rounded-md ${page >= totalPages
                 ? "opacity-40 pointer-events-none"
                 : "hover:bg-accent transition"
-            }`}
+              }`}
           >
             Next
           </a>

@@ -23,6 +23,9 @@ async function getCareerData() {
     return null;
   }
 }
+// disable caching completely
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function CareersPage() {
   const data = await getCareerData();

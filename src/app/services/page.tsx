@@ -8,19 +8,30 @@ export const metadata: Metadata = {
     "Explore Mera Pind Balle Balle’s rural empowerment initiatives including skill training, women empowerment, sustainable farming and product innovation.",
 };
 
-// ✅ DIRECT DB FETCH (SERVER SAFE)
-async function fetchInitiatives() {
-  await connectDB();
+// Disable caching completely
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-  return Service.find({ isActive: true })
-    .sort({ createdAt: 1 })
-    .lean();
+// DB Fetch
+async function fetchInitiatives() {
+  try {
+    await connectDB();
+
+    const initiatives = await Service.find({ isActive: true })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    return initiatives ?? [];
+  } catch (error) {
+    console.error("INITIATIVES FETCH ERROR:", error);
+    return [];
+  }
 }
 
 export default async function InitiativesPage() {
   const initiatives = await fetchInitiatives();
 
-  if (!initiatives || initiatives.length === 0) {
+  if (!initiatives.length) {
     return (
       <main className="container mx-auto px-4 py-12">
         <p className="text-center text-muted-foreground">
@@ -32,22 +43,24 @@ export default async function InitiativesPage() {
 
   return (
     <main className="container mx-auto px-4 py-12">
-      {/* PAGE HEADER */}
+
+      {/* Header */}
       <section className="mb-16 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
           Our Initiatives
         </h1>
+
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          We work with rural communities to build sustainable livelihoods through
-          capacity building, innovation, and fair market access.
+          We work with rural communities to build sustainable livelihoods
+          through capacity building, innovation, and fair market access.
         </p>
       </section>
 
-      {/* INITIATIVE GRID */}
+      {/* Grid */}
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
         {initiatives.map((item: any) => (
           <article
-            key={item._id.toString()}
+            key={item?._id?.toString() || item.title}
             className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition"
           >
             <div className="flex items-center gap-4 mb-4">
@@ -59,7 +72,9 @@ export default async function InitiativesPage() {
                 />
               )}
 
-              <h3 className="text-xl font-semibold">{item.title}</h3>
+              <h3 className="text-xl font-semibold">
+                {item.title}
+              </h3>
             </div>
 
             <p className="text-muted-foreground leading-relaxed">
@@ -74,9 +89,10 @@ export default async function InitiativesPage() {
         <h2 className="text-2xl font-semibold mb-2">
           Want to Support Our Work?
         </h2>
+
         <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-          You can make a meaningful difference as a sponsor, distributor,
-          volunteer, or partner organization.
+          You can make a meaningful difference as a sponsor,
+          distributor, volunteer, or partner organization.
         </p>
 
         <a
@@ -86,6 +102,7 @@ export default async function InitiativesPage() {
           Contact Us
         </a>
       </section>
+
     </main>
   );
 }

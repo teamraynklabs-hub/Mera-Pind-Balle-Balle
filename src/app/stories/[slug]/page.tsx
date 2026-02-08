@@ -23,6 +23,10 @@ export async function generateStaticParams() {
   return stories.map((story: any) => ({ slug: story.slug }));
 }
 
+// disable caching completely
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // METADATA (FULLY OPTIMIZED FOR SEO)
 export async function generateMetadata(
   props: { params: Promise<{ slug: string }> }

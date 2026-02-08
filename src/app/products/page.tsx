@@ -1,5 +1,6 @@
-import { getBaseUrl } from "@/lib/getBaseUrl";
+import { connectDB } from "@/lib/db";
 import type { Metadata } from "next";
+import Product from "@/lib/models/Product.model";
 
 export const metadata: Metadata = {
   title: "Products — Mera Pind Balle Balle",
@@ -7,27 +8,14 @@ export const metadata: Metadata = {
     "Explore our authentic rural products including handcrafted items, organic food, natural produce and sustainable village-based goods.",
 };
 
-// Fetch products via backend
-async function getProducts() {
-  try {
-    const base = getBaseUrl(); // SSR safe
-    const res = await fetch(`${base}/api/products`, {
-      cache: "force-cache",
-      next: { revalidate: 3600 },
-    });
-
-    if (!res.ok) throw new Error(`Products fetch failed: ${res.status}`);
-    const data = await res.json();
-    return data.data ?? [];
-  } catch (error) {
-    console.error("PRODUCT API ERROR:", error);
-    return [];
-  }
-}
-
+// disable caching completely
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function ProductsPage() {
-  const products = await getProducts();
+await connectDB();
+const products = await Product.find().lean();
+
 
   return (
     <main className="container mx-auto px-4 py-12">

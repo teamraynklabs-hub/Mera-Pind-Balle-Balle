@@ -1,5 +1,6 @@
-import { getBaseUrl } from "@/lib/getBaseUrl";
+import { connectDB } from "@/lib/db";
 import type { Metadata } from "next";
+import Resources from "@/lib/models/Resource.model";
 
 export const metadata: Metadata = {
   title: "Resources — Mera Pind Balle Balle",
@@ -7,24 +8,14 @@ export const metadata: Metadata = {
     "Access downloadable brochures, reports, policies, and important documentation from Mera Pind Balle Balle.",
 };
 
-// SSR Fetch
-async function getResources() {
-  try {
-    const base = getBaseUrl();
-    const res = await fetch(`${base}/api/resources`, {
-      cache: "force-cache",
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) throw new Error(`Resources fetch failed: ${res.status}`);
-    return await res.json();
-  } catch (error) {
-    console.error("RESOURCES FETCH ERROR:", error);
-    return null;
-  }
-}
+// disable caching completely
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function ResourcesPage() {
-  const data = await getResources();
+  await connectDB();
+
+  const data = await Resources.findOne({ isActive: true }).lean();
 
   if (!data) {
     return (

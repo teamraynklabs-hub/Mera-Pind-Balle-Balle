@@ -1,4 +1,4 @@
-import axios from "axios";
+import { connectDB } from "@/lib/db";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -26,8 +26,12 @@ async function getStories() {
   }
 }
 
+// disable caching completely
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function StoriesPage() {
+  await connectDB();
   const stories = await getStories();
 
   if (!stories) {

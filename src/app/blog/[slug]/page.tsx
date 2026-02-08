@@ -16,6 +16,10 @@ async function fetchBlogBySlug(slug: string) {
   }).lean();
 }
 
+// disable caching completely
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // === GENERATE STATIC PARAMS FOR PERFORMANCE ===
 export async function generateStaticParams() {
   await connectDB();
