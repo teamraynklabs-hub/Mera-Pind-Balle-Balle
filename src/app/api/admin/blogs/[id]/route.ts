@@ -21,7 +21,10 @@ export async function PUT(
   const title = formData.get("title") as string;
   const excerpt = formData.get("excerpt") as string;
   const content = formData.get("content") as string;
-  const isPublished = formData.get("isPublished") !== "false";
+  const rawIsPublished = formData.get("isPublished");
+  const isPublished = rawIsPublished === null
+    ? true
+    : (String(rawIsPublished) === "on" || String(rawIsPublished) === "true" || String(rawIsPublished) === "1");
   const slug = formData.get("slug") as string | null;
   const file = formData.get("image") as File | null;
 

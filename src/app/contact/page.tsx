@@ -30,22 +30,43 @@ export default function ContactPage() {
         <div className="space-y-8">
 
           <div>
-            <h3 className="text-2xl font-semibold mb-2">Office Address</h3>
+            <h3 className="text-2xl font-semibold mb-2">Delhi Office</h3>
             <p className="text-muted-foreground leading-relaxed">
-              Village Development Office <br />
-              Near Central Market <br />
+              Jiriko Ventures Pvt. Ltd. <br/>
+              A-702, Mahindra Apartments, <br />
+              Vikaspuri New Delhi. 110018 <br />
+              Delhi, India
+            </p>
+          </div>
+
+           <div>
+            <h3 className="text-2xl font-semibold mb-2">Haryana Office:</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Jiriko Ventures Pvt. Ltd. <br/>
+              D-125 SF, BPTP Amstoria, Sector 102, <br />
+              Gurgaon, Haryana 122006 <br />
+              Haryana, India
+            </p>
+          </div>
+
+           <div>
+            <h3 className="text-2xl font-semibold mb-2">Punjab Office</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Jiriko Ventures Pvt. Ltd. <br/>
+              Opp. Nalash Road, NH-44, Bharat Colony, <br />
+              Main Road, Rajpura, Punjab. 140401. <br />
               Punjab, India
             </p>
           </div>
 
           <div>
             <h3 className="text-2xl font-semibold mb-2">Email</h3>
-            <p className="text-muted-foreground">support@merapind.org</p>
+            <p className="text-muted-foreground">contact@merapindballeballe.com</p>
           </div>
 
           <div>
             <h3 className="text-2xl font-semibold mb-2">Phone</h3>
-            <p className="text-muted-foreground">+91 98765 43210</p>
+            <p className="text-muted-foreground">+91 90411-42411</p>
           </div>
 
           <div>

@@ -12,8 +12,7 @@ async function getCareerData() {
   try {
     const base = getBaseUrl();
     const res = await fetch(`${base}/api/careers`, {
-      cache: "force-cache",
-      next: { revalidate: 3600 },
+      cache: "no-store",
     });
     if (!res.ok) throw new Error(`Careers fetch failed: ${res.status}`);
     const data = await res.json();
@@ -73,6 +72,13 @@ export default async function CareersPage() {
                 key={index}
                 className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-lg transition-all duration-200"
               >
+                <img
+                  src={job.image}
+                  alt={job.title}
+                  width={1200}
+                  height={630}
+                  className="w-full h-auto rounded-xl"
+                />
                 <h3 className="text-xl font-semibold mb-2">{job.title}</h3>
                 <div className="flex flex-wrap gap-2 mb-3">
                   <span className="text-sm px-3 py-1 bg-primary/10 text-primary rounded-full">

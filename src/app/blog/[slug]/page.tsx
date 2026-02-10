@@ -1,20 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-
 import { connectDB } from "@/lib/db";
 import Blog from "@/lib/models/Blog.model";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://merapind.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 async function fetchBlogBySlug(slug: string) {
   await connectDB();
 
-  return Blog.findOne({
+  const blog = await Blog.findOne({
     slug: slug.trim().toLowerCase(),
     isPublished: true,
   }).lean();
+
+  return blog ? JSON.parse(JSON.stringify(blog)) : null;
 }
+
+
 
 // disable caching completely
 export const dynamic = "force-dynamic";
@@ -23,9 +26,18 @@ export const revalidate = 0;
 // === GENERATE STATIC PARAMS FOR PERFORMANCE ===
 export async function generateStaticParams() {
   await connectDB();
-  const blogs = await Blog.find({ isPublished: true }, { slug: 1 }).lean();
-  return blogs.map((blog: any) => ({ slug: blog.slug }));
+
+  const blogs = await Blog.find(
+    { isPublished: true },
+    { slug: 1 }
+  ).lean();
+
+  return blogs.map((blog: any) => ({
+    slug: blog.slug,
+  }));
 }
+
+
 
 // === METADATA ===
 export async function generateMetadata(
@@ -103,14 +115,24 @@ export default async function BlogDetailPage(
   return (
     <article className="container mx-auto px-4 py-12 max-w-3xl">
       <header className="mb-10">
-        <Image
-          src={blog.image}
-          alt={blog.title}
-          width={1200}
-          height={630}
-          priority
-          className="w-full h-auto rounded-xl"
-        />
+        {blog.image && (
+          <header className="mb-10">
+            {blog.image && (
+              <header className="mb-10">
+                <Image
+                  src={blog.image}
+                  alt={blog.title}
+                  width={1200}
+                  height={630}
+                  priority
+                  className="w-full h-auto rounded-xl"
+                />
+              </header>
+            )}
+
+          </header>
+        )}
+
       </header>
 
       <div className="mb-8">
@@ -128,9 +150,14 @@ export default async function BlogDetailPage(
         </time>
       </div>
 
-      <div className="prose prose-lg max-w-none mb-10">
-        <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+      <div className="prose prose-lg max-w-none mb-10 leading-relaxed">
+        {blog.content ? (
+          <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+        ) : (
+          <p>No content available.</p>
+        )}
       </div>
+
 
       <nav className="mt-10 border-t pt-6">
         <a href="/blog" className="text-primary hover:underline">

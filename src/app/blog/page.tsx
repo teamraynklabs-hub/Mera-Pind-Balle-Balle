@@ -1,5 +1,7 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
+import { connectDB } from "@/lib/db";
+import Blog from "@/lib/models/Blog.model";
 
 export const metadata: Metadata = {
   title: "Blog — Mera Pind Balle Balle",
@@ -22,51 +24,60 @@ async function fetchBlogs(search: string, page: number, limit: number) {
     });
 
     const res = await fetch(`${base}/api/blogs?${params}`, {
-      cache: "force-cache",
-      next: { revalidate: 300 }, // 5 minutes
+      cache: "no-store",
     });
 
-    if (!res.ok) {
-      throw new Error(`Blog fetch failed: ${res.status}`);
-    }
+    if (!res.ok) throw new Error("Failed to fetch blogs");
 
     const data = await res.json();
 
     return {
-      blogs: Array.isArray(data.blogs) ? data.blogs : [],
-      total: typeof data.total === "number" ? data.total : 0,
+      blogs: data.blogs ?? [],
+      total: data.total ?? 0,
     };
   } catch (error) {
-    console.error("BLOG FETCH ERROR:", error);
+    console.error(error);
     return { blogs: [], total: 0 };
   }
 }
 
 
 
-export default async function BlogPage(props: any) {
-  // NEXT FIX — unwrap the promise first
-  const searchParams = await props.searchParams;
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    search?: string;
+    page?: string;
+  }>;
+}) {
+  const params = await searchParams;
 
-  const search = searchParams?.search ?? "";
-  const page = Number(searchParams?.page ?? 1);
+  const search = params?.search ?? "";
+  const page = Number(params?.page ?? 1);
   const limit = 6;
 
-  const { blogs = [], total = 0 } = await fetchBlogs(search, page, limit);
+  const { blogs = [], total = 0 } = await fetchBlogs(
+    search,
+    page,
+    limit
+  );
 
   const totalPages = Math.ceil(total / limit);
 
   return (
     <main className="container mx-auto px-4 py-12">
-      {/* TITLE */}
       <section className="mb-12 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Latest Blogs</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          Latest Blogs
+        </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Explore real stories, updates and inspiring journeys from rural India.
+          Explore real stories, updates and inspiring journeys
+          from rural India.
         </p>
       </section>
 
-      {/* SEARCH BAR */}
+      {/* SEARCH */}
       <form className="max-w-md mx-auto mb-12" method="GET">
         <input
           type="text"
@@ -92,20 +103,27 @@ export default async function BlogPage(props: any) {
             href={`/blog/${blog.slug}`}
             className="block bg-card border rounded-xl shadow-sm hover:shadow-lg transition"
           >
-            <img
-              src={blog.image}
-              alt={blog.title}
-              className="w-full h-56 object-cover"
-            />
+            {blog.image && (
+              <img
+                src={blog.image}
+                alt={blog.title}
+                className="w-full h-56 object-cover"
+              />
+            )}
 
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-2">{blog.title}</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                {blog.title}
+              </h2>
+
               <p className="text-sm text-muted-foreground line-clamp-3">
                 {blog.excerpt}
               </p>
 
               <p className="text-xs text-primary mt-3">
-                {new Date(blog.date).toDateString()}
+                {blog.createdAt
+                  ? new Date(blog.createdAt || blog.data).toDateString()
+                  : ""}
               </p>
             </div>
           </a>
@@ -115,13 +133,13 @@ export default async function BlogPage(props: any) {
       {/* PAGINATION */}
       {totalPages > 1 && (
         <section className="flex justify-center items-center gap-4 mt-10">
-          {/* PREVIOUS */}
           <a
             href={`?search=${search}&page=${page - 1}`}
-            className={`px-4 py-2 border rounded-md ${page <= 1
+            className={`px-4 py-2 border rounded-md ${
+              page <= 1
                 ? "opacity-40 pointer-events-none"
-                : "hover:bg-accent transition"
-              }`}
+                : "hover:bg-accent"
+            }`}
           >
             Previous
           </a>
@@ -130,13 +148,13 @@ export default async function BlogPage(props: any) {
             Page {page} / {totalPages}
           </span>
 
-          {/* NEXT */}
           <a
             href={`?search=${search}&page=${page + 1}`}
-            className={`px-4 py-2 border rounded-md ${page >= totalPages
+            className={`px-4 py-2 border rounded-md ${
+              page >= totalPages
                 ? "opacity-40 pointer-events-none"
-                : "hover:bg-accent transition"
-              }`}
+                : "hover:bg-accent"
+            }`}
           >
             Next
           </a>

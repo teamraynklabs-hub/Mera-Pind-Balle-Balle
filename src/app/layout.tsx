@@ -85,8 +85,11 @@ export default async function RootLayout({
 }>) {
 
   await connectDB();
-  const dashboard = await Dashboard.findOne({ isActive: true }).lean();
-
+  const dashboardDoc = await Dashboard.findOne({ isActive: true }).lean();
+  const dashboard = dashboardDoc
+    ? JSON.parse(JSON.stringify(dashboardDoc))
+    : null;
+    
   return (
     <html lang="en" suppressHydrationWarning>
 

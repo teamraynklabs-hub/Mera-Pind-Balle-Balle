@@ -15,49 +15,43 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Trash2, Plus } from "lucide-react";
 
-
 export default function BlogsManager() {
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<any>(null);
-  const [previewImage, setPreviewImage] = useState<string>("");
+  const [previewImage, setPreviewImage] = useState("");
 
-  const [form, setForm] = useState<{
-    title: string;
-    excerpt: string;
-    content: string;
-    image: File | null;
-  }>({
+  const [form, setForm] = useState({
     title: "",
     excerpt: "",
     content: "",
-    image: null,
+    image: null as File | null,
+    isPublished: true,
   });
 
   // ================= LOAD BLOGS =================
-async function loadBlogs() {
-  try {
-    const res = await fetch("/api/admin/blogs", {
-      credentials: "include",
-      cache: "no-store",
-    });
+  async function loadBlogs() {
+    try {
+      const res = await fetch("/api/admin/blogs", {
+        credentials: "include",
+        cache: "no-store",
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
+        setBlogs([]);
+        return;
+      }
+
+      const data = await res.json();
+      setBlogs(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("BLOG LOAD ERROR:", err);
       setBlogs([]);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    const data = await res.json();
-    setBlogs(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error("BLOG LOAD ERROR:", err);
-    setBlogs([]);
-  } finally {
-    setLoading(false);
   }
-}
-
 
   useEffect(() => {
     loadBlogs();
@@ -71,18 +65,26 @@ async function loadBlogs() {
   function handleFileChange(e: any) {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setForm({ ...form, image: file });
     setPreviewImage(URL.createObjectURL(file));
   }
 
+  function handlePublishChange(e: any) {
+    setForm({ ...form, isPublished: e.target.checked });
+  }
+
   function startEdit(blog: any) {
     setEditingBlog(blog);
+
     setForm({
       title: blog.title,
       excerpt: blog.excerpt,
       content: blog.content,
       image: null,
+      isPublished: blog.isPublished ?? true,
     });
+
     setPreviewImage(blog.image);
     setOpen(true);
   }
@@ -94,6 +96,7 @@ async function loadBlogs() {
       excerpt: "",
       content: "",
       image: null,
+      isPublished: true,
     });
     setPreviewImage("");
   }
@@ -109,6 +112,8 @@ async function loadBlogs() {
     fd.append("title", form.title);
     fd.append("excerpt", form.excerpt);
     fd.append("content", form.content);
+    fd.append("isPublished", String(form.isPublished));
+
     if (form.image) fd.append("image", form.image);
 
     const url = editingBlog
@@ -168,7 +173,11 @@ async function loadBlogs() {
 
             <div className="space-y-4">
               <Label>Image</Label>
-              <Input type="file" accept="image/*" onChange={handleFileChange} />
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
 
               {previewImage && (
                 <img
@@ -178,9 +187,13 @@ async function loadBlogs() {
               )}
 
               <Label>Title</Label>
-              <Input name="title" value={form.title} onChange={handleChange} />
+              <Input
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+              />
 
-              <Label>Excerpt (short summary)</Label>
+              <Label>Excerpt</Label>
               <Textarea
                 name="excerpt"
                 rows={2}
@@ -188,13 +201,23 @@ async function loadBlogs() {
                 onChange={handleChange}
               />
 
-              <Label>Content (full blog)</Label>
+              <Label>Content</Label>
               <Textarea
                 name="content"
                 rows={6}
                 value={form.content}
                 onChange={handleChange}
               />
+
+              {/* ⭐ Publish Toggle */}
+              <Label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={form.isPublished}
+                  onChange={handlePublishChange}
+                />
+                Publish Blog
+              </Label>
 
               <Button onClick={handleSubmit}>
                 {editingBlog ? "Save Changes" : "Create Blog"}
@@ -220,8 +243,16 @@ async function loadBlogs() {
                   {blog.excerpt}
                 </p>
 
+                <p className="text-xs">
+                  Status:{" "}
+                  {blog.isPublished ? "Published" : "Draft"}
+                </p>
+
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => startEdit(blog)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => startEdit(blog)}
+                  >
                     <Pencil size={16} /> Edit
                   </Button>
                   <Button

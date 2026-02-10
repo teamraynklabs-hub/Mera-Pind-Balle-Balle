@@ -42,7 +42,7 @@ export default function Navbar() {
               suppressHydrationWarning
             />
           </div>
-          <span className="font-semibold text-xl">Mera Pind</span>
+          <span className="font-semibold text-xl">MPBB</span>
         </Link>
 
         {/* DESKTOP MENU */}

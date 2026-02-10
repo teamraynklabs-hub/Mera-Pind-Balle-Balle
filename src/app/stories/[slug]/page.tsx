@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db";
 import Story from "@/lib/models/Story.model";
 import type { Metadata } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://merapind.com";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 // DB QUERY
 async function fetchStoryBySlug(slug: string) {

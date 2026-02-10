@@ -13,8 +13,7 @@ async function getDistributorInfo() {
   try {
     const base = getBaseUrl();
     const res = await fetch(`${base}/api/distributors`, {
-      cache: "force-cache",
-      next: { revalidate: 3600 },
+      cache: "no-store",
     });
     if (!res.ok) throw new Error(`Distributors fetch failed: ${res.status}`);
     const data = await res.json();
