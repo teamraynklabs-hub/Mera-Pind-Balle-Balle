@@ -26,6 +26,13 @@ const ProductSchema = new Schema(
       required: true,
     },
 
+    category: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
+    },
+
     isActive: {
       type: Boolean,
       default: true,

@@ -1,26 +1,43 @@
 import { connectDB } from "@/lib/db";
 import type { Metadata } from "next";
 import Product from "@/lib/models/Product.model";
+import ProductCard from "@/components/products/ProductCard";
+import Link from "next/link";
+import { breadcrumbForPage } from "@/lib/seo";
+import { Button } from "@/components/ui/button";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
-  title: "Products — Mera Pind Balle Balle",
+  title: "Products — Mera Pind Balle Balle | Handcrafted & Organic Rural Goods",
   description:
     "Explore our authentic rural products including handcrafted items, organic food, natural produce and sustainable village-based goods.",
+  alternates: { canonical: `${baseUrl}/products` },
+  openGraph: {
+    title: "Products — Mera Pind Balle Balle | Handcrafted & Organic Rural Goods",
+    description: "Explore our authentic rural products including handcrafted items, organic food, natural produce and sustainable village-based goods.",
+    url: `${baseUrl}/products`,
+    type: "website",
+  },
 };
 
-// disable caching completely
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function ProductsPage() {
-await connectDB();
-const products = await Product.find().lean();
-
+  await connectDB();
+  const products = await Product.find({ isActive: true }).lean();
+  const serialized = JSON.parse(JSON.stringify(products));
 
   return (
     <main className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Products", "/products")) }}
+      />
+
       {/* PAGE TITLE */}
-      <section className="mb-16 text-center">
+      <section className="mb-12 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Products</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Discover authentic, handmade, natural and eco-friendly products crafted
@@ -29,41 +46,14 @@ const products = await Product.find().lean();
       </section>
 
       {/* PRODUCT GRID */}
-      <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
-        {products.length === 0 ? (
+      <section className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-16">
+        {serialized.length === 0 ? (
           <p className="col-span-full text-center text-muted-foreground">
             No products available at the moment.
           </p>
         ) : (
-          products.map((item: any) => (
-            <div
-              key={item.name}
-              className="bg-card border rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition"
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-56 object-cover"
-              />
-
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1">{item.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {item.description}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <p className="text-lg font-bold text-primary">₹{item.price}</p>
-
-                  <a
-                    href="/contact"
-                    className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:opacity-90 transition"
-                  >
-                    Inquire
-                  </a>
-                </div>
-              </div>
-            </div>
+          serialized.map((item: any) => (
+            <ProductCard key={item._id} product={item} />
           ))
         )}
       </section>
@@ -75,13 +65,9 @@ const products = await Product.find().lean();
           If you are a wholesaler, retailer, NGO or corporate organization, we
           offer custom and bulk order solutions.
         </p>
-
-        <a
-          href="/distributors"
-          className="px-8 py-3 bg-primary text-white rounded-md text-sm shadow-md hover:opacity-90 transition"
-        >
-          Become a Distributor
-        </a>
+        <Button asChild>
+          <Link href="/distributors">Become a Distributor</Link>
+        </Button>
       </section>
     </main>
   );

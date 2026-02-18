@@ -9,6 +9,7 @@ import {
   X,
   LayoutDashboard,
   Package,
+  ShoppingCart,
   FileText,
   BookOpen,
   Users,
@@ -52,6 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const menuItems = [
     { title: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard size={18} /> },
     { title: "Products", href: "/admin/dashboard/products", icon: <Package size={18} /> },
+    { title: "Orders", href: "/admin/dashboard/orders", icon: <ShoppingCart size={18} /> },
     { title: "Blogs", href: "/admin/dashboard/blogs", icon: <FileText size={18} /> },
     { title: "Stories", href: "/admin/dashboard/stories", icon: <BookOpen size={18} /> },
     { title: "Careers", href: "/admin/dashboard/careers", icon: <BriefcaseBusiness size={18} /> },

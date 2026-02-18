@@ -46,6 +46,20 @@ const DashboardSchema = z.object({
     buttonText: z.string().min(1),
     link: z.string().min(1),
   }),
+  testimonials: z.optional(z.array(
+    z.object({
+      name: z.string().min(1),
+      role: z.string().min(1),
+      quote: z.string().min(1),
+      avatar: z.string().optional().default(""),
+    })
+  )),
+  storySection: z.optional(z.object({
+    title: z.string(),
+    description: z.string(),
+    image: z.string(),
+    link: z.string(),
+  })),
   footer: z.optional(z.any()),
   isActive: z.boolean().default(true),
 });

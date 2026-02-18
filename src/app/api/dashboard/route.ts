@@ -60,6 +60,32 @@ const DEFAULT_DASHBOARD = {
     buttonText: "Get in Touch",
     link: "/contact",
   },
+  testimonials: [
+    {
+      name: "Gurpreet Kaur",
+      role: "Women Entrepreneur, Patiala",
+      quote: "Mera Pind Balle Balle helped me turn my pickle-making hobby into a full-time business. I now employ 5 other women!",
+      avatar: "",
+    },
+    {
+      name: "Ramesh Kumar",
+      role: "Organic Farmer, Hoshiarpur",
+      quote: "Their training programs taught me organic farming techniques that doubled my yield and gave me access to urban markets.",
+      avatar: "",
+    },
+    {
+      name: "Sunita Devi",
+      role: "Artisan, Ludhiana",
+      quote: "I learned basket weaving through their skill program. Now my handmade baskets are sold across India through this platform.",
+      avatar: "",
+    },
+  ],
+  storySection: {
+    title: "Our Story & Mission",
+    description: "From a small village initiative to empowering thousands of rural families — learn about the journey of Mera Pind Balle Balle and how we are transforming lives through sustainable development.",
+    image: "/hero.png",
+    link: "/stories",
+  },
   footer: {
     supportLinks: [
       { label: "Resources", link: "/resources" },

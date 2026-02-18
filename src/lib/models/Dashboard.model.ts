@@ -12,6 +12,13 @@ export interface IDashboard extends Document {
   popularProducts: Array<{ title: string; description: string; image: string }>;
   impact: Array<{ label: string; value: string }>;
   cta: { title: string; description: string; buttonText: string; link: string };
+  testimonials: Array<{ name: string; role: string; quote: string; avatar?: string }>;
+  storySection: {
+    title: string;
+    description: string;
+    image: string;
+    link: string;
+  };
   footer: {
     supportLinks: Array<{ label: string; link: string }>;
     quickLinks: Array<{ label: string; link: string }>;
@@ -63,6 +70,20 @@ const DashboardSchema = new Schema<IDashboard>(
       description: { type: String, required: true },
       buttonText: { type: String, required: true },
       link: { type: String, required: true }
+    },
+    testimonials: [
+      {
+        name: { type: String, required: true },
+        role: { type: String, required: true },
+        quote: { type: String, required: true },
+        avatar: { type: String, default: "" }
+      }
+    ],
+    storySection: {
+      title: { type: String, default: "" },
+      description: { type: String, default: "" },
+      image: { type: String, default: "" },
+      link: { type: String, default: "/stories" }
     },
     footer: {
       supportLinks: [

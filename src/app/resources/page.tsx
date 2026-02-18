@@ -1,11 +1,21 @@
 import { connectDB } from "@/lib/db";
 import type { Metadata } from "next";
 import Resources from "@/lib/models/Resource.model";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Resources — Mera Pind Balle Balle",
   description:
     "Access downloadable brochures, reports, policies, and important documentation from Mera Pind Balle Balle.",
+  alternates: { canonical: `${baseUrl}/resources` },
+  openGraph: {
+    title: "Resources — Mera Pind Balle Balle",
+    description: "Access downloadable brochures, reports, policies, and important documentation from Mera Pind Balle Balle.",
+    url: `${baseUrl}/resources`,
+    type: "website",
+  },
 };
 
 // disable caching completely
@@ -27,6 +37,10 @@ export default async function ResourcesPage() {
 
   return (
     <main className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Resources", "/resources")) }}
+      />
 
       {/* BANNER */}
       <section className="mb-16">

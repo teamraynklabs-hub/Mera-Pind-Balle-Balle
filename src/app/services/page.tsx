@@ -1,11 +1,21 @@
 import { connectDB } from "@/lib/db";
 import Service from "@/lib/models/Service.model";
 import type { Metadata } from "next";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Initiatives — Mera Pind Balle Balle",
   description:
-    "Explore Mera Pind Balle Balle’s rural empowerment initiatives including skill training, women empowerment, sustainable farming and product innovation.",
+    "Explore Mera Pind Balle Balle's rural empowerment initiatives including skill training, women empowerment, sustainable farming and product innovation.",
+  alternates: { canonical: `${baseUrl}/services` },
+  openGraph: {
+    title: "Initiatives — Mera Pind Balle Balle",
+    description: "Explore Mera Pind Balle Balle's rural empowerment initiatives including skill training, women empowerment, sustainable farming and product innovation.",
+    url: `${baseUrl}/services`,
+    type: "website",
+  },
 };
 
 // Disable caching completely
@@ -43,6 +53,10 @@ export default async function InitiativesPage() {
 
   return (
     <main className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Initiatives", "/services")) }}
+      />
 
       {/* Header */}
       <section className="mb-16 text-center">

@@ -15,6 +15,11 @@ export default function AdminDashboardHome() {
       href: "/admin/dashboard/products",
     },
     {
+      title: "Orders Manager",
+      desc: "View and manage customer orders.",
+      href: "/admin/dashboard/orders",
+    },
+    {
       title: "Blog Manager",
       desc: "Publish and edit blogs.",
       href: "/admin/dashboard/blogs",

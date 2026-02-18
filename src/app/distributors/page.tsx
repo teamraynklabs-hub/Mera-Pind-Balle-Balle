@@ -1,11 +1,21 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 import DistributorsForm from "./DistributorsForm";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Distributors — Mera Pind Balle Balle",
   description:
     "Become an official distributor for Mera Pind Balle Balle and promote rural-made products backed by training, quality, and sustainability.",
+  alternates: { canonical: `${baseUrl}/distributors` },
+  openGraph: {
+    title: "Distributors — Mera Pind Balle Balle",
+    description: "Become an official distributor for Mera Pind Balle Balle and promote rural-made products backed by training, quality, and sustainability.",
+    url: `${baseUrl}/distributors`,
+    type: "website",
+  },
 };
 
 // GET data SSR
@@ -58,6 +68,11 @@ export default async function DistributorsPage() {
 
   return (
     <main className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Distributors", "/distributors")) }}
+      />
+
       {/* BANNER */}
       {info.bannerImage && info.bannerImage.trim() && (
         <section className="mb-16">

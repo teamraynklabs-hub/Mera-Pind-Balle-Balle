@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
+
 export const metadata: Metadata = {
   title: "Privacy Policy — Mera Pind Balle Balle",
   description:
     "Read the Privacy Policy of Mera Pind Balle Balle to understand how we collect, use, and protect your personal information.",
+  alternates: { canonical: `${baseUrl}/privacy-policy` },
+  openGraph: {
+    title: "Privacy Policy — Mera Pind Balle Balle",
+    description: "Read the Privacy Policy of Mera Pind Balle Balle to understand how we collect, use, and protect your personal information.",
+    url: `${baseUrl}/privacy-policy`,
+    type: "website",
+  },
 };
 
 export default function PrivacyPolicyPage() {

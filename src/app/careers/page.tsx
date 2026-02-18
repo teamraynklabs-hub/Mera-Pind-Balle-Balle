@@ -1,11 +1,21 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 import CareersForm from "./CareersForm";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Careers — Mera Pind Balle Balle",
   description:
     "Join Mera Pind Balle Balle to make a meaningful impact in rural development, empowerment, and sustainable community growth.",
+  alternates: { canonical: `${baseUrl}/careers` },
+  openGraph: {
+    title: "Careers — Mera Pind Balle Balle",
+    description: "Join Mera Pind Balle Balle to make a meaningful impact in rural development, empowerment, and sustainable community growth.",
+    url: `${baseUrl}/careers`,
+    type: "website",
+  },
 };
 
 async function getCareerData() {
@@ -41,6 +51,11 @@ export default async function CareersPage() {
 
   return (
     <main className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Careers", "/careers")) }}
+      />
+
       {/* BANNER */}
       {/* <section className="mb-16">
         <img

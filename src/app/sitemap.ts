@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapind.com";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -88,6 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Dynamic imports after DB connection
     const Blog = (await import("@/lib/models/Blog.model")).default;
     const Story = (await import("@/lib/models/Story.model")).default;
+    const Product = (await import("@/lib/models/Product.model")).default;
 
     // Fetch blogs
     const blogs = await Blog.find(
@@ -101,6 +102,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const stories = await Story.find(
       { isPublished: true },
       { slug: 1, updatedAt: 1 },
+    )
+      .lean()
+      .exec();
+
+    // Fetch products
+    const products = await Product.find(
+      { isActive: true },
+      { _id: 1, updatedAt: 1 },
     )
       .lean()
       .exec();
@@ -121,7 +130,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     );
 
-    return [...staticPages, ...blogPages, ...storyPages];
+    const productPages: MetadataRoute.Sitemap = (products || []).map(
+      (product: any) => ({
+        url: `${baseUrl}/product/${product._id}`,
+        lastModified: new Date(product.updatedAt || new Date()),
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      })
+    );
+
+    return [...staticPages, ...blogPages, ...storyPages, ...productPages];
   } catch (error) {
     console.error("Sitemap generation error:", error);
     return staticPages; // Fallback to static pages

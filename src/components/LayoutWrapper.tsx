@@ -3,18 +3,18 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./navbar";
 import Footer from "./footer";
+import PageTransition from "./layout/PageTransition";
 
 export default function LayoutWrapper({ children, footer }: any) {
   const pathname = usePathname();
 
-  // hide navbar + footer inside admin pages
   const isAdmin = pathname.startsWith("/admin");
 
   return (
     <>
       {!isAdmin && <Navbar />}
 
-      {children}
+      {isAdmin ? children : <PageTransition key={pathname}>{children}</PageTransition>}
 
       {!isAdmin && <Footer footer={footer} />}
     </>

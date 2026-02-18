@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
 import ContactForm from "./ContactForm";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Contact Us — Mera Pind Balle Balle",
   description:
     "Get in touch with Mera Pind Balle Balle for inquiries, support, partnerships, or distribution opportunities.",
+  alternates: { canonical: `${baseUrl}/contact` },
+  openGraph: {
+    title: "Contact Us — Mera Pind Balle Balle",
+    description: "Get in touch with Mera Pind Balle Balle for inquiries, support, partnerships, or distribution opportunities.",
+    url: `${baseUrl}/contact`,
+    type: "website",
+  },
 };
 
 export default function ContactPage() {
   return (
     <main className="px-4 sm:px-6 md:px-10 lg:px-20 xl:px-28 py-12 w-full">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Contact Us", "/contact")) }}
+      />
 
       {/* PAGE TITLE */}
       <section className="text-center mb-16">

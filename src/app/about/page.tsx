@@ -1,11 +1,23 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "About — Mera Pind Balle Balle | Empowering Rural Communities",
   description:
     "Learn about Mera Pind Balle Balle's mission, vision, values, and rural empowerment approach.",
+  alternates: { canonical: `${baseUrl}/about` },
+  openGraph: {
+    title: "About — Mera Pind Balle Balle | Empowering Rural Communities",
+    description: "Learn about Mera Pind Balle Balle's mission, vision, values, and rural empowerment approach.",
+    url: `${baseUrl}/about`,
+    type: "website",
+  },
 };
+
+export const dynamic = "force-dynamic";
 
 /* ------------------------
    BACKEND FETCH
@@ -48,6 +60,10 @@ export default async function AboutPage() {
 
   return (
     <main className="container mx-auto px-4 py-12 space-y-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("About", "/about")) }}
+      />
 
       {/* HERO SECTION */}
       <section className="grid lg:grid-cols-2 gap-10 items-center">

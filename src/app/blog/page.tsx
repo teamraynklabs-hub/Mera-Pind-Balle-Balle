@@ -2,11 +2,21 @@ import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 import { connectDB } from "@/lib/db";
 import Blog from "@/lib/models/Blog.model";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Blog — Mera Pind Balle Balle",
   description:
     "Read inspiring stories, updates, and news from rural communities.",
+  alternates: { canonical: `${baseUrl}/blog` },
+  openGraph: {
+    title: "Blog — Mera Pind Balle Balle",
+    description: "Read inspiring stories, updates, and news from rural communities.",
+    url: `${baseUrl}/blog`,
+    type: "website",
+  },
 };
 
 // Disable caching completely for real-time data
@@ -67,6 +77,11 @@ export default async function BlogPage({
 
   return (
     <main className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Blog", "/blog")) }}
+      />
+
       <section className="mb-12 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">
           Latest Blogs

@@ -3,6 +3,11 @@ import { redirect } from "next/navigation";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import { AdminSessionProvider } from "@/components/AdminSessionProvider";
 import { Toaster } from "@/components/ui/sonner"
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function AdminLayout({
   children,

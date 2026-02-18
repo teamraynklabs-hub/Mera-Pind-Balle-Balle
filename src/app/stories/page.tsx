@@ -2,11 +2,21 @@ import { connectDB } from "@/lib/db";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { breadcrumbForPage } from "@/lib/seo";
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Success Stories — Mera Pind Balle Balle",
   description:
     "Real stories from rural communities, artisans, farmers, and women entrepreneurs empowered by Mera Pind Balle Balle initiatives.",
+  alternates: { canonical: `${baseUrl}/stories` },
+  openGraph: {
+    title: "Success Stories — Mera Pind Balle Balle",
+    description: "Real stories from rural communities, artisans, farmers, and women entrepreneurs empowered by Mera Pind Balle Balle initiatives.",
+    url: `${baseUrl}/stories`,
+    type: "website",
+  },
 };
 
 // Backend Fetch
@@ -46,6 +56,10 @@ export default async function StoriesPage() {
 
   return (
     <main className="container mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Success Stories", "/stories")) }}
+      />
 
       {/* HEADER */}
       <section className="text-center mb-16">
