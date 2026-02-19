@@ -31,6 +31,9 @@ export async function PUT(
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const price = Number(formData.get("price"));
+    const category = formData.get("category") as string | null;
+    const stock = formData.get("stock");
+    const isFeatured = formData.get("isFeatured");
     const file = formData.get("image") as File | null;
 
     const product = await Product.findById(id);
@@ -47,6 +50,10 @@ export async function PUT(
       description,
       price,
     };
+
+    if (category !== null) updateData.category = category;
+    if (stock !== null) updateData.stock = Number(stock);
+    if (isFeatured !== null) updateData.isFeatured = isFeatured === "true";
 
     // 🔁 Replace image if new file uploaded
     if (file && file.size > 0) {

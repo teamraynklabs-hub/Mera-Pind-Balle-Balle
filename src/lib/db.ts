@@ -50,7 +50,6 @@ export async function connectDB(): Promise<typeof mongoose> {
         family: 4,
       })
       .then((mongoose) => {
-        console.log("✓ MongoDB connected with connection pooling");
         return mongoose;
       })
       .catch((error) => {

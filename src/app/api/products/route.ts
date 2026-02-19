@@ -6,8 +6,8 @@ export async function GET() {
   try {
     await connectDB();
 
-    const products = await Product.find({})
-      .select("name price description image isActive")
+    const products = await Product.find({ isActive: true })
+      .select("name price description image category stock isActive isFeatured")
       .lean();
 
     return NextResponse.json({
@@ -15,7 +15,7 @@ export async function GET() {
       data: products,
     });
   } catch (error: any) {
-    console.error(" PRODUCTS API ERROR (REAL):", error);
+    console.error("PRODUCTS API ERROR:", error);
 
     return NextResponse.json(
       {

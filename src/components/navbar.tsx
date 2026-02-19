@@ -59,10 +59,10 @@ export default function Navbar() {
               <Link
                 key={item.title}
                 href={item.href}
-                className={`text-sm font-medium px-3 py-2 rounded-lg transition-colors relative ${
+                className={`text-sm font-medium px-3 py-2 transition-colors relative after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${
                   isActive
-                    ? "text-primary bg-primary/5"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                    ? "text-primary after:bg-primary after:scale-x-100"
+                    : "text-muted-foreground hover:text-foreground after:bg-foreground after:scale-x-0 hover:after:scale-x-100"
                 }`}
               >
                 {item.title}
@@ -74,7 +74,7 @@ export default function Navbar() {
 
           <Link
             href="/cart"
-            className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
           >
             <ShoppingCart size={20} />
             {totalItems > 0 && (
@@ -87,7 +87,7 @@ export default function Navbar() {
           {user ? (
             <button
               onClick={logout}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
               title={`Logout (${user.name})`}
             >
               <LogOut size={20} />
@@ -95,7 +95,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
               title="Login"
             >
               <User size={20} />
@@ -129,10 +129,10 @@ export default function Navbar() {
                   key={item.title}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`text-sm py-2.5 px-3 rounded-lg font-medium transition-colors ${
+                  className={`text-sm py-2.5 px-3 font-medium transition-colors border-l-2 ${
                     isActive
-                      ? "text-primary bg-primary/5"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      ? "text-primary border-primary"
+                      : "text-muted-foreground hover:text-foreground border-transparent hover:border-foreground"
                   }`}
                 >
                   {item.title}
@@ -146,7 +146,7 @@ export default function Navbar() {
               <Link
                 href="/cart"
                 onClick={() => setOpen(false)}
-                className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ShoppingCart size={20} />
                 {totalItems > 0 && (
@@ -161,7 +161,7 @@ export default function Navbar() {
                     setOpen(false);
                     logout();
                   }}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <LogOut size={20} />
                 </button>
@@ -169,7 +169,7 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <User size={20} />
                 </Link>

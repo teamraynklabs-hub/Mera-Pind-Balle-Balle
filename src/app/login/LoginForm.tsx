@@ -84,7 +84,7 @@ export default function LoginForm() {
                 className={errors.email ? "border-red-500 focus-visible:ring-red-500/30" : ""}
               />
               {errors.email && (
-                <p className="text-xs text-red-500">{errors.email}</p>
+                <p className="text-xs text-destructive">{errors.email}</p>
               )}
             </div>
 
@@ -113,7 +113,7 @@ export default function LoginForm() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-red-500">{errors.password}</p>
+                <p className="text-xs text-destructive">{errors.password}</p>
               )}
             </div>
 

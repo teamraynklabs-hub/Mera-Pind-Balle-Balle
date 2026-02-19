@@ -7,6 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useUserAuth } from "@/context/UserAuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import CheckoutDrawer from "@/components/cart/CheckoutDrawer";
 
 interface ProductActionsProps {
   product: {
@@ -19,6 +20,7 @@ interface ProductActionsProps {
 
 export default function ProductActions({ product }: ProductActionsProps) {
   const [quantity, setQuantity] = useState(1);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { addToCart } = useCart();
   const { user, loading } = useUserAuth();
   const router = useRouter();
@@ -50,61 +52,65 @@ export default function ProductActions({ product }: ProductActionsProps) {
       image: product.image,
       quantity,
     });
-    router.push("/cart");
+    setCheckoutOpen(true);
   }
 
   return (
-    <div className="space-y-5">
-      {/* Quantity Selector */}
-      <div>
-        <label className="text-sm font-medium mb-2.5 block text-muted-foreground">
-          Quantity
-        </label>
-        <div className="inline-flex items-center gap-3 border rounded-xl p-1.5 bg-card">
+    <>
+      <div className="space-y-5">
+        {/* Quantity Selector */}
+        <div>
+          <label className="text-sm font-medium mb-2.5 block text-muted-foreground">
+            Quantity
+          </label>
+          <div className="inline-flex items-center gap-3 border rounded-xl p-1.5 bg-card">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+            >
+              <Minus size={16} />
+            </Button>
+            <span className="text-lg font-semibold w-8 text-center tabular-nums">
+              {quantity}
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer"
+              onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+              disabled={quantity >= 10}
+            >
+              <Plus size={16} />
+            </Button>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3">
           <Button
-            variant="ghost"
-            size="icon"
-            className="cursor-pointer"
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            disabled={quantity <= 1}
+            variant="outline"
+            size="lg"
+            className="flex-1 cursor-pointer"
+            onClick={handleAddToCart}
           >
-            <Minus size={16} />
+            <ShoppingCart size={18} className="mr-2" />
+            Add to Cart
           </Button>
-          <span className="text-lg font-semibold w-8 text-center tabular-nums">
-            {quantity}
-          </span>
           <Button
-            variant="ghost"
-            size="icon"
-            className="cursor-pointer"
-            onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-            disabled={quantity >= 10}
+            size="lg"
+            className="flex-1 cursor-pointer"
+            onClick={handleBuyNow}
           >
-            <Plus size={16} />
+            <Zap size={18} className="mr-2" />
+            Buy Now
           </Button>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex-1 cursor-pointer"
-          onClick={handleAddToCart}
-        >
-          <ShoppingCart size={18} className="mr-2" />
-          Add to Cart
-        </Button>
-        <Button
-          size="lg"
-          className="flex-1 cursor-pointer"
-          onClick={handleBuyNow}
-        >
-          <Zap size={18} className="mr-2" />
-          Buy Now
-        </Button>
-      </div>
-    </div>
+      <CheckoutDrawer open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
+    </>
   );
 }

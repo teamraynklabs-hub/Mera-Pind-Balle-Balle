@@ -19,7 +19,10 @@ export async function POST(
     const name = formData.get("name") as string;
     const description = formData.get("description") as string;
     const price = Number(formData.get("price"));
+    const category = (formData.get("category") as string) || "";
+    const stock = Number(formData.get("stock") || 0);
     const isActive = formData.get("isActive") !== "false";
+    const isFeatured = formData.get("isFeatured") === "true";
     const file = formData.get("image") as File;
 
     if (!name || !description || !price || !file) {
@@ -39,13 +42,17 @@ export async function POST(
       ).end(buffer);
     });
 
- const product = await Product.create({
-  name,
-  description,
-  price,
-  image: upload.secure_url,
-  imageId: upload.public_id, 
-});
+    const product = await Product.create({
+      name,
+      description,
+      price,
+      category,
+      stock,
+      isActive,
+      isFeatured,
+      image: upload.secure_url,
+      imageId: upload.public_id,
+    });
 
 
     return NextResponse.json(product);

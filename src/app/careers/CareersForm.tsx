@@ -56,13 +56,13 @@ export default function CareersForm() {
       <h2 className="text-2xl font-semibold mb-6">Submit Your Application</h2>
 
       {sent && (
-        <div className="p-4 mb-6 bg-green-100 border border-green-200 text-green-800 rounded-lg">
+        <div className="p-4 mb-6 bg-primary/10 border border-primary/20 text-primary rounded-lg">
           Application submitted successfully! We'll get back to you soon.
         </div>
       )}
 
       {error && (
-        <div className="p-4 mb-6 bg-red-100 border border-red-200 text-red-800 rounded-lg">
+        <div className="p-4 mb-6 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           {error}
         </div>
       )}
@@ -133,7 +133,7 @@ export default function CareersForm() {
             type="submit"
             disabled={loading}
             className={`
-              px-8 py-3 bg-primary text-white font-medium rounded-md
+              px-8 py-3 bg-primary text-primary-foreground font-medium rounded-md
               transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
               disabled:opacity-60 disabled:cursor-not-allowed
             `}

@@ -111,7 +111,7 @@ export default async function InitiativesPage() {
 
         <a
           href="/contact"
-          className="inline-block px-8 py-3 bg-primary text-white rounded-md text-sm shadow-md hover:opacity-90 transition"
+          className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-md text-sm shadow-md hover:opacity-90 transition"
         >
           Contact Us
         </a>

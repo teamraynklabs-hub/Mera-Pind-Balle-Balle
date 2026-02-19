@@ -69,7 +69,7 @@ export default async function ResourcesPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <span className="font-semibold text-lg">{doc.title}</span>
-              <span className="px-3 py-1 text-xs bg-primary text-white rounded-md">
+              <span className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded-md">
                 {doc.type}
               </span>
             </div>
@@ -99,7 +99,7 @@ export default async function ResourcesPage() {
 
         <a
           href="/contact"
-          className="px-8 py-3 bg-primary text-white rounded-md text-sm hover:opacity-90 transition"
+          className="px-8 py-3 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
         >
           Contact Us
         </a>

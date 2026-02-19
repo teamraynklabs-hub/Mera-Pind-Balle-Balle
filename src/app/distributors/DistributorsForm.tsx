@@ -54,13 +54,13 @@ export default function DistributorsForm() {
       <h2 className="text-2xl font-semibold mb-4">Distributor Inquiry Form</h2>
 
       {submitted && (
-        <p className="p-3 mb-6 bg-green-100 text-green-800 rounded-lg">
+        <p className="p-3 mb-6 bg-primary/10 text-primary rounded-lg">
           Thank you! Your distributor request has been submitted successfully.
         </p>
       )}
 
       {error && (
-        <p className="p-3 mb-6 bg-red-100 text-red-800 rounded-lg">
+        <p className="p-3 mb-6 bg-destructive/10 text-destructive rounded-lg">
           {error}
         </p>
       )}
@@ -133,7 +133,7 @@ export default function DistributorsForm() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full md:w-auto px-8 py-3 bg-primary text-white rounded-md font-medium hover:opacity-90 transition ${
+            className={`w-full md:w-auto px-8 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 transition ${
               loading ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >

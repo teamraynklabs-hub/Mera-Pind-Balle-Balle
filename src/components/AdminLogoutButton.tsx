@@ -25,8 +25,6 @@ export function AdminLogoutButton() {
       });
 
       if (res.ok) {
-        console.log("✅ Session destroyed, redirecting to login...");
-        
         // Clear localStorage if any auth data is stored
         localStorage.clear();
         sessionStorage.clear();

@@ -33,6 +33,11 @@ const ProductSchema = new Schema(
       index: true,
     },
 
+    stock: {
+      type: Number,
+      default: 0,
+    },
+
     isActive: {
       type: Boolean,
       default: true,

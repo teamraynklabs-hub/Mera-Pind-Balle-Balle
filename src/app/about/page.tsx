@@ -200,7 +200,7 @@ export default async function AboutPage() {
           </p>
           <a
             href="/contact"
-            className="inline-block px-8 py-3 bg-primary text-white rounded-md text-sm hover:opacity-90 transition"
+            className="inline-block px-8 py-3 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
           >
             {data.cta.buttonText || "Contact Us"}
           </a>

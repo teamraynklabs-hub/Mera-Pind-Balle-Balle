@@ -10,8 +10,6 @@ export async function POST(req: Request) {
   const requestId = await getRequestId();
 
   try {
-    console.log(`[${requestId}] Processing contact form submission`);
-
     const body = await req.json();
 
     // Validate using Zod
@@ -28,8 +26,6 @@ export async function POST(req: Request) {
     await connectDB();
 
     const contact = await Contact.create(sanitized);
-
-    console.log(`[${requestId}] Contact message saved with ID: ${contact._id}`);
 
     return NextResponse.json(
       {

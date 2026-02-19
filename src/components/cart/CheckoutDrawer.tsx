@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X, Loader2, User, MapPin, Banknote, Package } from "lucide-react";
+import { X, Loader2, User, MapPin, Banknote, Package, Lock, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -113,7 +113,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
   }
 
   function inputClasses(fieldName: keyof CheckoutFormData) {
-    return errors[fieldName] ? "border-red-500 focus-visible:ring-red-500/30" : "";
+    return errors[fieldName] ? "border-destructive focus-visible:ring-destructive/30" : "";
   }
 
   return (
@@ -135,7 +135,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            transition={{ type: "spring", damping: 30, stiffness: 280 }}
             className="fixed right-0 top-0 h-full w-full max-w-lg bg-background border-l shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
@@ -173,7 +173,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
                         className={inputClasses("name")}
                       />
                       {errors.name && (
-                        <p className="text-xs text-red-500">{errors.name.message}</p>
+                        <p className="text-xs text-destructive">{errors.name.message}</p>
                       )}
                     </div>
                     <div className="space-y-2">
@@ -186,7 +186,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
                         className={inputClasses("email")}
                       />
                       {errors.email && (
-                        <p className="text-xs text-red-500">{errors.email.message}</p>
+                        <p className="text-xs text-destructive">{errors.email.message}</p>
                       )}
                     </div>
                     <div className="space-y-2">
@@ -199,7 +199,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
                         className={inputClasses("phone")}
                       />
                       {errors.phone && (
-                        <p className="text-xs text-red-500">{errors.phone.message}</p>
+                        <p className="text-xs text-destructive">{errors.phone.message}</p>
                       )}
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
                         className={inputClasses("line1")}
                       />
                       {errors.line1 && (
-                        <p className="text-xs text-red-500">{errors.line1.message}</p>
+                        <p className="text-xs text-destructive">{errors.line1.message}</p>
                       )}
                     </div>
                     <div className="space-y-2">
@@ -244,7 +244,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
                           className={inputClasses("city")}
                         />
                         {errors.city && (
-                          <p className="text-xs text-red-500">{errors.city.message}</p>
+                          <p className="text-xs text-destructive">{errors.city.message}</p>
                         )}
                       </div>
                       <div className="space-y-2">
@@ -256,7 +256,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
                           className={inputClasses("state")}
                         />
                         {errors.state && (
-                          <p className="text-xs text-red-500">{errors.state.message}</p>
+                          <p className="text-xs text-destructive">{errors.state.message}</p>
                         )}
                       </div>
                     </div>
@@ -269,7 +269,7 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
                         className={inputClasses("pincode")}
                       />
                       {errors.pincode && (
-                        <p className="text-xs text-red-500">{errors.pincode.message}</p>
+                        <p className="text-xs text-destructive">{errors.pincode.message}</p>
                       )}
                     </div>
                   </div>
@@ -335,6 +335,16 @@ export default function CheckoutDrawer({ open, onClose }: CheckoutDrawerProps) {
 
               {/* Footer */}
               <div className="p-6 border-t bg-background sticky bottom-0">
+                <div className="flex items-center justify-center gap-4 mb-4 text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Lock size={13} className="text-primary" />
+                    <span className="text-xs font-medium">Encrypted</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Shield size={13} className="text-primary" />
+                    <span className="text-xs font-medium">Secure Checkout</span>
+                  </div>
+                </div>
                 <Button
                   type="submit"
                   size="lg"

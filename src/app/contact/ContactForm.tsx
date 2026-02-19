@@ -43,7 +43,7 @@ export default function ContactForm() {
       <h2 className="text-2xl font-semibold mb-4">Send Us a Message</h2>
 
       {sent && (
-        <p className="p-3 mb-6 bg-green-200 text-green-800 rounded-lg">
+        <p className="p-3 mb-6 bg-primary/10 text-primary rounded-lg">
           Message sent successfully!
         </p>
       )}
@@ -88,7 +88,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-3 w-full bg-primary text-white rounded-md text-sm hover:opacity-90 transition"
+          className="px-6 py-3 w-full bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
         >
           {loading ? "Sending..." : "Send Message"}
         </button>

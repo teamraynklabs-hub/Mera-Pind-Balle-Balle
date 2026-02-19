@@ -82,8 +82,6 @@ export default function ProductsManager() {
   const file = e.target.files?.[0];
   if (!file) return;
 
-  console.log("Selected file:", file); // 👈 TEMP debug
-
   setPreviewImage(URL.createObjectURL(file));
   setForm({ ...form, image: file });
 }
@@ -183,15 +181,12 @@ async function handleSubmit() {
         credentials: "include",
       });
 
-      console.log("DELETE RESPONSE STATUS:", res.status);
-
       if (!res.ok) {
         const error = await res.json();
         alert(`Error: ${error.error || "Failed to delete product"}`);
         return;
       }
 
-      console.log("DELETE SUCCESS - Reloading products");
       await loadProducts();
     } catch (err) {
       console.error("DELETE ERROR:", err);

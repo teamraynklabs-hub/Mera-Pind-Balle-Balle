@@ -111,7 +111,7 @@ export default async function StoriesPage() {
 
         <a
           href="/contact"
-          className="px-8 py-3 bg-primary text-white rounded-md text-sm shadow-md hover:opacity-90 transition"
+          className="px-8 py-3 bg-primary text-primary-foreground rounded-md text-sm shadow-md hover:opacity-90 transition"
         >
           Contact Us
         </a>

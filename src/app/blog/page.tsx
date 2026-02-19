@@ -104,7 +104,7 @@ export default async function BlogPage({
 
         <button
           type="submit"
-          className="mt-3 w-full bg-primary text-white py-2 rounded-md"
+          className="mt-3 w-full bg-primary text-primary-foreground py-2 rounded-md"
         >
           Search
         </button>

@@ -8,73 +8,22 @@ export async function GET() {
   try {
     await connectDB();
 
-    let data = await DistributorsPage.findOne({ isActive: true }).lean();
+    const data = await DistributorsPage.findOne({ isActive: true }).lean();
 
-    // If no page data exists, create default
     if (!data) {
-      console.log("No distributor page data found. Creating default...");
-      try {
-        const newPage = new DistributorsPage({
-          bannerImage: "",
-          benefits: [
-            "Competitive commission structure",
-            "Marketing support and training",
-            "Quality products with guaranteed profits",
-            "Dedicated distributor support team",
-          ],
-          requirements: [
-            "Registered business entity",
-            "Minimum investment capacity",
-            "Valid GST registration",
-            "Willingness to maintain quality standards",
-          ],
-          isActive: true,
-        });
-        
-        data = await newPage.save();
-        console.log("Default distributor page created successfully");
-      } catch (saveError) {
-        console.error("Failed to create default distributor page:", saveError);
-        // Return default data even if save fails
-        data = {
-          bannerImage: "",
-          benefits: [
-            "Competitive commission structure",
-            "Marketing support and training",
-            "Quality products with guaranteed profits",
-            "Dedicated distributor support team",
-          ],
-          requirements: [
-            "Registered business entity",
-            "Minimum investment capacity",
-            "Valid GST registration",
-            "Willingness to maintain quality standards",
-          ],
-          isActive: true,
-        };
-      }
+      return NextResponse.json(
+        { success: false, message: "No distributor page configured. Please set up via admin panel." },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(data);
   } catch (error) {
     console.error("DISTRIBUTOR API ERROR:", error);
-    // Return default fallback data on error
-    return NextResponse.json({
-      bannerImage: "",
-      benefits: [
-        "Competitive commission structure",
-        "Marketing support and training",
-        "Quality products with guaranteed profits",
-        "Dedicated distributor support team",
-      ],
-      requirements: [
-        "Registered business entity",
-        "Minimum investment capacity",
-        "Valid GST registration",
-        "Willingness to maintain quality standards",
-      ],
-      isActive: true,
-    });
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -84,7 +33,6 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validate required fields
     if (!body.name || !body.email || !body.phone) {
       return NextResponse.json(
         { error: "Name, email, and phone are required" },
@@ -92,7 +40,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new distributor submission
     const distributor = await Distributor.create({
       name: body.name.trim(),
       email: body.email.trim().toLowerCase(),

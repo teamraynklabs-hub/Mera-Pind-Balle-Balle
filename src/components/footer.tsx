@@ -34,12 +34,12 @@ export default function Footer({ footer }: { footer?: any }) {
   };
 
   return (
-    <footer className="w-full bg-background border-t mt-16">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="w-full bg-muted/30 border-t mt-16">
+      <div className="container mx-auto px-4 py-16">
 
         {/* MAIN GRID */}
         <div className="
-          grid gap-10
+          grid gap-12
           grid-cols-1
           sm:grid-cols-2
           lg:grid-cols-4
@@ -64,7 +64,7 @@ export default function Footer({ footer }: { footer?: any }) {
               </span>
             </div>
 
-            <p className="text-sm text-muted-foreground max-w-xs">
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
               Empowering rural India with resources, inspiring stories,
               and sustainable development initiatives.
             </p>
@@ -72,11 +72,11 @@ export default function Footer({ footer }: { footer?: any }) {
 
           {/* SUPPORT */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <h3 className="text-lg font-semibold mb-5">Support</h3>
             <ul className="space-y-3 text-sm">
               {supportLinks.map((item: any) => (
                 <li key={item.label}>
-                  <Link href={item.link} className="hover:text-primary transition">
+                  <Link href={item.link} className="footer-link text-muted-foreground">
                     {item.label}
                   </Link>
                 </li>
@@ -86,11 +86,11 @@ export default function Footer({ footer }: { footer?: any }) {
 
           {/* QUICK LINKS */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-5">Quick Links</h3>
             <ul className="space-y-3 text-sm">
               {quickLinks.map((item: any) => (
                 <li key={item.label}>
-                  <Link href={item.link} className="hover:text-primary transition">
+                  <Link href={item.link} className="footer-link text-muted-foreground">
                     {item.label}
                   </Link>
                 </li>
@@ -100,12 +100,12 @@ export default function Footer({ footer }: { footer?: any }) {
 
           {/* LEGAL + SOCIAL */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Legal & Social</h3>
+            <h3 className="text-lg font-semibold mb-5">Legal & Social</h3>
 
             <ul className="space-y-3 text-sm mb-6">
               {legalLinks.map((item: any) => (
                 <li key={item.label}>
-                  <Link href={item.link} className="hover:text-primary transition">
+                  <Link href={item.link} className="footer-link text-muted-foreground">
                     {item.label}
                   </Link>
                 </li>
@@ -113,7 +113,7 @@ export default function Footer({ footer }: { footer?: any }) {
             </ul>
 
             {/* SOCIAL ICONS */}
-            <div className="flex justify-center sm:justify-start gap-5">
+            <div className="flex justify-center sm:justify-start gap-4">
               {socialLinks.map((item: any) => {
                 const Icon = icons[item.platform];
                 return (
@@ -123,7 +123,7 @@ export default function Footer({ footer }: { footer?: any }) {
                       href={item.link}
                       target="_blank"
                       aria-label={item.platform}
-                      className="p-2 rounded-full border hover:bg-accent transition"
+                      className="social-icon p-2.5 rounded-full border text-muted-foreground"
                     >
                       <Icon size={20} />
                     </Link>
@@ -136,7 +136,7 @@ export default function Footer({ footer }: { footer?: any }) {
 
         {/* COPYRIGHT */}
         <div className="
-          border-t mt-10 pt-5
+          border-t mt-14 pt-6
           text-center text-xs text-muted-foreground
         ">
           © {new Date().getFullYear()} Mera Pind Balle Balle. All Rights Reserved.

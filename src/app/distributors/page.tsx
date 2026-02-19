@@ -1,5 +1,6 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
+import Image from "next/image";
 import DistributorsForm from "./DistributorsForm";
 import { breadcrumbForPage } from "@/lib/seo";
 
@@ -18,53 +19,33 @@ export const metadata: Metadata = {
   },
 };
 
-// GET data SSR
 async function getDistributorInfo() {
   try {
     const base = getBaseUrl();
     const res = await fetch(`${base}/api/distributors`, {
       cache: "no-store",
     });
-    if (!res.ok) throw new Error(`Distributors fetch failed: ${res.status}`);
-    const data = await res.json();
-    console.log("Distributor page data:", data);
-    return data;
-  } catch (err) {
-    console.error("DISTRIBUTOR GET ERROR:", err);
-    // Return default fallback data
-    return {
-      bannerImage: "",
-      benefits: [
-        "Competitive commission structure",
-        "Marketing support and training",
-        "Quality products with guaranteed profits",
-        "Dedicated distributor support team",
-      ],
-      requirements: [
-        "Registered business entity",
-        "Minimum investment capacity",
-        "Valid GST registration",
-        "Willingness to maintain quality standards",
-      ],
-      isActive: true,
-    };
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
   }
 }
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function DistributorsPage() {
   const info = await getDistributorInfo();
 
-  if (!info)
+  if (!info || info.success === false) {
     return (
       <main className="container mx-auto px-4 py-16 text-center">
         <p className="text-muted-foreground">
-          Unable to load distributor data.
+          Distributor information is not available at the moment. Please check back later.
         </p>
       </main>
     );
+  }
 
   return (
     <main className="container mx-auto px-4 py-12">
@@ -75,11 +56,13 @@ export default async function DistributorsPage() {
 
       {/* BANNER */}
       {info.bannerImage && info.bannerImage.trim() && (
-        <section className="mb-16">
-          <img
+        <section className="mb-16 relative w-full h-72 rounded-xl overflow-hidden shadow">
+          <Image
             src={info.bannerImage}
             alt="Distributors"
-            className="w-full h-72 object-cover rounded-xl shadow"
+            fill
+            className="object-cover"
+            sizes="100vw"
           />
         </section>
       )}
@@ -95,32 +78,34 @@ export default async function DistributorsPage() {
 
       {/* BENEFITS & REQUIREMENTS */}
       <section className="grid md:grid-cols-2 gap-10 mb-20">
-        {/* Benefits */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Why Partner With Us?</h2>
-          <ul className="space-y-3 text-muted-foreground">
-            {info.benefits.map((b: string, i: number) => (
-              <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
-                • {b}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {info.benefits?.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Why Partner With Us?</h2>
+            <ul className="space-y-3 text-muted-foreground">
+              {info.benefits.map((b: string, i: number) => (
+                <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
+                  {b}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-        {/* Requirements */}
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Distributor Requirements</h2>
-          <ul className="space-y-3 text-muted-foreground">
-            {info.requirements.map((r: string, i: number) => (
-              <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
-                • {r}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {info.requirements?.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Distributor Requirements</h2>
+            <ul className="space-y-3 text-muted-foreground">
+              {info.requirements.map((r: string, i: number) => (
+                <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
-      {/* FORM COMPONENT */}
+      {/* FORM */}
       <DistributorsForm />
     </main>
   );

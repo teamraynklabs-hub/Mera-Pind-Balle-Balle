@@ -111,7 +111,7 @@ export default function SignupForm() {
                 autoFocus
                 className={fieldClass("name")}
               />
-              {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -126,7 +126,7 @@ export default function SignupForm() {
                 autoComplete="email"
                 className={fieldClass("email")}
               />
-              {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
@@ -141,7 +141,7 @@ export default function SignupForm() {
                 autoComplete="tel"
                 className={fieldClass("phone")}
               />
-              {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
+              {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
             </div>
 
             <div className="space-y-2">
@@ -166,7 +166,7 @@ export default function SignupForm() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
+              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
@@ -191,7 +191,7 @@ export default function SignupForm() {
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.confirmPassword && <p className="text-xs text-red-500">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
             </div>
 
             <Button

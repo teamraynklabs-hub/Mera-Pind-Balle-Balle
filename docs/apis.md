@@ -8,7 +8,7 @@ Base URL: `http://localhost:3000` (dev) / `https://merapindballeballe.com` (prod
 
 ### User Auth
 - JWT tokens stored in HttpOnly secure cookies (`user-token`, 7-day expiry)
-- Send cookies automatically via browser or include `Cookie` header manually in Postman
+- Send cookies automatically via browser or include `Cookie` header in Postman
 
 ### Admin Auth
 - NextAuth v5 session-based authentication
@@ -17,52 +17,182 @@ Base URL: `http://localhost:3000` (dev) / `https://merapindballeballe.com` (prod
 
 ---
 
+## Seed Data Examples (Postman-Ready)
+
+### POST /api/admin/dashboard
+
+Create/update full dashboard configuration. **Requires admin session.**
+
+```json
+{
+  "hero": {
+    "title": "Empowering Villages Through Innovation & Sustainable Products",
+    "subtitle": "Mera Pind Balle Balle works with rural communities to create quality products, generate employment, and encourage sustainable growth.",
+    "image": "https://res.cloudinary.com/yourcloud/image/upload/v1/mpbb/hero.jpg",
+    "primaryCTA": { "label": "Explore Products", "link": "/products" },
+    "secondaryCTA": { "label": "Our Initiatives", "link": "/services" }
+  },
+  "initiatives": [
+    { "title": "Skill Development", "description": "Training villagers in craft, digital literacy, and entrepreneurship." },
+    { "title": "Women Empowerment", "description": "Helping rural women build independent and sustainable businesses." },
+    { "title": "Sustainable Products", "description": "Organic, handmade, eco-friendly items crafted by communities." }
+  ],
+  "popularProducts": [
+    { "title": "Organic Jaggery", "description": "Pure village-made jaggery with no chemicals.", "image": "https://res.cloudinary.com/yourcloud/image/upload/v1/mpbb/products/jaggery.jpg" },
+    { "title": "Handcrafted Baskets", "description": "Made by artisans using natural materials.", "image": "https://res.cloudinary.com/yourcloud/image/upload/v1/mpbb/products/baskets.jpg" }
+  ],
+  "impact": [
+    { "label": "Villagers Empowered", "value": "2500+" },
+    { "label": "Women-Owned Units", "value": "120+" },
+    { "label": "Product Lines", "value": "65+" }
+  ],
+  "cta": {
+    "title": "Want to Work With Us?",
+    "description": "Join us as a distributor, volunteer, or partner NGO.",
+    "buttonText": "Get in Touch",
+    "link": "/contact"
+  },
+  "testimonials": [
+    {
+      "name": "Gurpreet Kaur",
+      "role": "Women Entrepreneur, Patiala",
+      "quote": "Mera Pind Balle Balle helped me turn my pickle-making hobby into a full-time business. I now employ 5 other women!",
+      "avatar": ""
+    },
+    {
+      "name": "Ramesh Kumar",
+      "role": "Organic Farmer, Hoshiarpur",
+      "quote": "Their training programs taught me organic farming techniques that doubled my yield and gave me access to urban markets.",
+      "avatar": ""
+    },
+    {
+      "name": "Sunita Devi",
+      "role": "Artisan, Ludhiana",
+      "quote": "I learned basket weaving through their skill program. Now my handmade baskets are sold across India through this platform.",
+      "avatar": ""
+    }
+  ],
+  "storySection": {
+    "title": "Our Story & Mission",
+    "description": "From a small village initiative to empowering thousands of rural families — learn about the journey of Mera Pind Balle Balle.",
+    "image": "https://res.cloudinary.com/yourcloud/image/upload/v1/mpbb/story.jpg",
+    "link": "/stories"
+  },
+  "footer": {
+    "supportLinks": [
+      { "label": "Resources", "link": "/resources" },
+      { "label": "Distributors", "link": "/distributors" },
+      { "label": "Careers", "link": "/careers" },
+      { "label": "Contact", "link": "/contact" }
+    ],
+    "quickLinks": [
+      { "label": "About Us", "link": "/about" },
+      { "label": "Services", "link": "/services" },
+      { "label": "Products", "link": "/products" },
+      { "label": "Blog", "link": "/blog" }
+    ],
+    "legalLinks": [
+      { "label": "Privacy Policy", "link": "/privacy-policy" },
+      { "label": "Terms & Conditions", "link": "/terms-conditions" }
+    ],
+    "socialLinks": [
+      { "platform": "facebook", "link": "https://facebook.com/merapindballeballe" },
+      { "platform": "instagram", "link": "https://instagram.com/merapindballeballe" },
+      { "platform": "twitter", "link": "https://x.com/Merapindballe" },
+      { "platform": "linkedin", "link": "https://linkedin.com/in/merapind-balleballe" }
+    ]
+  },
+  "isActive": true
+}
+```
+
+---
+
+### POST /api/admin/products
+
+Create a new product. **Requires admin session. Body: FormData.**
+
+| Field | Type | Required |
+|-------|------|----------|
+| name | string | Yes |
+| description | string | Yes |
+| price | number | Yes |
+| category | string | No |
+| stock | number | No (default 0) |
+| isActive | boolean | No (default true) |
+| isFeatured | boolean | No (default false) |
+| image | File | Yes |
+
+**Example seed (use form-data in Postman):**
+
+```
+name: "Organic Honey"
+description: "Pure handmade village honey collected from rural beekeepers. No chemicals, no processing — just natural sweetness straight from the hive."
+price: 299
+category: "Food"
+stock: 50
+isFeatured: true
+image: [Upload file]
+```
+
+```
+name: "Handwoven Basket"
+description: "Traditional handwoven basket made from natural bamboo and grass by skilled rural artisans."
+price: 450
+category: "Handicrafts"
+stock: 30
+image: [Upload file]
+```
+
+```
+name: "Organic Jaggery"
+description: "Pure unprocessed jaggery from sugarcane grown in village farms. Rich in iron and minerals."
+price: 199
+category: "Food"
+stock: 100
+isFeatured: true
+image: [Upload file]
+```
+
+```
+name: "Handmade Soap"
+description: "Natural herbal soap made with neem, turmeric, and aloe vera by women self-help groups."
+price: 120
+category: "Personal Care"
+stock: 75
+image: [Upload file]
+```
+
+```
+name: "Khadi Cloth Bag"
+description: "Eco-friendly reusable bag made from handspun khadi fabric. Durable and stylish."
+price: 250
+category: "Textiles"
+stock: 40
+image: [Upload file]
+```
+
+---
+
 ## Public API Routes
 
 ### GET /api/home
-Aggregated home page data (hero, initiatives, featured products, impact, testimonials, story section, categories).
+
+Aggregated home page data.
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "hero": {
-      "title": "string",
-      "subtitle": "string",
-      "image": "string (URL or /path)",
-      "primaryCTA": { "label": "string", "link": "string" },
-      "secondaryCTA": { "label": "string", "link": "string" }
-    },
-    "initiatives": [{ "title": "string", "description": "string" }],
-    "impact": [{ "label": "string", "value": "string" }],
-    "cta": {
-      "title": "string",
-      "description": "string",
-      "buttonText": "string",
-      "link": "string"
-    },
-    "testimonials": [{
-      "name": "string",
-      "role": "string",
-      "quote": "string",
-      "avatar": "string (optional)"
-    }],
-    "storySection": {
-      "title": "string",
-      "description": "string",
-      "image": "string",
-      "link": "string"
-    },
-    "featuredProducts": [{
-      "_id": "string",
-      "name": "string",
-      "price": 100,
-      "image": "string",
-      "description": "string",
-      "category": "string"
-    }],
-    "categories": ["Category A", "Category B"]
+    "hero": { "title": "...", "subtitle": "...", "image": "https://...", "primaryCTA": {}, "secondaryCTA": {} },
+    "initiatives": [{ "title": "...", "description": "..." }],
+    "impact": [{ "label": "...", "value": "..." }],
+    "cta": { "title": "...", "description": "...", "buttonText": "...", "link": "..." },
+    "testimonials": [{ "name": "...", "role": "...", "quote": "...", "avatar": "..." }],
+    "storySection": { "title": "...", "description": "...", "image": "...", "link": "..." },
+    "featuredProducts": [{ "_id": "...", "name": "...", "price": 299, "image": "...", "description": "...", "category": "Food" }],
+    "categories": ["Food", "Handicrafts", "Personal Care", "Textiles"]
   }
 }
 ```
@@ -70,20 +200,21 @@ Aggregated home page data (hero, initiatives, featured products, impact, testimo
 ---
 
 ### GET /api/dashboard
-Full dashboard configuration. Returns fallback defaults if DB fails.
+
+Full dashboard configuration from DB.
 
 **Response:**
 ```json
 {
   "success": true,
-  "data": { "hero": {}, "initiatives": [], "popularProducts": [], "impact": [], "cta": {}, "testimonials": [], "storySection": {}, "footer": {} },
-  "warning": "string (optional — present when using fallback)"
+  "data": { "hero": {}, "initiatives": [], "popularProducts": [], "impact": [], "cta": {}, "testimonials": [], "storySection": {}, "footer": {} }
 }
 ```
 
 ---
 
 ### GET /api/products
+
 All active products.
 
 **Response:**
@@ -91,12 +222,15 @@ All active products.
 {
   "success": true,
   "data": [{
-    "_id": "string",
-    "name": "string",
-    "price": 100,
-    "description": "string",
-    "image": "string (Cloudinary URL)",
-    "isActive": true
+    "_id": "665abc...",
+    "name": "Organic Honey",
+    "price": 299,
+    "description": "Pure handmade village honey...",
+    "image": "https://res.cloudinary.com/...",
+    "category": "Food",
+    "stock": 50,
+    "isActive": true,
+    "isFeatured": true
   }]
 }
 ```
@@ -104,152 +238,80 @@ All active products.
 ---
 
 ### GET /api/blogs
-Published blogs with pagination and search.
 
-**Query Params:** `?search=keyword&page=1&limit=6`
+Published blogs with pagination. `?search=keyword&page=1&limit=6`
 
 **Response:**
 ```json
 {
-  "blogs": [{
-    "_id": "string",
-    "title": "string",
-    "slug": "string",
-    "excerpt": "string",
-    "content": "string (HTML)",
-    "image": "string",
-    "isPublished": true,
-    "createdAt": "ISO date"
-  }],
+  "blogs": [{ "_id": "...", "title": "...", "slug": "...", "excerpt": "...", "content": "...", "image": "...", "createdAt": "..." }],
   "total": 25,
   "page": 1,
   "limit": 6
 }
 ```
 
----
-
 ### GET /api/blogs/[slug]
-Single published blog by slug.
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": { "_id": "string", "title": "string", "slug": "string", "content": "string", "image": "string", "createdAt": "ISO date" }
-}
-```
+Single blog by slug. **Response:** `{ "success": true, "data": { ... } }`
 
 ---
 
 ### GET /api/stories
-All published stories.
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [{ "_id": "string", "title": "string", "slug": "string", "excerpt": "string", "content": "string", "image": "string" }]
-}
-```
-
----
+All published stories. **Response:** `{ "success": true, "data": [...] }`
 
 ### GET /api/stories/[slug]
-Single published story by slug.
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": { "_id": "string", "title": "string", "slug": "string", "content": "string", "image": "string" }
-}
-```
+Single story by slug. **Response:** `{ "success": true, "data": { ... } }`
 
 ---
 
 ### GET /api/services
-All active services.
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": [{ "_id": "string", "title": "string", "description": "string", "image": "string" }]
-}
-```
-
----
+All active services. **Response:** `{ "success": true, "data": [...] }`
 
 ### GET /api/about
-Active about page content.
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": { "_id": "string", "isActive": true, "...about page fields" }
-}
-```
-
----
+About page content. **Response:** `{ "success": true, "data": { ... } }`
 
 ### GET /api/resources
-Downloadable resources/documents.
 
-**Response:**
-```json
-{ "documents": [{ "title": "string", "desc": "string", "fileUrl": "string" }] }
-```
-
----
+Downloadable resources. **Response:** `[{ "title": "...", "link": "...", "description": "..." }]`
 
 ### GET /api/careers
-Careers page with job postings.
 
-**Response:**
-```json
-{
-  "success": true,
-  "data": { "jobs": [{ "title": "string", "description": "string", "location": "string", "type": "string" }] }
-}
-```
+Careers page and job postings.
 
 ---
 
 ### POST /api/contact
+
 Submit contact form.
 
-**Body (JSON):**
 ```json
 {
-  "name": "string (required)",
-  "email": "string (required)",
-  "phone": "string (optional)",
-  "message": "string (required)"
+  "name": "Rajesh Singh",
+  "email": "rajesh@example.com",
+  "phone": "9876543210",
+  "message": "I am interested in becoming a distributor in Amritsar."
 }
 ```
 
-**Response (201):**
-```json
-{ "success": true, "message": "Message sent successfully" }
-```
+**Response (201):** `{ "success": true, "message": "Message sent successfully. We'll get back to you soon!" }`
 
 ---
 
-### GET /api/distributors
-Distributor page content.
-
 ### POST /api/distributors
+
 Submit distributor application.
 
-**Body (JSON):**
 ```json
 {
-  "name": "string (required)",
-  "email": "string (required)",
-  "phone": "string (required)",
-  "website": "string (optional)"
+  "name": "Punjab Distributors Pvt Ltd",
+  "email": "info@punjabdist.com",
+  "phone": "9812345678",
+  "website": "https://punjabdist.com"
 }
 ```
 
@@ -258,360 +320,176 @@ Submit distributor application.
 ## User Authentication Routes
 
 ### POST /api/auth/register
-Register new user.
 
-**Body (JSON):**
 ```json
 {
-  "name": "string (required)",
-  "email": "string (required, unique)",
-  "phone": "string (required, 10 digits)",
-  "password": "string (required, min 6 chars)"
+  "name": "Amanpreet Kaur",
+  "email": "aman@example.com",
+  "phone": "9876543210",
+  "password": "securepass123"
 }
 ```
 
-**Response (200):**
-```json
-{
-  "success": true,
-  "user": { "id": "string", "name": "string", "email": "string", "phone": "string" }
-}
-```
+**Response:** `{ "success": true, "user": { "id": "...", "name": "...", "email": "...", "phone": "..." } }`
+
 Sets HttpOnly cookie: `user-token` (7 days)
 
 ---
 
 ### POST /api/auth/login
-User login.
 
-**Body (JSON):**
 ```json
-{
-  "email": "string (required)",
-  "password": "string (required)"
-}
+{ "email": "aman@example.com", "password": "securepass123" }
 ```
 
-**Response (200):**
-```json
-{
-  "success": true,
-  "user": { "id": "string", "name": "string", "email": "string", "phone": "string", "address": {} }
-}
-```
-Sets HttpOnly cookie: `user-token` (7 days)
+**Response:** `{ "success": true, "user": { "id": "...", "name": "...", "email": "...", "phone": "...", "address": {} } }`
 
 ---
 
 ### GET /api/auth/me
-Get current user profile. Requires `user-token` cookie.
 
-**Response (200):**
-```json
-{
-  "success": true,
-  "user": { "id": "string", "name": "string", "email": "string", "phone": "string", "address": {} }
-}
-```
-
----
+Requires `user-token` cookie. Returns current user profile.
 
 ### POST /api/auth/user-logout
-Logout user. Clears `user-token` cookie.
 
-**Response (200):**
-```json
-{ "success": true, "message": "Logged out" }
-```
+Clears `user-token` cookie.
 
 ---
 
 ## Order Routes
 
 ### POST /api/orders/create
-Create order. **Requires user login** (JWT in cookie).
 
-**Body (JSON):**
+**Requires user login** (JWT in cookie). Server re-validates product prices from DB.
+
 ```json
 {
   "customer": {
-    "name": "string (required)",
-    "email": "string (required)",
-    "phone": "string (required)",
+    "name": "Amanpreet Kaur",
+    "email": "aman@example.com",
+    "phone": "9876543210",
     "address": {
-      "line1": "string (required)",
-      "line2": "string (optional)",
-      "city": "string (required)",
-      "state": "string (required)",
-      "pincode": "string (required)"
+      "line1": "House No. 42, Sector 17",
+      "line2": "Near Gurudwara Sahib",
+      "city": "Chandigarh",
+      "state": "Punjab",
+      "pincode": "160017"
     }
   },
   "items": [
-    { "productId": "string (required)", "quantity": 1 }
+    { "productId": "665abc123...", "quantity": 2 },
+    { "productId": "665def456...", "quantity": 1 }
   ],
   "paymentMethod": "COD"
 }
 ```
 
-**Response (200):**
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "_id": "string",
+    "_id": "...",
     "orderNumber": "MPBB-20260219-0001",
-    "total": 500,
-    "estimatedDelivery": "ISO date"
+    "total": 748,
+    "estimatedDelivery": "2026-02-26T00:00:00.000Z"
   }
 }
 ```
-
-> Server re-validates product prices from DB. Never trusts client-side prices.
 
 ---
 
 ### GET /api/orders/[id]
-Get order by `_id` or `orderNumber`.
 
-**Response (200):**
-```json
-{
-  "success": true,
-  "data": {
-    "_id": "string",
-    "orderNumber": "string",
-    "customer": {},
-    "items": [],
-    "total": 500,
-    "paymentMethod": "COD",
-    "paymentStatus": "PENDING",
-    "status": "PLACED",
-    "estimatedDelivery": "ISO date",
-    "createdAt": "ISO date"
-  }
-}
-```
+Get order by `_id` or `orderNumber`.
 
 ---
 
 ## Admin Routes
 
-> All admin routes require active NextAuth session with `role: "admin"`. Use the admin login page at `/admin` to authenticate.
-
-### POST /api/admin/dashboard
-Update full dashboard configuration.
-
-**Body (JSON):**
-```json
-{
-  "hero": {
-    "title": "string",
-    "subtitle": "string",
-    "image": "string (URL or /path)",
-    "primaryCTA": { "label": "string", "link": "string" },
-    "secondaryCTA": { "label": "string", "link": "string" }
-  },
-  "initiatives": [{ "title": "string", "description": "string" }],
-  "popularProducts": [{ "title": "string", "description": "string", "image": "string" }],
-  "impact": [{ "label": "string", "value": "string" }],
-  "cta": { "title": "string", "description": "string", "buttonText": "string", "link": "string" },
-  "testimonials": [{ "name": "string", "role": "string", "quote": "string", "avatar": "string" }],
-  "storySection": { "title": "string", "description": "string", "image": "string", "link": "string" },
-  "footer": { "supportLinks": [], "quickLinks": [], "legalLinks": [], "socialLinks": [] },
-  "isActive": true
-}
-```
-
----
+> All require active NextAuth session with `role: "admin"`.
 
 ### GET /api/admin/products
-Fetch all active products (admin view).
 
-### POST /api/admin/products
-Create new product.
-
-**Body (FormData):**
-| Field | Type | Required |
-|-------|------|----------|
-| name | string | Yes |
-| description | string | Yes |
-| price | number | Yes |
-| isActive | boolean | No (default true) |
-| image | File | Yes |
-
-Uploads image to Cloudinary `mpbb/products` folder.
-
----
+All active products (admin view).
 
 ### PUT /api/admin/products/[id]
-Update product. Body: FormData (same fields, image optional).
+
+Update product. **Body: FormData** (same fields as POST, image optional). Now supports `category`, `stock`, `isFeatured`.
 
 ### DELETE /api/admin/products/[id]
+
 Delete product and remove Cloudinary image.
 
 ---
 
-### GET /api/admin/blogs
-Fetch all blogs (published + unpublished).
+### GET/POST /api/admin/blogs
 
-### POST /api/admin/blogs
-Create new blog.
+Fetch all or create new blog. **Body: FormData** with title, excerpt, content, slug, isPublished, image.
 
-**Body (FormData):**
-| Field | Type | Required |
-|-------|------|----------|
-| title | string | Yes |
-| excerpt | string | Yes |
-| content | string (HTML) | Yes |
-| slug | string | No (auto-generated) |
-| isPublished | boolean | No |
-| image | File | Yes |
+### PUT/DELETE /api/admin/blogs/[id]
 
-### PUT /api/admin/blogs/[id]
-Update blog. Body: FormData (same fields, image optional).
-
-### DELETE /api/admin/blogs/[id]
-Delete blog and remove image.
+Update or delete blog.
 
 ---
 
-### GET /api/admin/stories
-Fetch all stories.
+### GET/POST /api/admin/stories
 
-### POST /api/admin/stories
-Create new story.
+Fetch all or create new story. **Body: FormData** with title, excerpt, content, isPublished, image.
 
-**Body (FormData):**
-| Field | Type | Required |
-|-------|------|----------|
-| title | string | Yes |
-| excerpt | string | Yes |
-| content | string (HTML) | Yes |
-| isPublished | boolean | No |
-| image | File | Yes |
+### PUT/DELETE /api/admin/stories/[id]
 
-### PUT /api/admin/stories/[id]
-Update story. Body: FormData (same fields, image optional).
-
-### DELETE /api/admin/stories/[id]
-Delete story and remove image.
+Update or delete story.
 
 ---
 
 ### GET /api/admin/orders
-Fetch orders with filtering and pagination.
 
-**Query Params:**
-| Param | Type | Description |
-|-------|------|-------------|
-| status | string | PLACED, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED |
-| paymentStatus | string | PENDING, PAID, FAILED, REFUNDED |
-| paymentMethod | string | COD, ONLINE |
-| search | string | Search orderNumber, customer name, email, phone |
-| from | date | Filter orders created after this date |
-| to | date | Filter orders created before this date |
-| page | number | Page number (default 1) |
-| limit | number | Items per page (default 20) |
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "orders": [],
-    "total": 100,
-    "page": 1,
-    "totalPages": 5
-  }
-}
-```
-
----
-
-### GET /api/admin/orders/[id]
-Fetch single order detail.
+Fetch orders with filtering. **Query:** `?status=PLACED&paymentStatus=PENDING&search=MPBB&page=1&limit=20`
 
 ### PATCH /api/admin/orders/[id]
-Update order status.
 
-**Body (JSON):**
-```json
-{
-  "status": "SHIPPED",
-  "paymentStatus": "PAID"
-}
-```
+Update order status: `{ "status": "SHIPPED", "paymentStatus": "PAID" }`
 
 ---
 
 ### GET /api/admin/contact-leads
-Fetch all contact form submissions (sorted newest first).
 
----
+All contact form submissions (newest first).
 
 ### GET/PATCH /api/admin/about
-Fetch or update about page content.
 
----
+Fetch or update about page.
 
-### GET/POST /api/admin/careers
-Fetch careers page or add new job posting.
+### GET/POST /api/admin/careers + PUT/DELETE /api/admin/careers/[id]
 
-### PUT/DELETE /api/admin/careers/[id]
-Update or delete job posting.
+Manage job postings.
 
----
+### GET/POST /api/admin/distributors + GET/PATCH/DELETE /api/admin/distributors/[id]
 
-### GET/POST /api/admin/distributors
-Fetch all distributors or create new one.
-
-### GET/PATCH/DELETE /api/admin/distributors/[id]
-Fetch, update, or delete distributor.
-
----
+Manage distributors.
 
 ### GET/PATCH /api/admin/distributors-page
-Fetch or update distributors page configuration.
 
----
+Manage distributors page content (benefits, requirements, banner).
 
-### GET/POST /api/admin/resources
-Fetch or add downloadable resources.
+### GET/POST /api/admin/resources + DELETE /api/admin/resources/[id]
 
-### DELETE /api/admin/resources/[id]
-Delete resource.
-
----
-
-### POST /api/admin/services
-Create or manage services.
+Manage downloadable resources.
 
 ---
 
 ### POST /api/upload
-Upload image to Cloudinary.
 
-**Auth:** Admin API key header (`x-admin-key`) OR NextAuth admin session.
+Upload image to Cloudinary. **Auth:** Admin API key (`x-admin-key` header) OR NextAuth session.
 
-**Body (FormData):**
-| Field | Type | Required |
-|-------|------|----------|
-| file | File | Yes |
+**Body: FormData** with `file` field.
 
-**Response:**
-```json
-{
-  "success": true,
-  "url": "https://res.cloudinary.com/...",
-  "secure_url": "https://res.cloudinary.com/..."
-}
-```
+**Response:** `{ "success": true, "url": "https://res.cloudinary.com/...", "secure_url": "https://res.cloudinary.com/..." }`
 
 ---
 
 ## Error Response Format
-
-All endpoints return consistent error format:
 
 ```json
 {
@@ -622,23 +500,22 @@ All endpoints return consistent error format:
 }
 ```
 
-**Common Status Codes:**
 | Code | Meaning |
 |------|---------|
 | 200 | Success |
 | 201 | Created |
-| 400 | Validation error / Bad request |
-| 401 | Unauthorized (not logged in or not admin) |
-| 404 | Resource not found |
-| 409 | Conflict (duplicate email, etc.) |
-| 500 | Internal server error |
+| 400 | Validation error |
+| 401 | Unauthorized |
+| 404 | Not found |
+| 409 | Conflict (duplicate) |
+| 500 | Server error |
 
 ---
 
-## Postman Setup Tips
+## Postman Setup
 
-1. **Base URL Variable:** Set `{{BASE_URL}}` = `http://localhost:3000`
-2. **User Auth:** Call POST `/api/auth/login` first — cookie is auto-stored
-3. **Admin Auth:** Login via browser at `/admin`, then copy session cookies to Postman
-4. **FormData Routes:** Use "form-data" body type for product/blog/story creation
-5. **JSON Routes:** Use "raw" body type with JSON content type
+1. Set variable `{{BASE_URL}}` = `http://localhost:3000`
+2. **User Auth:** POST `/api/auth/login` first — cookie auto-stored
+3. **Admin Auth:** Login via browser at `/admin`, copy session cookies to Postman
+4. **FormData routes:** Use "form-data" body type for product/blog/story creation
+5. **JSON routes:** Use "raw" body type with `Content-Type: application/json`
