@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { AdminLogoutButton } from "@/components/AdminLogoutButton";
-import { AdminSessionProvider } from "@/components/AdminSessionProvider";
+import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
+import { AdminSessionProvider } from "@/components/admin/AdminSessionProvider";
 import { Toaster } from "@/components/ui/sonner"
 import type { Metadata } from "next";
 

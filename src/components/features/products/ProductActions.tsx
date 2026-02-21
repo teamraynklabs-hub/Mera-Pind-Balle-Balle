@@ -7,7 +7,7 @@ import { useCart } from "@/context/CartContext";
 import { useUserAuth } from "@/context/UserAuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import CheckoutDrawer from "@/components/cart/CheckoutDrawer";
+import CheckoutDrawer from "@/components/features/cart/CheckoutDrawer";
 
 interface ProductActionsProps {
   product: {

@@ -1,12 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"
-import LayoutWrapper from "@/components/LayoutWrapper";
-import { AuthSessionProvider } from "@/components/AuthSessionProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AuthSessionProvider } from "@/components/providers/AuthSessionProvider";
 import { CartProvider } from "@/context/CartContext";
 import { UserAuthProvider } from "@/context/UserAuthContext";
-import { connectDB } from "@/lib/db";
-import Dashboard from "@/lib/models/Dashboard.model";
 
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
@@ -80,21 +77,13 @@ export const metadata: Metadata = {
 };
 
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  await connectDB();
-  const dashboardDoc = await Dashboard.findOne({ isActive: true }).lean();
-  const dashboard = dashboardDoc
-    ? JSON.parse(JSON.stringify(dashboardDoc))
-    : null;
-    
   return (
     <html lang="en" suppressHydrationWarning>
-
       <body>
         <script
           type="application/ld+json"
@@ -149,7 +138,7 @@ export default async function RootLayout({
           >
             <UserAuthProvider>
               <CartProvider>
-                <LayoutWrapper footer={dashboard?.footer}>{children}</LayoutWrapper>
+                {children}
               </CartProvider>
             </UserAuthProvider>
           </ThemeProvider>

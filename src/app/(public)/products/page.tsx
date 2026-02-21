@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/db";
 import type { Metadata } from "next";
 import Product from "@/lib/models/Product.model";
-import ProductCard from "@/components/products/ProductCard";
+import ProductCard from "@/components/features/products/ProductCard";
 import Link from "next/link";
 import { breadcrumbForPage } from "@/lib/seo";
 import { Button } from "@/components/ui/button";

@@ -1,18 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import ClientImage from "@/components/ClientImage";
+import ClientImage from "@/components/common/ClientImage";
 import { connectDB } from "@/lib/db";
 import Dashboard from "@/lib/models/Dashboard.model";
 import Product from "@/lib/models/Product.model";
-import FeaturedProductsScroll from "@/components/products/FeaturedProductsScroll";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
-import HeroSection from "@/components/home/HeroSection";
-import ScrollStorySection from "@/components/home/ScrollStorySection";
-import CategoryGrid from "@/components/home/CategoryGrid";
-import ProductSpotlight from "@/components/home/ProductSpotlight";
-import TrustSection from "@/components/home/TrustSection";
-import ClosingCTA from "@/components/home/ClosingCTA";
+import FeaturedProductsScroll from "@/components/features/products/FeaturedProductsScroll";
+import TestimonialsSection from "@/components/features/home/TestimonialsSection";
+import HeroSection from "@/components/features/home/HeroSection";
+import ScrollStorySection from "@/components/features/home/ScrollStorySection";
+import CategoryGrid from "@/components/features/home/CategoryGrid";
+import ProductSpotlight from "@/components/features/home/ProductSpotlight";
+import TrustSection from "@/components/features/home/TrustSection";
+import ClosingCTA from "@/components/features/home/ClosingCTA";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 import { ArrowRight, BookOpen } from "lucide-react";
 

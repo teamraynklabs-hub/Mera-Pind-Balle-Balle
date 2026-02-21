@@ -1,6 +1,6 @@
 "use client";
 
-import ProductCard from "@/components/products/ProductCard";
+import ProductCard from "@/components/features/products/ProductCard";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 import StaggerContainer from "@/components/motion/StaggerContainer";
 

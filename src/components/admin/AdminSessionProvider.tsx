@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import { useActivityTimeout } from "@/lib/hooks/useActivityTimeout";
+import { useActivityTimeout } from "@/hooks/useActivityTimeout";
 
 /**
  * 🔐 ADMIN SESSION PROTECTION PROVIDER

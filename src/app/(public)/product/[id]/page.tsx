@@ -5,8 +5,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Shield, Truck, RotateCcw } from "lucide-react";
-import ProductActions from "@/components/products/ProductActions";
-import RelatedProducts from "@/components/products/RelatedProducts";
+import ProductActions from "@/components/features/products/ProductActions";
+import RelatedProducts from "@/components/features/products/RelatedProducts";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 import { buildBreadcrumbJsonLd } from "@/lib/seo";
 
