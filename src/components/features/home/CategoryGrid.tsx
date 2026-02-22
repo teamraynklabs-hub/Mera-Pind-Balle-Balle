@@ -1,13 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import StaggerContainer from "@/components/motion/StaggerContainer";
-import TiltCard from "@/components/motion/TiltCard";
+import Image from "next/image";
+import { motion } from "motion/react";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 
-interface CategoryGridProps {
-  categories: string[];
+interface CategoryWithImage {
+  name: string;
+  image?: string;
+  productCount?: number;
 }
+
+interface CategoryGridProps {
+  categories: CategoryWithImage[];
+}
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export default function CategoryGrid({ categories }: CategoryGridProps) {
   if (categories.length === 0) return null;
@@ -16,31 +24,67 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
     <section className="bg-accent/30">
       <div className="container mx-auto px-4 md:px-8 lg:px-12 py-20 md:py-28">
         <ScrollReveal className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          <p className="text-sm uppercase tracking-[0.2em] text-primary font-medium mb-3">
+            Collections
+          </p>
+          <h2
+            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
             Shop by Category
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Browse our curated collections
+            Browse our curated collections of handcrafted, sustainable products
           </p>
         </ScrollReveal>
 
-        <StaggerContainer
-          className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"
-          staggerDelay={0.08}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {categories.map((cat, i) => (
-            <TiltCard key={i} maxTilt={6} scale={1.03}>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: i * 0.08, ease }}
+            >
               <Link
-                href={`/products?category=${encodeURIComponent(cat)}`}
-                className="group flex items-center justify-center p-8 md:p-10 border rounded-2xl bg-card shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-deep)] hover:border-primary/30 transition-all duration-500"
+                href={`/products?category=${encodeURIComponent(cat.name)}`}
+                className="group relative block rounded-2xl overflow-hidden aspect-[4/5] border shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-deep)] transition-shadow duration-500"
               >
-                <span className="text-lg font-semibold group-hover:text-primary transition-colors duration-300">
-                  {cat}
-                </span>
+                {/* Background Image or Gradient Fallback */}
+                {cat.image ? (
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-accent group-hover:from-primary/30 group-hover:via-primary/15 transition-colors duration-500" />
+                )}
+
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent group-hover:from-black/80 transition-colors duration-500" />
+
+                {/* Content at bottom */}
+                <div className="absolute inset-x-0 bottom-0 p-6">
+                  <h3
+                    className="text-xl font-bold text-white mb-1"
+                    style={{ fontFamily: "var(--font-heading)" }}
+                  >
+                    {cat.name}
+                  </h3>
+                  {cat.productCount !== undefined && cat.productCount > 0 && (
+                    <p className="text-white/70 text-sm">
+                      {cat.productCount} {cat.productCount === 1 ? "Product" : "Products"}
+                    </p>
+                  )}
+                </div>
               </Link>
-            </TiltCard>
+            </motion.div>
           ))}
-        </StaggerContainer>
+        </div>
       </div>
     </section>
   );
