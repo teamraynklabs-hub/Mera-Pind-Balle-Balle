@@ -1,32 +1,20 @@
 import { NextResponse } from "next/server";
 import About from "@/lib/models/About.model";
 import { connectDB } from "@/lib/db";
+import { normalizeAboutData, ABOUT_SEED_DATA } from "@/lib/normalizeAbout";
 
-// DB fetch helper
-async function getAbout() {
-  await connectDB();
-  return About.findOne({ isActive: true }).lean();
-}
-
-// GET /api/about
 export async function GET() {
   try {
-    const about = await getAbout();
+    await connectDB();
+    const about = await About.findOne({ isActive: true }).lean();
 
     if (!about) {
-      return NextResponse.json(
-        { success: false, message: "About data not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: true, data: ABOUT_SEED_DATA });
     }
 
-    return NextResponse.json({
-      success: true,
-      data: about,
-    });
-  } catch (error) {
-    console.error("ABOUT API ERROR:", error);
-
+    const normalized = normalizeAboutData(about) || ABOUT_SEED_DATA;
+    return NextResponse.json({ success: true, data: normalized });
+  } catch {
     return NextResponse.json(
       { success: false, message: "Failed to fetch About data" },
       { status: 500 }

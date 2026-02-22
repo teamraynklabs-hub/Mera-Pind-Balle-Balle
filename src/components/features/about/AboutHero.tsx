@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 interface AboutHeroProps {
   title?: string;
   subtitle?: string;
+  image?: string;
 }
 
 const FALLBACK_TITLE = "Weaving Dreams into Reality";
@@ -13,17 +14,30 @@ const FALLBACK_SUBTITLE =
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-export default function AboutHero({ title, subtitle }: AboutHeroProps) {
+export default function AboutHero({ title, subtitle, image }: AboutHeroProps) {
   const heading = title || FALLBACK_TITLE;
   const sub = subtitle || FALLBACK_SUBTITLE;
+  const hasImage = image && image.trim() !== "";
 
   return (
     <section className="relative flex items-center justify-center overflow-hidden py-30 md:py-44 lg:py-52">
-      {/* Dark gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#141420] to-[#0a0a0a]" />
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-[var(--gold)]/[0.03]" />
+      {hasImage ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image}
+            alt={heading}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/65" />
+        </>
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#141420] to-[#0a0a0a]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-[var(--gold)]/[0.03]" />
+        </>
+      )}
 
-      {/* Content */}
       <div className="relative z-10 text-center px-4 md:px-8 max-w-4xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}

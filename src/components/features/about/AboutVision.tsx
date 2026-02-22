@@ -12,17 +12,11 @@ interface AboutVisionProps {
 const FALLBACK_TITLE = "A World Where Tradition Meets Opportunity";
 const FALLBACK_DESCRIPTION =
   "We envision a future where every rural woman artisan has the opportunity to earn a dignified living through her craft, where traditional techniques are celebrated globally, and where handmade products are valued for their authenticity and story.";
-const FALLBACK_DESCRIPTION_2 =
-  "Our goal is to impact 100,000 artisan families across India by 2030, creating a ripple effect of economic empowerment and cultural preservation.";
 const FALLBACK_IMAGE = "/hero.png";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-export default function AboutVision({
-  title,
-  description,
-  image,
-}: AboutVisionProps) {
+export default function AboutVision({ title, description, image }: AboutVisionProps) {
   const heading = title || FALLBACK_TITLE;
   const desc = description || FALLBACK_DESCRIPTION;
   const img = image && image.trim() !== "" ? image : FALLBACK_IMAGE;
@@ -30,7 +24,6 @@ export default function AboutVision({
   return (
     <section className="container mx-auto px-4 md:px-8 lg:px-12 py-20 md:py-28">
       <div className="grid items-center gap-10 lg:gap-16 md:grid-cols-2">
-        {/* Left — Content */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -53,14 +46,8 @@ export default function AboutVision({
           <p className="mt-6 text-muted-foreground leading-relaxed text-base md:text-lg max-w-prose">
             {desc}
           </p>
-          {!description && (
-            <p className="mt-4 text-muted-foreground leading-relaxed text-base md:text-lg max-w-prose">
-              {FALLBACK_DESCRIPTION_2}
-            </p>
-          )}
         </motion.div>
 
-        {/* Right — Image */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           whileInView={{ opacity: 1, x: 0 }}

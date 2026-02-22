@@ -16,12 +16,14 @@ interface Hero {
 interface Initiative {
   title: string;
   description: string;
+  image: string;
 }
 
-interface Product {
-  title: string;
-  description: string;
-  image: string;
+interface Feedback {
+  name: string;
+  role: string;
+  quote: string;
+  avatar: string;
 }
 
 interface Impact {
@@ -39,7 +41,7 @@ interface CTA {
 interface DashboardFormData {
   hero: Hero;
   initiatives: Initiative[];
-  popularProducts: Product[];
+  feedback: Feedback[];
   impact: Impact[];
   cta: CTA;
   footer: any;
@@ -54,8 +56,8 @@ const INITIAL_DATA: DashboardFormData = {
     primaryCTA: { label: '', link: '' },
     secondaryCTA: { label: '', link: '' }
   },
-  initiatives: [{ title: '', description: '' }],
-  popularProducts: [{ title: '', description: '', image: '' }],
+  initiatives: [{ title: '', description: '', image: '/photo1.png' }],
+  feedback: [{ name: '', role: '', quote: '', avatar: '' }],
   impact: [{ label: '', value: '' }],
   cta: { title: '', description: '', buttonText: '', link: '' },
   footer: {},
@@ -76,7 +78,24 @@ export default function HomepageManagerPage() {
         setLoadingData(true);
         const response = await axios.get('/api/dashboard');
         if (response.data.data) {
-          setFormData(response.data.data);
+          const data = response.data.data;
+          setFormData(prev => ({
+            ...prev,
+            ...data,
+            initiatives: (data.initiatives || []).map((item: any) => ({
+              title: item.title || '',
+              description: item.description || '',
+              image: item.image || '/photo1.png',
+            })),
+            feedback: (data.feedback || []).length > 0
+              ? data.feedback.map((item: any) => ({
+                  name: item.name || '',
+                  role: item.role || '',
+                  quote: item.quote || '',
+                  avatar: item.avatar || '',
+                }))
+              : [{ name: '', role: '', quote: '', avatar: '' }],
+          }));
         }
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
@@ -292,7 +311,7 @@ export default function HomepageManagerPage() {
       {/* Tabs */}
       <div className="border rounded-lg bg-card">
         <div className="flex border-b">
-          {['hero', 'initiatives', 'products', 'impact', 'cta'].map(tab => (
+          {['hero', 'initiatives', 'feedback', 'impact', 'cta'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -429,12 +448,35 @@ export default function HomepageManagerPage() {
                     className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Description"
                   />
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Image</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={initiative.image || '/photo1.png'}
+                        onChange={e => handleArrayChange(e.target.value, 'initiatives', index, 'image')}
+                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="/photo1.png"
+                      />
+                      <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 flex items-center gap-1">
+                        <Upload className="w-4 h-4" />
+                        Upload
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, `initiatives.${index}.image`)}
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
               ))}
 
               <button
                 type="button"
-                onClick={() => addArrayItem('initiatives', { title: '', description: '' })}
+                onClick={() => addArrayItem('initiatives', { title: '', description: '', image: '/photo1.png' })}
                 className="w-full py-2 border-2 border-dashed rounded-lg text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -443,17 +485,17 @@ export default function HomepageManagerPage() {
             </div>
           )}
 
-          {/* Products */}
-          {activeTab === 'products' && (
+          {/* Feedback */}
+          {activeTab === 'feedback' && (
             <div className="space-y-4">
-              {formData.popularProducts.map((product, index) => (
+              {formData.feedback.map((item, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-3">
                   <div className="flex justify-between">
-                    <h3 className="font-semibold">Product {index + 1}</h3>
-                    {formData.popularProducts.length > 1 && (
+                    <h3 className="font-semibold">Feedback {index + 1}</h3>
+                    {formData.feedback.length > 1 && (
                       <button
                         type="button"
-                        onClick={() => removeArrayItem('popularProducts', index)}
+                        onClick={() => removeArrayItem('feedback', index)}
                         className="text-red-600 hover:text-red-700"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -461,53 +503,72 @@ export default function HomepageManagerPage() {
                     )}
                   </div>
 
-                  <input
-                    type="text"
-                    value={product.title}
-                    onChange={e => handleArrayChange(e.target.value, 'popularProducts', index, 'title')}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Title"
-                  />
-
-                  <textarea
-                    value={product.description}
-                    onChange={e => handleArrayChange(e.target.value, 'popularProducts', index, 'description')}
-                    rows={2}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Description"
-                  />
-
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={product.image}
-                      onChange={e => handleArrayChange(e.target.value, 'popularProducts', index, 'image')}
-                      className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Image URL"
-                    />
-                    <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
-                      <Upload className="w-4 h-4" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Name</label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleFileUpload(e, `popularProducts.${index}.image`)
-                        }
+                        type="text"
+                        value={item.name}
+                        onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'name')}
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Person's name"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Role / Location</label>
+                      <input
+                        type="text"
+                        value={item.role}
+                        onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'role')}
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g. Artisan, Ludhiana"
+                      />
+                    </div>
+                  </div>
 
-                    </label>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Quote</label>
+                    <textarea
+                      value={item.quote}
+                      onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'quote')}
+                      rows={3}
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Their feedback quote..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Avatar URL</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={item.avatar}
+                        onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'avatar')}
+                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Avatar image URL (optional)"
+                      />
+                      <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 flex items-center gap-1">
+                        <Upload className="w-4 h-4" />
+                        Upload
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleFileUpload(e, `feedback.${index}.avatar`)}
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
               ))}
 
               <button
                 type="button"
-                onClick={() => addArrayItem('popularProducts', { title: '', description: '', image: '' })}
+                onClick={() => addArrayItem('feedback', { name: '', role: '', quote: '', avatar: '' })}
                 className="w-full py-2 border-2 border-dashed rounded-lg text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
-                Add Product
+                Add Feedback
               </button>
             </div>
           )}

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import Story from "@/lib/models/Story.model";
+import Blog from "@/lib/models/Blog.model";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(
   req: NextRequest,
@@ -11,26 +13,26 @@ export async function GET(
   try {
     await connectDB();
 
-    const story = await Story.findOne({
+    const blog = await Blog.findOne({
       slug: slug.trim().toLowerCase(),
       isPublished: true,
     }).lean();
 
-    if (!story) {
+    if (!blog) {
       return NextResponse.json(
-        { success: false, error: "Story not found" },
+        { success: false, message: "Blog not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      data: story,
+      data: blog,
     });
   } catch (error) {
-    console.error("STORY SLUG API ERROR:", error);
+    console.error("BLOG SLUG API ERROR:", error);
     return NextResponse.json(
-      { success: false, error: "Server error" },
+      { success: false, message: "Server error" },
       { status: 500 }
     );
   }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Story from "@/lib/models/Story.model";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -23,10 +25,14 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: story,
-    });
+    return NextResponse.json(
+      { success: true, data: story },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("STORY SLUG API ERROR:", error);
     return NextResponse.json(

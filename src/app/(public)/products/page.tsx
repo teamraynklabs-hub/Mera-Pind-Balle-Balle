@@ -1,11 +1,12 @@
 import { connectDB } from "@/lib/db";
 import type { Metadata } from "next";
 import Product from "@/lib/models/Product.model";
+import Category from "@/lib/models/Category.model";
 import Link from "next/link";
 import { breadcrumbForPage } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import ScrollReveal from "@/components/motion/ScrollReveal";
-import ProductsClient from "./ProductsClient";
+import ProductsPageClient from "@/components/features/products/ProductsPageClient";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -23,20 +24,23 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export default async function ProductsPage() {
   await connectDB();
-  const products = await Product.find({ isActive: true }).lean();
+  const [products, dbCategories] = await Promise.all([
+    Product.find({ isActive: true }).lean(),
+    Category.find({ isActive: true }).select("name").sort({ name: 1 }).lean(),
+  ]);
   const serialized = JSON.parse(JSON.stringify(products));
 
-  const categories: string[] = [
-    ...new Set<string>(
-      serialized
-        .map((p: any) => p.category)
-        .filter((c: string) => c && c.trim() !== "")
-    ),
-  ].sort();
+  // Merge categories from Category model + any used in products
+  const categoryNames = new Set<string>(
+    dbCategories.map((c: any) => c.name)
+  );
+  serialized.forEach((p: any) => {
+    if (p.category && p.category.trim()) categoryNames.add(p.category);
+  });
+  const categories: string[] = [...categoryNames].sort();
 
   return (
     <main className="container mx-auto px-4 py-16 md:py-20">
@@ -57,8 +61,8 @@ export default async function ProductsPage() {
         </section>
       </ScrollReveal>
 
-      {/* FILTERS + PRODUCT GRID */}
-      <ProductsClient products={serialized} categories={categories} />
+      {/* FILTERS + PRODUCT GRID — client component for real-time updates */}
+      <ProductsPageClient initialProducts={serialized} initialCategories={categories} />
 
       {/* CTA SECTION */}
       <ScrollReveal>

@@ -8,12 +8,27 @@ import ScrollReveal from "@/components/motion/ScrollReveal";
 
 interface AboutCTAProps {
   title?: string;
-  subtitle?: string;
+  description?: string;
+  primaryButtonText?: string;
+  primaryButtonLink?: string;
+  secondaryButtonText?: string;
+  secondaryButtonLink?: string;
 }
 
-export default function AboutCTA({ title, subtitle }: AboutCTAProps) {
+export default function AboutCTA({
+  title,
+  description,
+  primaryButtonText,
+  primaryButtonLink,
+  secondaryButtonText,
+  secondaryButtonLink,
+}: AboutCTAProps) {
   const heading = title || "Join Our Mission";
-  const sub = subtitle || "Support rural women artisans and help preserve India's rich craft heritage";
+  const sub = description || "Support rural women artisans and help preserve India's rich craft heritage";
+  const primaryText = primaryButtonText || "Shop Collection";
+  const primaryLink = primaryButtonLink || "/products";
+  const secondaryText = secondaryButtonText || "Read Stories";
+  const secondaryLink = secondaryButtonLink || "/stories";
 
   return (
     <section className="relative overflow-hidden">
@@ -49,8 +64,8 @@ export default function AboutCTA({ title, subtitle }: AboutCTAProps) {
                 size="lg"
                 className="text-base px-10 py-6 shadow-lg hover:shadow-primary/25 hover:shadow-xl transition-all duration-300"
               >
-                <Link href="/products">
-                  Shop Collection
+                <Link href={primaryLink}>
+                  {primaryText}
                   <ArrowRight size={18} className="ml-2" />
                 </Link>
               </Button>
@@ -60,7 +75,7 @@ export default function AboutCTA({ title, subtitle }: AboutCTAProps) {
                 size="lg"
                 className="text-base px-10 py-6"
               >
-                <Link href="/stories">Read Stories</Link>
+                <Link href={secondaryLink}>{secondaryText}</Link>
               </Button>
             </div>
           </ScrollReveal>

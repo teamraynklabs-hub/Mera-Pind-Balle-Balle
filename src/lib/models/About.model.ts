@@ -3,50 +3,67 @@ import mongoose, { Schema, models } from "mongoose";
 const AboutSchema = new Schema(
   {
     hero: {
-      title: String,
-      description: String,
-      image: String,
+      title: { type: String, default: "" },
+      subtitle: { type: String, default: "" },
+      image: { type: String, default: "" },
     },
 
     mission: {
-      title: String,
-      description: String,
+      title: { type: String, default: "" },
+      description: { type: String, default: "" },
+      image: { type: String, default: "" },
     },
 
     vision: {
-      title: String,
-      description: String,
+      title: { type: String, default: "" },
+      description: { type: String, default: "" },
+      image: { type: String, default: "" },
     },
 
     values: {
-      title: String,
-      description: String,
+      sectionTitle: { type: String, default: "" },
+      sectionSubtitle: { type: String, default: "" },
+      items: [
+        {
+          icon: { type: String, default: "" },
+          title: { type: String, default: "" },
+          description: { type: String, default: "" },
+        },
+      ],
     },
 
-    whyWeExist: {
-      description: String,
+    impact: {
+      sectionTitle: { type: String, default: "" },
+      sectionSubtitle: { type: String, default: "" },
+      stats: [
+        {
+          number: { type: String, default: "" },
+          label: { type: String, default: "" },
+          icon: { type: String, default: "" },
+        },
+      ],
     },
 
-    focusAreas: [
-      {
-        title: String,
-        description: String,
-      },
-    ],
-
-    coreTeam: [
-      {
-        name: String,
-        role: String,
-        description: String,
-        image: String,
-      },
-    ],
+    team: {
+      sectionTitle: { type: String, default: "" },
+      sectionSubtitle: { type: String, default: "" },
+      members: [
+        {
+          name: { type: String, default: "" },
+          role: { type: String, default: "" },
+          description: { type: String, default: "" },
+          image: { type: String, default: "" },
+        },
+      ],
+    },
 
     cta: {
-      title: String,
-      description: String,
-      buttonText: String,
+      title: { type: String, default: "" },
+      description: { type: String, default: "" },
+      primaryButtonText: { type: String, default: "" },
+      primaryButtonLink: { type: String, default: "" },
+      secondaryButtonText: { type: String, default: "" },
+      secondaryButtonLink: { type: String, default: "" },
     },
 
     isActive: {

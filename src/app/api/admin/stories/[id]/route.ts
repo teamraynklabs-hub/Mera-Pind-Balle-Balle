@@ -17,10 +17,21 @@ export async function PUT(
   await connectDB();
   const formData = await req.formData();
 
+  const tagsRaw = (formData.get("tags") as string) || "";
+  const tags = tagsRaw
+    .split(",")
+    .map((t: string) => t.trim())
+    .filter(Boolean);
+
   const updateData: any = {
-    title: formData.get("title"),
-    excerpt: formData.get("excerpt"),
-    content: formData.get("content"),
+    title: (formData.get("title") as string)?.trim(),
+    excerpt: (formData.get("excerpt") as string)?.trim(),
+    content: formData.get("content") as string,
+    name: (formData.get("name") as string)?.trim() || "",
+    author: (formData.get("author") as string)?.trim() || "Mera Pind Balle Balle",
+    location: (formData.get("location") as string)?.trim() || "",
+    tags,
+    featured: formData.get("featured") === "true",
     isPublished: formData.get("isPublished") !== "false",
   };
 
@@ -34,10 +45,12 @@ export async function PUT(
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const upload: any = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "mpbb/stories" },
-        (err, result) => (err ? reject(err) : resolve(result))
-      ).end(buffer);
+      cloudinary.uploader
+        .upload_stream(
+          { folder: "mpbb/stories" },
+          (err, result) => (err ? reject(err) : resolve(result))
+        )
+        .end(buffer);
     });
 
     updateData.image = upload.secure_url;
@@ -48,7 +61,14 @@ export async function PUT(
     runValidators: true,
   });
 
-  return NextResponse.json(updated);
+  if (!updated) {
+    return NextResponse.json(
+      { success: false, error: "Story not found" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({ success: true, data: updated });
 }
 
 export async function DELETE(
@@ -64,11 +84,14 @@ export async function DELETE(
 
   const story = await Story.findById(id);
   if (!story) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: "Story not found" },
+      { status: 404 }
+    );
   }
 
   await deleteCloudinaryImage(story.image);
   await story.deleteOne();
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, message: "Story deleted" });
 }

@@ -4,12 +4,12 @@ import Blog from "@/lib/models/Blog.model";
 import cloudinary from "@/lib/cloudinary";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { deleteCloudinaryImage } from "@/lib/cloudinaryDelete";
-// ================= UPDATE BLOG =================
+
 export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await context.params; // ✅ REQUIRED
+  const { id } = await context.params;
 
   const admin = await requireAdmin();
   if (admin instanceof Response) return admin;
@@ -21,17 +21,29 @@ export async function PUT(
   const title = formData.get("title") as string;
   const excerpt = formData.get("excerpt") as string;
   const content = formData.get("content") as string;
+  const author = (formData.get("author") as string) || "Mera Pind Balle Balle";
+  const tagsRaw = (formData.get("tags") as string) || "";
   const rawIsPublished = formData.get("isPublished");
-  const isPublished = rawIsPublished === null
-    ? true
-    : (String(rawIsPublished) === "on" || String(rawIsPublished) === "true" || String(rawIsPublished) === "1");
+  const isPublished =
+    rawIsPublished === null
+      ? true
+      : String(rawIsPublished) === "on" ||
+        String(rawIsPublished) === "true" ||
+        String(rawIsPublished) === "1";
   const slug = formData.get("slug") as string | null;
   const file = formData.get("image") as File | null;
+
+  const tags = tagsRaw
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
 
   const updateData: any = {
     title,
     excerpt,
     content,
+    author,
+    tags,
     isPublished,
   };
 
@@ -41,29 +53,30 @@ export async function PUT(
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const upload: any = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { folder: "mpbb/blogs" },
-        (err, result) => (err ? reject(err) : resolve(result))
-      ).end(buffer);
+      cloudinary.uploader
+        .upload_stream(
+          { folder: "mpbb/blogs" },
+          (err, result) => (err ? reject(err) : resolve(result))
+        )
+        .end(buffer);
     });
 
     updateData.image = upload.secure_url;
   }
 
-  const updated = await Blog.findByIdAndUpdate(
-    id, // ✅ NOW CORRECT
-    updateData,
-    { new: true, runValidators: true }
-  );
+  const updated = await Blog.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!updated) {
     return NextResponse.json(
-      { error: "Blog not found" },
+      { success: false, message: "Blog not found" },
       { status: 404 }
     );
   }
 
-  return NextResponse.json(updated);
+  return NextResponse.json({ success: true, data: updated });
 }
 
 export async function DELETE(
@@ -81,16 +94,13 @@ export async function DELETE(
 
   if (!blog) {
     return NextResponse.json(
-      { error: "Blog not found" },
+      { success: false, message: "Blog not found" },
       { status: 404 }
     );
   }
 
-  // 🔥 DELETE IMAGE FROM CLOUDINARY
   await deleteCloudinaryImage(blog.image);
-
-  // 🔥 DELETE BLOG FROM DB
   await blog.deleteOne();
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, message: "Blog deleted" });
 }

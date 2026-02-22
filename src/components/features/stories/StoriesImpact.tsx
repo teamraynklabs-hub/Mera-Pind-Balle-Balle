@@ -3,30 +3,37 @@
 import { motion } from "motion/react";
 import { Heart, DollarSign, Gem } from "lucide-react";
 import ScrollReveal from "@/components/motion/ScrollReveal";
-import { MOCK_IMPACT, type ImpactItem } from "./storiesData";
 
-interface StoriesImpactProps {
-  items?: ImpactItem[];
+interface ImpactCard {
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  title: string;
+  description: string;
 }
 
-const ICON_MAP: Record<
-  string,
-  React.ComponentType<{ size?: number; className?: string }>
-> = {
-  "fair-wages": DollarSign,
-  independence: Heart,
-  heritage: Gem,
-};
-
-function getIcon(iconKey: string) {
-  return ICON_MAP[iconKey] || Heart;
-}
+const IMPACT_CARDS: ImpactCard[] = [
+  {
+    icon: DollarSign,
+    title: "Fair Wages",
+    description:
+      "Artisans receive 3-5x more than traditional middlemen would pay them",
+  },
+  {
+    icon: Heart,
+    title: "Economic Independence",
+    description:
+      "Women gain financial autonomy and decision-making power in their households",
+  },
+  {
+    icon: Gem,
+    title: "Heritage Preservation",
+    description:
+      "Traditional crafts and techniques are kept alive for future generations",
+  },
+];
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-export default function StoriesImpact({ items }: StoriesImpactProps) {
-  const impactItems = items && items.length > 0 ? items : MOCK_IMPACT;
-
+export default function StoriesImpact() {
   return (
     <section className="container mx-auto px-4 md:px-8 lg:px-12 py-20 md:py-28">
       {/* Section Header */}
@@ -46,8 +53,8 @@ export default function StoriesImpact({ items }: StoriesImpactProps) {
 
       {/* Impact Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-        {impactItems.map((item, i) => {
-          const Icon = getIcon(item.icon);
+        {IMPACT_CARDS.map((item, i) => {
+          const Icon = item.icon;
           return (
             <motion.div
               key={i}

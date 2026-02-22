@@ -4,20 +4,19 @@ import { motion } from "motion/react";
 import { Heart, Shield, Leaf, Users } from "lucide-react";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 
-interface CoreValue {
+interface ValueItem {
   icon?: string;
   title: string;
   description: string;
 }
 
 interface AboutValuesProps {
-  values?: CoreValue[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  items?: ValueItem[];
 }
 
-const ICON_MAP: Record<
-  string,
-  React.ComponentType<{ size?: number; className?: string }>
-> = {
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   heart: Heart,
   empowerment: Heart,
   shield: Shield,
@@ -42,37 +41,19 @@ function getIcon(title: string, iconKey?: string) {
   return Heart;
 }
 
-const FALLBACK_VALUES: CoreValue[] = [
-  {
-    icon: "heart",
-    title: "Women Empowerment",
-    description:
-      "Placing women at the center of change — providing skills, markets, and confidence to lead their families towards a brighter future.",
-  },
-  {
-    icon: "sustainability",
-    title: "Sustainability",
-    description:
-      "Every product is crafted with respect for the environment, using natural materials and eco-friendly practices passed down through generations.",
-  },
-  {
-    icon: "trust",
-    title: "Fair Trade & Trust",
-    description:
-      "We ensure transparent pricing, fair wages, and trust-based partnerships with every artisan and customer in our community.",
-  },
-  {
-    icon: "community",
-    title: "Community First",
-    description:
-      "We believe in the strength of collective action — our work nurtures entire villages, not just individuals, building lasting impact.",
-  },
+const FALLBACK_ITEMS: ValueItem[] = [
+  { icon: "heart", title: "Women Empowerment", description: "Placing women at the center of change — providing skills, markets, and confidence to lead their families towards a brighter future." },
+  { icon: "sustainability", title: "Sustainability", description: "Every product is crafted with respect for the environment, using natural materials and eco-friendly practices passed down through generations." },
+  { icon: "trust", title: "Fair Trade & Trust", description: "We ensure transparent pricing, fair wages, and trust-based partnerships with every artisan and customer in our community." },
+  { icon: "community", title: "Community First", description: "We believe in the strength of collective action — our work nurtures entire villages, not just individuals, building lasting impact." },
 ];
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-export default function AboutValues({ values }: AboutValuesProps) {
-  const items = values && values.length > 0 ? values : FALLBACK_VALUES;
+export default function AboutValues({ sectionTitle, sectionSubtitle, items }: AboutValuesProps) {
+  const heading = sectionTitle || "Our Core Values";
+  const subtitle = sectionSubtitle || "The principles that guide everything we do";
+  const valueItems = items && items.length > 0 ? items : FALLBACK_ITEMS;
 
   return (
     <section className="relative overflow-hidden">
@@ -87,15 +68,15 @@ export default function AboutValues({ values }: AboutValuesProps) {
             className="text-3xl sm:text-4xl font-bold tracking-tight"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            Our Core Values
+            {heading}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            The principles that guide everything we do
+            {subtitle}
           </p>
         </ScrollReveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {items.map((value, i) => {
+          {valueItems.map((value, i) => {
             const Icon = getIcon(value.title, value.icon);
             return (
               <motion.div

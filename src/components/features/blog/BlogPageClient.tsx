@@ -1,159 +1,160 @@
 "use client";
 
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import BlogHero from "./BlogHero";
 import BlogFeatured from "./BlogFeatured";
 import BlogGrid from "./BlogGrid";
 import BlogNewsletter from "./BlogNewsletter";
 
-/* ── Temporary dummy blog data (replace when backend returns author/tags/featured) ── */
-const DUMMY_BLOGS = [
-  {
-    slug: "story-behind-block-printing",
-    title: "The Story Behind Block Printing",
-    excerpt:
-      "Uncover the rich history of block printing, a traditional art form that transforms fabric into masterpieces.",
-    image:
-      "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&q=80",
-    author: "Priya Sharma",
-    date: "21/02/2026",
-    tags: ["traditional crafts", "heritage textiles"],
-    featured: true,
-  },
-  {
-    slug: "sustainable-living-small-changes",
-    title: "Sustainable Living: Small Changes, Big Impact",
-    excerpt:
-      "Practical tips for incorporating sustainable, handcrafted products into your daily life and supporting rural communities.",
-    image:
-      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&q=80",
-    author: "Priya Sharma",
-    date: "20/02/2026",
-    tags: ["sustainable fashion", "eco-friendly"],
-    featured: false,
-  },
-  {
-    slug: "terracotta-jewelry-earth-to-elegance",
-    title: "Terracotta Jewelry: Earth to Elegance",
-    excerpt:
-      "Discover the timeless beauty of terracotta jewelry and the skilled artisans who transform clay into wearable art.",
-    image:
-      "https://images.unsplash.com/photo-1515562141589-67f0d2da1b3b?w=800&q=80",
-    author: "Priya Sharma",
-    date: "18/02/2026",
-    tags: ["artisans", "traditional crafts"],
-    featured: false,
-  },
-  {
-    slug: "natural-dyes-eco-friendly-choice",
-    title: "Natural Dyes: The Eco-Friendly Choice",
-    excerpt:
-      "Learn about the sustainable practice of using natural dyes extracted from plants, flowers, and minerals to color fabrics.",
-    image:
-      "https://images.unsplash.com/photo-1606722590656-3019cf763c10?w=800&q=80",
-    author: "Priya Sharma",
-    date: "15/02/2026",
-    tags: ["natural dyes", "eco-friendly"],
-    featured: false,
-  },
-  {
-    slug: "women-weavers-of-rajasthan",
-    title: "Women Weavers of Rajasthan",
-    excerpt:
-      "Meet the incredible women artisans of Rajasthan who are keeping centuries-old weaving traditions alive while building sustainable livelihoods.",
-    image:
-      "https://images.unsplash.com/photo-1594040226829-7f251ab46d80?w=800&q=80",
-    author: "Priya Sharma",
-    date: "12/02/2026",
-    tags: ["rural women", "handweaving"],
-    featured: false,
-  },
-  {
-    slug: "bamboo-craft-revival",
-    title: "The Revival of Bamboo Craft",
-    excerpt:
-      "How rural artisan communities are reviving ancient bamboo craftsmanship to create modern, eco-conscious home decor.",
-    image:
-      "https://images.unsplash.com/photo-1567225591450-06036b3392a6?w=800&q=80",
-    author: "Priya Sharma",
-    date: "10/02/2026",
-    tags: ["traditional crafts", "eco-friendly"],
-    featured: false,
-  },
-];
-
-interface BlogFromDB {
+interface BlogPost {
   slug: string;
   title: string;
   excerpt: string;
-  image?: string;
-  date?: string;
-  createdAt?: string;
+  image: string;
+  author: string;
+  date: string;
+  tags: string[];
 }
 
-interface BlogPageClientProps {
-  blogs: BlogFromDB[];
+interface BlogApiResponse {
+  blogs: any[];
   total: number;
   page: number;
   limit: number;
-  search: string;
+  topics: string[];
 }
+
+const POLL_INTERVAL = 30_000;
 
 function formatDate(dateStr?: string): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "2-digit",
+  return d.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
     year: "numeric",
   });
 }
 
-export default function BlogPageClient({
-  blogs,
-  total,
-  page,
-  limit,
-  search,
-}: BlogPageClientProps) {
-  const hasBackendData = blogs.length > 0;
+function normalizeBlog(b: any): BlogPost {
+  return {
+    slug: b.slug,
+    title: b.title,
+    excerpt: b.excerpt,
+    image: b.image || "",
+    author: b.author || "Mera Pind Balle Balle",
+    date: formatDate(b.date || b.createdAt),
+    tags: b.tags || [],
+  };
+}
 
-  /* ── Normalize posts: use backend data or fall back to dummy ── */
-  const allPosts = hasBackendData
-    ? blogs.map((b) => ({
-        slug: b.slug,
-        title: b.title,
-        excerpt: b.excerpt,
-        image: b.image || "",
-        author: "Priya Sharma", // DB model lacks author field — fallback
-        date: formatDate(b.date || b.createdAt),
-        tags: [] as string[],
-        featured: false,
-      }))
-    : DUMMY_BLOGS;
+function LoadingSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="section-padding text-center">
+        <div className="h-12 w-72 bg-muted/40 rounded mx-auto mb-4" />
+        <div className="h-6 w-96 bg-muted/30 rounded mx-auto mb-8" />
+        <div className="h-12 w-full max-w-xl bg-muted/30 rounded-xl mx-auto" />
+      </div>
+      <div className="section-container mb-16">
+        <div className="h-72 rounded-2xl bg-muted/30" />
+      </div>
+      <div className="section-container">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-80 rounded-xl bg-muted/30" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-  /* ── Featured post: first item ── */
+function BlogPageInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const search = searchParams.get("search") || "";
+  const page = Number(searchParams.get("page") || 1);
+  const limit = 6;
+
+  const [data, setData] = useState<BlogApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const mountedRef = useRef(true);
+
+  const fetchBlogs = useCallback(
+    async (isInitial = false) => {
+      try {
+        const params = new URLSearchParams({
+          search,
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+
+        const res = await fetch(`/api/blogs?${params}`, { cache: "no-store" });
+        const json = await res.json();
+
+        if (!mountedRef.current) return;
+
+        if (json.success && json.data) {
+          setData(json.data);
+        }
+      } catch {
+        // Silently fail on poll errors
+      } finally {
+        if (isInitial && mountedRef.current) {
+          setLoading(false);
+        }
+      }
+    },
+    [search, page, limit]
+  );
+
+  useEffect(() => {
+    mountedRef.current = true;
+    setLoading(true);
+    fetchBlogs(true);
+
+    const interval = setInterval(() => fetchBlogs(false), POLL_INTERVAL);
+
+    return () => {
+      mountedRef.current = false;
+      clearInterval(interval);
+    };
+  }, [fetchBlogs]);
+
+  if (loading) return <LoadingSkeleton />;
+
+  if (!data || data.blogs.length === 0) {
+    return (
+      <>
+        <BlogHero topics={data?.topics || []} initialSearch={search} />
+        <div className="section-container section-padding text-center">
+          <p className="text-muted-foreground text-lg">
+            {search
+              ? `No articles found for "${search}". Try a different search term.`
+              : "No blog posts yet. Check back soon!"}
+          </p>
+        </div>
+        <BlogNewsletter />
+      </>
+    );
+  }
+
+  const allPosts = data.blogs.map(normalizeBlog);
   const featuredPost = allPosts[0];
-
-  /* ── Grid posts: remaining items ── */
   const gridPosts = allPosts.slice(1);
-
-  const totalPages = hasBackendData
-    ? Math.ceil(total / limit)
-    : 1;
+  const totalPages = Math.ceil(data.total / limit);
 
   return (
     <>
-      {/* Section 1 — Hero */}
-      <Suspense fallback={null}>
-        <BlogHero initialSearch={search} />
-      </Suspense>
+      <BlogHero topics={data.topics} initialSearch={search} />
 
-      {/* Section 2 — Featured Post */}
       {featuredPost && <BlogFeatured post={featuredPost} />}
 
-      {/* Section 3 — Blog Grid */}
       {gridPosts.length > 0 && (
         <BlogGrid
           posts={gridPosts}
@@ -163,8 +164,15 @@ export default function BlogPageClient({
         />
       )}
 
-      {/* Section 4 — Newsletter */}
       <BlogNewsletter />
     </>
+  );
+}
+
+export default function BlogPageClient() {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <BlogPageInner />
+    </Suspense>
   );
 }

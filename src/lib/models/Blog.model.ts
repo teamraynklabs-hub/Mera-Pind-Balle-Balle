@@ -19,13 +19,22 @@ const BlogSchema = new Schema(
       type: String,
       required: true,
     },
+    content: {
+      type: String,
+      required: true,
+    },
     image: {
       type: String,
       default: "",
     },
-    content: {
+    author: {
       type: String,
-      required: true,
+      default: "Mera Pind Balle Balle",
+      trim: true,
+    },
+    tags: {
+      type: [String],
+      default: [],
     },
     date: {
       type: Date,
@@ -41,9 +50,8 @@ const BlogSchema = new Schema(
   { timestamps: true }
 );
 
-// Compound indexes for common queries
 BlogSchema.index({ isPublished: 1, date: -1 });
 BlogSchema.index({ isPublished: 1, createdAt: -1 });
+BlogSchema.index({ tags: 1 });
 
 export default models.Blog || model("Blog", BlogSchema);
-

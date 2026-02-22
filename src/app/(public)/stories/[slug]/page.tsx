@@ -1,33 +1,28 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import Story from "@/lib/models/Story.model";
 import type { Metadata } from "next";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
-// DB QUERY
-async function fetchStoryBySlug(slug: string) {
-  await connectDB();
-
-  return Story.findOne({
-    slug: slug.toLowerCase().trim(),
-    isPublished: true,
-  }).lean();
-}
-
-// GENERATE STATIC PARAMS FOR PERFORMANCE
-export async function generateStaticParams() {
-  await connectDB();
-  const stories = await Story.find({ isPublished: true }, { slug: 1 }).lean();
-  return stories.map((story: any) => ({ slug: story.slug }));
-}
-
-// disable caching completely
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// METADATA (FULLY OPTIMIZED FOR SEO)
+async function fetchStoryBySlug(slug: string) {
+  await connectDB();
+
+  const story = await Story.findOne({
+    slug: slug.toLowerCase().trim(),
+    isPublished: true,
+  }).lean();
+
+  return story ? JSON.parse(JSON.stringify(story)) : null;
+}
+
+// METADATA
 export async function generateMetadata(
   props: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
@@ -46,38 +41,33 @@ export async function generateMetadata(
   const description = story.metaDescription || story.excerpt;
 
   return {
-    title,
+    title: `${title} — Mera Pind Balle Balle`,
     description,
-    keywords: story.metaKeywords || [],
-    authors: [{ name: "Mera Pind Balle Balle" }],
+    keywords: story.tags || story.metaKeywords || [],
+    authors: [{ name: story.author || "Mera Pind Balle Balle" }],
     openGraph: {
       type: "article",
       url,
       title,
       description,
-      images: [
-        {
-          url: story.image,
-          width: 1200,
-          height: 630,
-          alt: story.title,
-          type: "image/jpeg",
-        },
-      ],
-      publishedTime: story.createdAt ? new Date(story.createdAt).toISOString() : undefined,
-      modifiedTime: story.updatedAt ? new Date(story.updatedAt).toISOString() : undefined,
-      authors: ["Mera Pind Balle Balle"],
+      images: story.image
+        ? [{ url: story.image, width: 1200, height: 630, alt: story.title }]
+        : [],
+      publishedTime: story.createdAt
+        ? new Date(story.createdAt).toISOString()
+        : undefined,
+      modifiedTime: story.updatedAt
+        ? new Date(story.updatedAt).toISOString()
+        : undefined,
+      authors: [story.author || "Mera Pind Balle Balle"],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [story.image],
-      creator: "@MeraPindBalleBalle",
+      images: story.image ? [story.image] : [],
     },
-    alternates: {
-      canonical: url,
-    },
+    alternates: { canonical: url },
   };
 }
 
@@ -94,15 +84,16 @@ export default async function StoryDetailPage(
 
   const url = `${BASE_URL}/stories/${story.slug}`;
   const createdDate = story.createdAt ? new Date(story.createdAt) : new Date();
-  const updatedDate = story.updatedAt ? new Date(story.updatedAt) : new Date();
-
-  // Validate dates are valid
-  const createdISO = !isNaN(createdDate.getTime()) ? createdDate.toISOString() : new Date().toISOString();
-  const updatedISO = !isNaN(updatedDate.getTime()) ? updatedDate.toISOString() : new Date().toISOString();
+  const createdISO = !isNaN(createdDate.getTime())
+    ? createdDate.toISOString()
+    : new Date().toISOString();
+  const updatedISO = story.updatedAt
+    ? new Date(story.updatedAt).toISOString()
+    : createdISO;
 
   return (
     <article className="container mx-auto px-4 py-12 max-w-3xl">
-      {/* IMAGE */}
+      {/* Cover Image */}
       {story.image && (
         <header className="mb-10">
           <Image
@@ -116,31 +107,61 @@ export default async function StoryDetailPage(
         </header>
       )}
 
-      {/* TITLE & META */}
+      {/* Title & Meta */}
       <div className="mb-8">
-        <h1 className="text-5xl font-bold mb-4">{story.title}</h1>
-        <time
-          dateTime={createdISO}
-          className="text-muted-foreground text-sm"
+        <h1
+          className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4"
+          style={{ fontFamily: "var(--font-heading)" }}
         >
-          {createdDate.toLocaleDateString("en-IN", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </time>
+          {story.title}
+        </h1>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+          {story.name && <span className="font-medium">{story.name}</span>}
+          {story.name && story.location && <span>&middot;</span>}
+          {story.location && <span>{story.location}</span>}
+          {(story.name || story.location) && <span>&middot;</span>}
+          <span>{story.author || "Mera Pind Balle Balle"}</span>
+          <span>&middot;</span>
+          <time dateTime={createdISO}>
+            {createdDate.toLocaleDateString("en-IN", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </time>
+        </div>
+
+        {/* Tags */}
+        {story.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {story.tags.map((tag: string) => (
+              <Link
+                key={tag}
+                href={`/stories?search=${encodeURIComponent(tag)}`}
+                className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors"
+              >
+                {tag}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* CONTENT */}
-      <div className="prose prose-lg max-w-none mb-10 leading-relaxed whitespace-pre-wrap">
-        {story.content}
+      {/* Content */}
+      <div className="prose prose-lg max-w-none mb-10 leading-relaxed">
+        {story.content ? (
+          <div dangerouslySetInnerHTML={{ __html: story.content }} />
+        ) : (
+          <p>No content available.</p>
+        )}
       </div>
 
-      {/* BACK LINK */}
+      {/* Back Link */}
       <nav className="mt-10 border-t pt-6">
-        <a href="/stories" className="text-primary hover:underline">
-          ← Back to All Stories
-        </a>
+        <Link href="/stories" className="text-primary hover:underline">
+          &larr; Back to All Stories
+        </Link>
       </nav>
 
       {/* JSON-LD Structured Data */}
@@ -151,16 +172,19 @@ export default async function StoryDetailPage(
             "@context": "https://schema.org",
             "@type": "Article",
             headline: story.title,
-            description: story.metaDescription || story.excerpt,
+            description: story.excerpt,
             image: story.image,
             datePublished: createdISO,
             dateModified: updatedISO,
             author: {
+              "@type": "Person",
+              name: story.author || "Mera Pind Balle Balle",
+            },
+            publisher: {
               "@type": "Organization",
               name: "Mera Pind Balle Balle",
               url: BASE_URL,
             },
-            articleBody: story.content,
             url,
           }),
         }}

@@ -8,8 +8,8 @@ export interface IDashboard extends Document {
     primaryCTA: { label: string; link: string };
     secondaryCTA: { label: string; link: string };
   };
-  initiatives: Array<{ title: string; description: string }>;
-  popularProducts: Array<{ title: string; description: string; image: string }>;
+  initiatives: Array<{ title: string; description: string; image: string }>;
+  feedback: Array<{ name: string; role: string; quote: string; avatar?: string }>;
   impact: Array<{ label: string; value: string }>;
   cta: { title: string; description: string; buttonText: string; link: string };
   testimonials: Array<{ name: string; role: string; quote: string; avatar?: string }>;
@@ -49,14 +49,16 @@ const DashboardSchema = new Schema<IDashboard>(
     initiatives: [
       {
         title: { type: String, required: true },
-        description: { type: String, required: true }
+        description: { type: String, required: true },
+        image: { type: String, default: "/photo1.png" }
       }
     ],
-    popularProducts: [
+    feedback: [
       {
-        title: { type: String, required: true },
-        description: { type: String, required: true },
-        image: { type: String, required: true }
+        name: { type: String, required: true },
+        role: { type: String, required: true },
+        quote: { type: String, required: true },
+        avatar: { type: String, default: "" }
       }
     ],
     impact: [

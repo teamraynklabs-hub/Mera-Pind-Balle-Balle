@@ -13,44 +13,24 @@ interface TeamMember {
 }
 
 interface AboutTeamProps {
-  team?: TeamMember[];
+  sectionTitle?: string;
+  sectionSubtitle?: string;
+  members?: TeamMember[];
 }
 
-const FALLBACK_TEAM: TeamMember[] = [
-  {
-    name: "Priya Sharma",
-    role: "Founder & CEO",
-    description:
-      "Passionate about rural empowerment and bridging the gap between traditional artisans and modern markets.",
-    image: "",
-  },
-  {
-    name: "Amit Verma",
-    role: "Head of Operations",
-    description:
-      "Ensures smooth supply chain management and quality control, connecting villages with customers nationwide.",
-    image: "",
-  },
-  {
-    name: "Neha Kaur",
-    role: "Community Manager",
-    description:
-      "Works closely with artisan communities to understand their needs and drive impactful skill-building programs.",
-    image: "",
-  },
-  {
-    name: "Rajesh Patel",
-    role: "Technology Lead",
-    description:
-      "Building the digital platform that empowers artisans with visibility and direct access to global customers.",
-    image: "",
-  },
+const FALLBACK_MEMBERS: TeamMember[] = [
+  { name: "Priya Sharma", role: "Founder & CEO", description: "Passionate about rural empowerment and bridging the gap between traditional artisans and modern markets.", image: "" },
+  { name: "Amit Verma", role: "Head of Operations", description: "Ensures smooth supply chain management and quality control, connecting villages with customers nationwide.", image: "" },
+  { name: "Neha Kaur", role: "Community Manager", description: "Works closely with artisan communities to understand their needs and drive impactful skill-building programs.", image: "" },
+  { name: "Rajesh Patel", role: "Technology Lead", description: "Building the digital platform that empowers artisans with visibility and direct access to global customers.", image: "" },
 ];
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-export default function AboutTeam({ team }: AboutTeamProps) {
-  const members = team && team.length > 0 ? team : FALLBACK_TEAM;
+export default function AboutTeam({ sectionTitle, sectionSubtitle, members }: AboutTeamProps) {
+  const heading = sectionTitle || "Meet Our Team";
+  const subtitle = sectionSubtitle || "Passionate individuals working to create meaningful change";
+  const teamMembers = members && members.length > 0 ? members : FALLBACK_MEMBERS;
 
   return (
     <section className="container mx-auto px-4 md:px-8 lg:px-12 py-20 md:py-28">
@@ -62,15 +42,15 @@ export default function AboutTeam({ team }: AboutTeamProps) {
           className="text-3xl sm:text-4xl font-bold tracking-tight"
           style={{ fontFamily: "var(--font-heading)" }}
         >
-          Meet Our Team
+          {heading}
         </h2>
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Passionate individuals working to create meaningful change
+          {subtitle}
         </p>
       </ScrollReveal>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-        {members.map((member, i) => {
+        {teamMembers.map((member, i) => {
           const hasImage = member.image && member.image.trim() !== "";
 
           return (
@@ -82,7 +62,6 @@ export default function AboutTeam({ team }: AboutTeamProps) {
               transition={{ duration: 0.6, delay: i * 0.1, ease }}
               className="group rounded-2xl bg-card border shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-deep)] hover:-translate-y-1.5 transition-all duration-500 overflow-hidden"
             >
-              {/* Image */}
               <div className="relative aspect-[4/5] overflow-hidden bg-muted">
                 {hasImage ? (
                   <Image
@@ -94,16 +73,11 @@ export default function AboutTeam({ team }: AboutTeamProps) {
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-primary/5">
-                    <User
-                      size={64}
-                      className="text-primary/20"
-                      strokeWidth={1}
-                    />
+                    <User size={64} className="text-primary/20" strokeWidth={1} />
                   </div>
                 )}
               </div>
 
-              {/* Content */}
               <div className="p-5 sm:p-6">
                 <h3
                   className="text-lg font-semibold leading-tight"
@@ -111,9 +85,7 @@ export default function AboutTeam({ team }: AboutTeamProps) {
                 >
                   {member.name}
                 </h3>
-                <p className="text-primary text-sm font-medium mt-1">
-                  {member.role}
-                </p>
+                <p className="text-primary text-sm font-medium mt-1">{member.role}</p>
                 {member.description && (
                   <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
                     {member.description}

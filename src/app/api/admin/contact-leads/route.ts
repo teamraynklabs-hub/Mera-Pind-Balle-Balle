@@ -4,16 +4,19 @@ import ContactLead from "@/lib/models/Contact.model";
 import { requireAdmin } from "@/lib/requireAdmin";
 
 export async function GET() {
-  const adminCheck = await requireAdmin();
-  if (adminCheck instanceof NextResponse) {
-    return adminCheck;
+  try {
+    const adminCheck = await requireAdmin();
+    if (adminCheck instanceof NextResponse) return adminCheck;
+
+    await connectDB();
+
+    const leads = await ContactLead.find().sort({ createdAt: -1 }).lean();
+
+    return NextResponse.json({ success: true, data: leads });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch contact leads" },
+      { status: 500 }
+    );
   }
-
-  await connectDB();
-
-  const leads = await ContactLead.find()
-    .sort({ createdAt: -1 })
-    .lean();
-
-  return NextResponse.json(leads);
 }

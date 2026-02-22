@@ -1,45 +1,107 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { Suspense } from "react";
 import StoriesHero from "./StoriesHero";
 import StoriesFeatured from "./StoriesFeatured";
 import StoriesGrid from "./StoriesGrid";
 import StoriesImpact from "./StoriesImpact";
 import StoriesCTA from "./StoriesCTA";
-import { MOCK_STORIES, type StoryItem } from "./storiesData";
+import type { StoryItem } from "./storiesData";
 
-interface StoriesPageClientProps {
-  /** Stories from backend API — may be empty or have different shape */
-  backendStories: any[];
+interface StoriesApiResponse {
+  stories: any[];
+  total: number;
+  page: number;
+  limit: number;
+  topics: string[];
 }
 
-/**
- * Maps backend story objects to the unified StoryItem shape.
- * Falls back to mock data if backend returns nothing usable.
- */
-function normalizeStories(raw: any[]): StoryItem[] {
-  if (!raw || raw.length === 0) return MOCK_STORIES;
+const POLL_INTERVAL = 30_000;
 
-  return raw.map((s: any, i: number) => ({
+function normalizeStory(s: any, i: number): StoryItem {
+  return {
     id: s._id || s.id || String(i + 1),
     slug: s.slug || `story-${i + 1}`,
     name: s.name || "",
     location: s.location || "",
     title: s.title || "Untitled",
-    excerpt: s.excerpt || s.summary || "",
+    excerpt: s.excerpt || "",
     image: s.image || "/photo1.png",
-    featured: s.featured ?? i === 0,
-  }));
+    featured: s.featured ?? false,
+  };
 }
 
-export default function StoriesPageClient({
-  backendStories,
-}: StoriesPageClientProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+function LoadingSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="py-28 md:py-40 bg-gradient-to-b from-[#0a0a0a] via-[#141420] to-[#0a0a0a]">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <div className="h-20 w-20 rounded-full bg-white/10 mx-auto mb-8" />
+          <div className="h-12 w-72 bg-white/10 rounded mx-auto mb-6" />
+          <div className="h-6 w-96 bg-white/5 rounded mx-auto mb-10" />
+          <div className="h-12 w-full max-w-xl bg-white/10 rounded-xl mx-auto" />
+        </div>
+      </div>
+      <div className="container mx-auto px-4 py-20">
+        <div className="h-72 rounded-2xl bg-muted/30" />
+      </div>
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-80 rounded-xl bg-muted/30" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
+function StoriesPageInner() {
+  const [data, setData] = useState<StoriesApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const mountedRef = useRef(true);
+
+  const fetchStories = useCallback(
+    async (isInitial = false) => {
+      try {
+        const res = await fetch("/api/stories", { cache: "no-store" });
+        const json = await res.json();
+
+        if (!mountedRef.current) return;
+
+        if (json.success && json.data) {
+          setData(json.data);
+        }
+      } catch {
+        // Silently fail on poll errors
+      } finally {
+        if (isInitial && mountedRef.current) {
+          setLoading(false);
+        }
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    mountedRef.current = true;
+    setLoading(true);
+    fetchStories(true);
+
+    const interval = setInterval(() => fetchStories(false), POLL_INTERVAL);
+
+    return () => {
+      mountedRef.current = false;
+      clearInterval(interval);
+    };
+  }, [fetchStories]);
+
+  // Normalize stories from API
   const stories = useMemo(
-    () => normalizeStories(backendStories),
-    [backendStories]
+    () => (data?.stories || []).map(normalizeStory),
+    [data]
   );
 
   // Featured story: first story with featured flag, or first story
@@ -54,7 +116,7 @@ export default function StoriesPageClient({
     [stories, featuredStory]
   );
 
-  // Search filtering
+  // Search filtering (client-side)
   const filteredGridStories = useMemo(() => {
     if (!searchQuery.trim()) return gridStories;
     const q = searchQuery.toLowerCase();
@@ -67,22 +129,43 @@ export default function StoriesPageClient({
     );
   }, [gridStories, searchQuery]);
 
+  if (loading) return <LoadingSkeleton />;
+
+  if (!data || stories.length === 0) {
+    return (
+      <>
+        <StoriesHero searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <div className="container mx-auto px-4 py-20 text-center">
+          <p className="text-muted-foreground text-lg">
+            No stories yet. Check back soon!
+          </p>
+        </div>
+        <StoriesImpact />
+        <StoriesCTA />
+      </>
+    );
+  }
+
   return (
     <>
-      {/* 1 — HERO */}
       <StoriesHero searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
-      {/* 2 — FEATURED STORY */}
       {featuredStory && <StoriesFeatured story={featuredStory} />}
 
-      {/* 3 — MORE INSPIRING STORIES */}
-      <StoriesGrid stories={filteredGridStories} />
+      {filteredGridStories.length > 0 && (
+        <StoriesGrid stories={filteredGridStories} />
+      )}
 
-      {/* 4 — IMPACT VALUE CARDS */}
       <StoriesImpact />
-
-      {/* 5 — SUPPORT CTA */}
       <StoriesCTA />
     </>
+  );
+}
+
+export default function StoriesPageClient() {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <StoriesPageInner />
+    </Suspense>
   );
 }

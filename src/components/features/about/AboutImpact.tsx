@@ -2,12 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { motion, useInView } from "motion/react";
-import {
-  Users,
-  MapPin,
-  ShoppingBag,
-  Smile,
-} from "lucide-react";
+import { Users, MapPin, ShoppingBag, Smile } from "lucide-react";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 
 interface ImpactStat {
@@ -17,13 +12,12 @@ interface ImpactStat {
 }
 
 interface AboutImpactProps {
+  sectionTitle?: string;
+  sectionSubtitle?: string;
   stats?: ImpactStat[];
 }
 
-const ICON_MAP: Record<
-  string,
-  React.ComponentType<{ size?: number; className?: string }>
-> = {
+const ICON_MAP: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   women: Users,
   artisans: Users,
   users: Users,
@@ -86,7 +80,9 @@ const FALLBACK_STATS: ImpactStat[] = [
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-export default function AboutImpact({ stats }: AboutImpactProps) {
+export default function AboutImpact({ sectionTitle, sectionSubtitle, stats }: AboutImpactProps) {
+  const heading = sectionTitle || "Our Impact";
+  const subtitle = sectionSubtitle || "Numbers that tell our story";
   const items = stats && stats.length > 0 ? stats : FALLBACK_STATS;
 
   return (
@@ -102,10 +98,10 @@ export default function AboutImpact({ stats }: AboutImpactProps) {
             className="text-3xl sm:text-4xl font-bold tracking-tight"
             style={{ fontFamily: "var(--font-heading)" }}
           >
-            Our Impact
+            {heading}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Numbers that tell our story
+            {subtitle}
           </p>
         </ScrollReveal>
 
@@ -128,9 +124,7 @@ export default function AboutImpact({ stats }: AboutImpactProps) {
                 </div>
                 <p className="text-4xl md:text-5xl font-bold text-foreground tabular-nums mb-3">
                   {num > 0 ? <CountUp target={num} /> : stat.number}
-                  {suffix && (
-                    <span className="text-primary">{suffix}</span>
-                  )}
+                  {suffix && <span className="text-primary">{suffix}</span>}
                 </p>
                 <p className="text-muted-foreground text-base font-medium">
                   {stat.label}

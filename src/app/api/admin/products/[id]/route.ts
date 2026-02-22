@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/db";
 import cloudinary from "@/lib/cloudinary";
 import Product from "@/lib/models/Product.model";
 import { requireAdmin } from "@/lib/requireAdmin";
-
 
 export async function PUT(
   req: Request,
@@ -11,128 +11,125 @@ export async function PUT(
 ) {
   try {
     const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) {
-      return adminCheck;
-    }
+    if (adminCheck instanceof NextResponse) return adminCheck;
 
     await connectDB();
-
     const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
-        { error: "Product ID required" },
+        { success: false, message: "Product ID required" },
         { status: 400 }
+      );
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return NextResponse.json(
+        { success: false, message: "Product not found" },
+        { status: 404 }
       );
     }
 
     const formData = await req.formData();
 
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
-    const price = Number(formData.get("price"));
-    const category = formData.get("category") as string | null;
-    const stock = formData.get("stock");
-    const isFeatured = formData.get("isFeatured");
-    const file = formData.get("image") as File | null;
+    const updateData: Record<string, unknown> = {};
 
-    const product = await Product.findById(id);
-
-    if (!product) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 }
-      );
+    const textFields = [
+      "name", "description", "category", "sku", "material",
+      "color", "weight", "story", "careInstructions", "socialImpact",
+    ];
+    for (const field of textFields) {
+      const val = formData.get(field);
+      if (val !== null) updateData[field] = val;
     }
 
-    const updateData: any = {
-      name,
-      description,
-      price,
-    };
+    const numFields = ["price", "originalPrice", "stock"];
+    for (const field of numFields) {
+      const val = formData.get(field);
+      if (val !== null) updateData[field] = Number(val);
+    }
 
-    if (category !== null) updateData.category = category;
-    if (stock !== null) updateData.stock = Number(stock);
+    const isActive = formData.get("isActive");
+    if (isActive !== null) updateData.isActive = isActive !== "false";
+
+    const isFeatured = formData.get("isFeatured");
     if (isFeatured !== null) updateData.isFeatured = isFeatured === "true";
 
-    // 🔁 Replace image if new file uploaded
+    const file = formData.get("image") as File | null;
     if (file && file.size > 0) {
-      // delete old image from Cloudinary if it exists
       if (product.imageId) {
         await cloudinary.uploader.destroy(product.imageId);
       }
 
       const buffer = Buffer.from(await file.arrayBuffer());
-
       const upload: any = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { folder: "mpbb/products" },
-          (err, result) => (err ? reject(err) : resolve(result))
-        ).end(buffer);
+        cloudinary.uploader
+          .upload_stream(
+            { folder: "mpbb/products" },
+            (err, result) => (err ? reject(err) : resolve(result))
+          )
+          .end(buffer);
       });
 
       updateData.image = upload.secure_url;
       updateData.imageId = upload.public_id;
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
+    const updated = await Product.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
 
-    return NextResponse.json(updatedProduct);
-  } catch (error) {
-    console.error("ADMIN UPDATE PRODUCT ERROR:", error);
+    revalidatePath("/products");
+
+    return NextResponse.json({ success: true, data: updated });
+  } catch {
     return NextResponse.json(
-      { error: "Failed to update product" },
+      { success: false, message: "Failed to update product" },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) {
-      return adminCheck;
-    }
+    if (adminCheck instanceof NextResponse) return adminCheck;
 
     await connectDB();
-
     const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
-        { error: "Product ID required" },
+        { success: false, message: "Product ID required" },
         { status: 400 }
       );
     }
 
     const product = await Product.findById(id);
-
     if (!product) {
       return NextResponse.json(
-        { error: "Product not found" },
+        { success: false, message: "Product not found" },
         { status: 404 }
       );
     }
 
-    // 🧹 Remove image from Cloudinary if it exists
     if (product.imageId) {
       await cloudinary.uploader.destroy(product.imageId);
     }
 
-    // 🗑 Delete product from database
     await Product.findByIdAndDelete(id);
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("ADMIN DELETE PRODUCT ERROR:", error);
+    revalidatePath("/products");
+
+    return NextResponse.json({ success: true, message: "Product deleted" });
+  } catch {
     return NextResponse.json(
-      { error: "Failed to delete product" },
+      { success: false, message: "Failed to delete product" },
       { status: 500 }
     );
   }

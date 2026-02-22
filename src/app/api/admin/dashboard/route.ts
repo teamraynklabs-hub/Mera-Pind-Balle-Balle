@@ -11,58 +11,52 @@ const DashboardSchema = z.object({
   hero: z.object({
     title: z.string().min(1),
     subtitle: z.string().min(1),
-    image: z.string().url().or(z.string().startsWith("/")),
+    image: z.string().min(1),
     primaryCTA: z.object({
       label: z.string().min(1),
       link: z.string().min(1),
-    }),
+    }).passthrough(),
     secondaryCTA: z.object({
       label: z.string().min(1),
       link: z.string().min(1),
-    }),
-  }),
+    }).passthrough(),
+  }).passthrough(),
   initiatives: z.array(
     z.object({
       title: z.string().min(1),
       description: z.string().min(1),
-    })
+      image: z.string().optional().default("/photo1.png"),
+    }).passthrough()
   ),
-  popularProducts: z.array(
+  feedback: z.optional(z.array(
     z.object({
-      title: z.string().min(1),
-      description: z.string().min(1),
-      image: z.string().url().or(z.string().startsWith("/")),
-    })
-  ),
+      name: z.string().min(1),
+      role: z.string().min(1),
+      quote: z.string().min(1),
+      avatar: z.string().optional().default(""),
+    }).passthrough()
+  )),
   impact: z.array(
     z.object({
       label: z.string().min(1),
       value: z.string().min(1),
-    })
+    }).passthrough()
   ),
   cta: z.object({
     title: z.string().min(1),
     description: z.string().min(1),
     buttonText: z.string().min(1),
     link: z.string().min(1),
-  }),
-  testimonials: z.optional(z.array(
-    z.object({
-      name: z.string().min(1),
-      role: z.string().min(1),
-      quote: z.string().min(1),
-      avatar: z.string().optional().default(""),
-    })
-  )),
+  }).passthrough(),
   storySection: z.optional(z.object({
     title: z.string(),
     description: z.string(),
     image: z.string(),
     link: z.string(),
-  })),
+  }).passthrough()),
   footer: z.optional(z.any()),
   isActive: z.boolean().default(true),
-});
+}).passthrough();
 
 // ────────────────────────────────────────────────
 // POST - Admin only
@@ -79,7 +73,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const parsed = DashboardSchema.safeParse(body);
+
+    // Strip MongoDB internal fields before Zod validation
+    const { _id, __v, createdAt, updatedAt, updatedBy: _ub, ...cleanBody } = body;
+    const stripId = ({ _id, ...rest }: any) => rest;
+    if (cleanBody.initiatives) cleanBody.initiatives = cleanBody.initiatives.map(stripId);
+    if (cleanBody.feedback) cleanBody.feedback = cleanBody.feedback.map(stripId);
+    if (cleanBody.impact) cleanBody.impact = cleanBody.impact.map(stripId);
+    if (cleanBody.hero?.primaryCTA) cleanBody.hero.primaryCTA = stripId(cleanBody.hero.primaryCTA);
+    if (cleanBody.hero?.secondaryCTA) cleanBody.hero.secondaryCTA = stripId(cleanBody.hero.secondaryCTA);
+
+    const parsed = DashboardSchema.safeParse(cleanBody);
 
     if (!parsed.success) {
       return NextResponse.json(
