@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 
 interface AboutHeroProps {
@@ -23,11 +24,13 @@ export default function AboutHero({ title, subtitle, image }: AboutHeroProps) {
     <section className="relative flex items-center justify-center overflow-hidden py-30 md:py-44 lg:py-52 bg-background">
       {hasImage ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={image}
+          <Image
+            src={image!}
             alt={heading}
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-black/65" />
         </>

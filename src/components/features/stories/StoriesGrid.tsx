@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { MapPin, ArrowRight } from "lucide-react";
@@ -43,12 +44,12 @@ export default function StoriesGrid({ stories }: StoriesGridProps) {
           >
             {/* Card Image */}
             <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={story.image}
                 alt={story.title}
-                className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-700"
-                loading="lazy"
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
               {/* Gradient overlay at bottom for text readability */}
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />

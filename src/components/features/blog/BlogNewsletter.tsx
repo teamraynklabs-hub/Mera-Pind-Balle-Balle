@@ -14,8 +14,7 @@ export default function BlogNewsletter() {
     e.preventDefault();
     if (!email.trim()) return;
 
-    /* ── POST /api/newsletter — placeholder until endpoint is ready ── */
-    console.log("[Newsletter] Subscribe:", email);
+    /* TODO: POST /api/newsletter when endpoint is ready */
     setSubmitted(true);
     setEmail("");
     setTimeout(() => setSubmitted(false), 4000);

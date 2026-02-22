@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, type FormEvent } from "react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { motion, useInView } from "motion/react";
 import {
   Heart,
@@ -11,8 +12,11 @@ import {
   CheckCircle,
   Send,
 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
+import { distributorSchema, type DistributorFormInput } from "@/lib/validations/distributor";
 
 /* ── Types ── */
 
@@ -139,19 +143,18 @@ export default function DistributorsPageClient({
   const [data, setData] = useState<DistributorsPageData>(initialData);
 
   /* Form state */
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    location: "",
-    businessType: "",
-    experience: "",
-    about: "",
-  });
-
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { errors: formErrors },
+  } = useForm<DistributorFormInput>({
+    resolver: zodResolver(distributorSchema),
+  });
 
   /* Fetch fresh data on mount for real-time updates */
   useEffect(() => {
@@ -170,45 +173,29 @@ export default function DistributorsPageClient({
     fetchData();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (formData: DistributorFormInput) => {
     setLoading(true);
-    setError(null);
+    setApiError(null);
 
     try {
       const base = getBaseUrl();
       const payload = {
-        name: form.name.trim(),
-        email: form.email.trim().toLowerCase(),
-        phone: form.phone.trim(),
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
         website: "",
       };
 
       await axios.post(`${base}/api/distributors`, payload);
 
       setSubmitted(true);
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        location: "",
-        businessType: "",
-        experience: "",
-        about: "",
-      });
+      reset();
       setTimeout(() => setSubmitted(false), 6000);
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "Something went wrong. Please try again."
+    } catch (err) {
+      setApiError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again."
       );
     } finally {
       setLoading(false);
@@ -228,19 +215,27 @@ export default function DistributorsPageClient({
   const inputBase =
     "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-border text-foreground placeholder:text-muted-foreground/60 text-sm transition-all duration-300 focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20";
 
+  const inputError =
+    "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-red-500 text-foreground placeholder:text-muted-foreground/60 text-sm transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20";
+
   const selectBase =
     "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-border text-foreground text-sm transition-all duration-300 focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 appearance-none cursor-pointer";
+
+  const selectError =
+    "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-red-500 text-foreground text-sm transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 appearance-none cursor-pointer";
 
   return (
     <>
       {/* ── 1. HERO ── */}
       <section className="relative overflow-hidden">
         <div className="relative w-full h-[50vh] min-h-[320px] max-h-[480px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={bannerImg}
             alt={data.hero.title}
-            className="w-full h-full object-cover"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
 
@@ -330,12 +325,12 @@ export default function DistributorsPageClient({
             transition={{ duration: 0.7, ease }}
           >
             <div className="relative rounded-2xl overflow-hidden shadow-[var(--shadow-deep)] border aspect-[4/3] bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={requirementsImg}
                 alt={data.requirements.sectionTitle}
-                className="w-full h-full object-cover absolute inset-0"
-                loading="lazy"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           </motion.div>
@@ -450,17 +445,17 @@ export default function DistributorsPageClient({
               </motion.div>
             )}
 
-            {error && (
+            {apiError && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="p-4 mb-6 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium"
               >
-                {error}
+                {apiError}
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={rhfHandleSubmit(onSubmit)} className="space-y-5">
               {/* Row 1: Name + Email */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
@@ -469,13 +464,13 @@ export default function DistributorsPageClient({
                   </label>
                   <input
                     type="text"
-                    name="name"
                     placeholder="Your name"
-                    className={inputBase}
-                    value={form.name}
-                    onChange={handleChange}
-                    required
+                    className={formErrors.name ? inputError : inputBase}
+                    {...register("name")}
                   />
+                  {formErrors.name && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.name.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
@@ -483,13 +478,13 @@ export default function DistributorsPageClient({
                   </label>
                   <input
                     type="email"
-                    name="email"
                     placeholder="your@email.com"
-                    className={inputBase}
-                    value={form.email}
-                    onChange={handleChange}
-                    required
+                    className={formErrors.email ? inputError : inputBase}
+                    {...register("email")}
                   />
+                  {formErrors.email && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.email.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -501,13 +496,13 @@ export default function DistributorsPageClient({
                   </label>
                   <input
                     type="tel"
-                    name="phone"
                     placeholder="+91 XXXXX XXXXX"
-                    className={inputBase}
-                    value={form.phone}
-                    onChange={handleChange}
-                    required
+                    className={formErrors.phone ? inputError : inputBase}
+                    {...register("phone")}
                   />
+                  {formErrors.phone && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.phone.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
@@ -516,13 +511,13 @@ export default function DistributorsPageClient({
                   </label>
                   <input
                     type="text"
-                    name="location"
                     placeholder="Your city"
-                    className={inputBase}
-                    value={form.location}
-                    onChange={handleChange}
-                    required
+                    className={formErrors.location ? inputError : inputBase}
+                    {...register("location")}
                   />
+                  {formErrors.location && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.location.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -533,11 +528,9 @@ export default function DistributorsPageClient({
                     Business Type <span className="text-destructive">*</span>
                   </label>
                   <select
-                    name="businessType"
-                    className={selectBase}
-                    value={form.businessType}
-                    onChange={handleChange}
-                    required
+                    className={formErrors.businessType ? selectError : selectBase}
+                    defaultValue=""
+                    {...register("businessType")}
                   >
                     <option value="" disabled>
                       Select type
@@ -561,6 +554,9 @@ export default function DistributorsPageClient({
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
+                  {formErrors.businessType && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.businessType.message}</p>
+                  )}
                 </div>
                 <div className="relative">
                   <label className="block text-sm font-medium text-foreground/80 mb-2">
@@ -568,11 +564,9 @@ export default function DistributorsPageClient({
                     <span className="text-destructive">*</span>
                   </label>
                   <select
-                    name="experience"
-                    className={selectBase}
-                    value={form.experience}
-                    onChange={handleChange}
-                    required
+                    className={formErrors.experience ? selectError : selectBase}
+                    defaultValue=""
+                    {...register("experience")}
                   >
                     <option value="" disabled>
                       Select experience
@@ -596,6 +590,9 @@ export default function DistributorsPageClient({
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
+                  {formErrors.experience && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.experience.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -606,14 +603,14 @@ export default function DistributorsPageClient({
                   <span className="text-destructive">*</span>
                 </label>
                 <textarea
-                  name="about"
                   placeholder="Share details about your current business, target market, and why you want to partner with us..."
                   rows={5}
-                  className={`${inputBase} resize-none`}
-                  value={form.about}
-                  onChange={handleChange}
-                  required
+                  className={`${formErrors.about ? inputError : inputBase} resize-none`}
+                  {...register("about")}
                 />
+                {formErrors.about && (
+                  <p className="text-xs text-destructive mt-1">{formErrors.about.message}</p>
+                )}
               </div>
 
               {/* Submit */}

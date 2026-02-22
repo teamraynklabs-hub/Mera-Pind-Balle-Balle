@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ChevronLeft, Save, Plus, Trash2, Upload, Loader } from 'lucide-react';
-import Link from 'next/link';
+import { Save, Plus, Trash2, Upload, Loader } from 'lucide-react';
 
 interface Hero {
   title: string;
@@ -44,7 +43,7 @@ interface DashboardFormData {
   feedback: Feedback[];
   impact: Impact[];
   cta: CTA;
-  footer: any;
+  footer: Record<string, unknown>;
   isActive: boolean;
 }
 
@@ -82,13 +81,13 @@ export default function HomepageManagerPage() {
           setFormData(prev => ({
             ...prev,
             ...data,
-            initiatives: (data.initiatives || []).map((item: any) => ({
+            initiatives: (data.initiatives || []).map((item: Initiative) => ({
               title: item.title || '',
               description: item.description || '',
               image: item.image || '/photo1.png',
             })),
             feedback: (data.feedback || []).length > 0
-              ? data.feedback.map((item: any) => ({
+              ? data.feedback.map((item: Feedback) => ({
                   name: item.name || '',
                   role: item.role || '',
                   quote: item.quote || '',
@@ -198,6 +197,7 @@ export default function HomepageManagerPage() {
       setFormData(prev => {
         const newData = JSON.parse(JSON.stringify(prev));
         const keys = path.split(".");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let current: any = newData;
 
         for (let i = 0; i < keys.length - 1; i++) {
@@ -250,8 +250,8 @@ export default function HomepageManagerPage() {
         setSuccess('Homepage updated successfully!');
         setTimeout(() => setSuccess(null), 5000);
       }
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to update homepage';
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update homepage';
       setError(errorMessage);
     } finally {
       setLoading(false);

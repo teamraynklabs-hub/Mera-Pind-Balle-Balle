@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import { motion, useInView } from "motion/react";
@@ -42,10 +43,12 @@ function BlogCard({ post, index }: { post: BlogPost; index: number }) {
           {/* Image */}
           <div className="relative aspect-[16/10] overflow-hidden">
             {post.image ? (
-              <img
+              <Image
                 src={post.image}
                 alt={post.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">

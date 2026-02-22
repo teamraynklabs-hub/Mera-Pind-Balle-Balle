@@ -45,8 +45,42 @@ const STATUS_COLORS: Record<string, string> = {
   REFUNDED: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
 };
 
+interface OrderAddress {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+interface OrderCustomer {
+  name: string;
+  email: string;
+  phone: string;
+  address: OrderAddress;
+}
+
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  _id: string;
+  orderNumber: string;
+  customer: OrderCustomer;
+  items: OrderItem[];
+  total: number;
+  status: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  estimatedDelivery?: string;
+  createdAt: string;
+}
+
 export default function OrdersManager() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -61,7 +95,7 @@ export default function OrdersManager() {
   const [toDate, setToDate] = useState("");
 
   // Detail dialog
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
 
@@ -452,7 +486,7 @@ export default function OrdersManager() {
               <div>
                 <h4 className="font-semibold text-sm mb-2">Items</h4>
                 <div className="space-y-1">
-                  {selectedOrder.items?.map((item: any, i: number) => (
+                  {selectedOrder.items?.map((item: OrderItem, i: number) => (
                     <div key={i} className="flex justify-between text-sm">
                       <span>
                         {item.name} x {item.quantity}

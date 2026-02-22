@@ -38,12 +38,10 @@ export default function DistributorsForm() {
 
       setSubmitted(true);
       setForm({ name: "", email: "", phone: "", website: "", message: "" });
-    } catch (err: any) {
-      console.error("Distributor submit error:", err);
-      setError(
-        err.response?.data?.error ||
-        "Something went wrong. Please try again."
-      );
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Quote, Star, MapPin } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -59,11 +60,12 @@ export default function TestimonialsSection({
 
           <div className="mt-6 pt-5 border-t flex items-center gap-3">
             {t.avatar ? (
-              <img
+              <Image
                 src={t.avatar}
                 alt={t.name}
+                width={48}
+                height={48}
                 className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
-                loading="lazy"
               />
             ) : (
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base">

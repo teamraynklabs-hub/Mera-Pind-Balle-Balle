@@ -20,13 +20,22 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
+interface Distributor {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  website?: string;
+  image?: string;
+}
+
 export default function DistributorsManager() {
   const [activeTab, setActiveTab] = useState<"submissions" | "page">("submissions");
-  const [distributors, setDistributors] = useState<any[]>([]);
+  const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<Distributor | null>(null);
   const [previewImage, setPreviewImage] = useState<string>("");
 
   const [formData, setFormData] = useState<{
@@ -67,14 +76,15 @@ export default function DistributorsManager() {
     loadDistributors();
   }, []);
 
-  function handleChange(e: any) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-  function handleImageUpload(e: any) {
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (previewImage.startsWith("blob:")) URL.revokeObjectURL(previewImage);
     const url = URL.createObjectURL(file);
     setPreviewImage(url);
     setFormData({ ...formData, image: file });
@@ -163,7 +173,7 @@ export default function DistributorsManager() {
     }
   }
 
-  function openEdit(item: any) {
+  function openEdit(item: Distributor) {
     setEditing(item);
     setFormData({
       name: item.name,

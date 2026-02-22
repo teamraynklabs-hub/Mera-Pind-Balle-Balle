@@ -36,6 +36,26 @@ interface ProductForm {
   image: File | string | null;
 }
 
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice: number;
+  category: string;
+  stock: number;
+  sku: string;
+  material: string;
+  color: string;
+  weight: string;
+  story: string;
+  careInstructions: string;
+  socialImpact: string;
+  isActive: boolean;
+  isFeatured: boolean;
+  image?: string;
+}
+
 interface Category {
   _id: string;
   name: string;
@@ -90,8 +110,8 @@ function CategoryManager({
       toast.success("Category added");
       setNewName("");
       onReload();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to add category");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to add category");
     } finally {
       setAdding(false);
     }
@@ -141,7 +161,7 @@ function CategoryManager({
 
 /* ─── Main Component ─── */
 export default function ProductsManager() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -149,7 +169,7 @@ export default function ProductsManager() {
 
   const [open, setOpen] = useState(false);
   const [catDialogOpen, setCatDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [form, setForm] = useState<ProductForm>({ ...EMPTY_FORM });
@@ -196,11 +216,12 @@ export default function ProductsManager() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (previewImage.startsWith("blob:")) URL.revokeObjectURL(previewImage);
     setPreviewImage(URL.createObjectURL(file));
     setForm((p) => ({ ...p, image: file }));
   }
 
-  function startEdit(item: any) {
+  function startEdit(item: Product) {
     setEditingProduct(item);
     setForm({
       name: item.name || "",
@@ -248,7 +269,7 @@ export default function ProductsManager() {
     setSubmitting(true);
     try {
       const url = isEdit
-        ? `/api/admin/products/${editingProduct._id}`
+        ? `/api/admin/products/${editingProduct!._id}`
         : "/api/admin/products";
 
       const fd = new FormData();
@@ -285,8 +306,8 @@ export default function ProductsManager() {
       setOpen(false);
       resetForm();
       await loadProducts();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save product");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save product");
     } finally {
       setSubmitting(false);
     }

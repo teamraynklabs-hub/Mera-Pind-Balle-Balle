@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useUserAuth } from "@/context/UserAuthContext";
 import { toast } from "sonner";
 import { motion } from "motion/react";
+import { loginSchema, type LoginFormInput } from "@/lib/validations/login";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -17,32 +20,26 @@ export default function LoginForm() {
   const redirectTo = searchParams.get("redirect") || "/";
   const { login, user } = useUserAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInput>({
+    resolver: zodResolver(loginSchema),
+  });
 
   if (user) {
     router.replace(redirectTo);
     return null;
   }
 
-  function validate() {
-    const e: { email?: string; password?: string } = {};
-    if (!email.trim()) e.email = "Email is required";
-    if (!password) e.password = "Password is required";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  }
-
-  async function handleSubmit(ev: React.FormEvent) {
-    ev.preventDefault();
+  async function onSubmit(data: LoginFormInput) {
     if (submitting) return;
-    if (!validate()) return;
-
     setSubmitting(true);
-    const result = await login(email.trim(), password);
+    const result = await login(data.email, data.password);
     setSubmitting(false);
 
     if (result.success) {
@@ -67,24 +64,20 @@ export default function LoginForm() {
             Login to your account to continue
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  if (errors.email) setErrors((p) => ({ ...p, email: undefined }));
-                }}
                 placeholder="you@example.com"
                 autoComplete="email"
                 autoFocus
                 className={errors.email ? "border-red-500 focus-visible:ring-red-500/30" : ""}
+                {...register("email")}
               />
               {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
+                <p className="text-xs text-destructive">{errors.email.message}</p>
               )}
             </div>
 
@@ -94,14 +87,10 @@ export default function LoginForm() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (errors.password) setErrors((p) => ({ ...p, password: undefined }));
-                  }}
                   placeholder="Your password"
                   autoComplete="current-password"
                   className={`pr-10 ${errors.password ? "border-red-500 focus-visible:ring-red-500/30" : ""}`}
+                  {...register("password")}
                 />
                 <button
                   type="button"
@@ -113,7 +102,7 @@ export default function LoginForm() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-destructive">{errors.password}</p>
+                <p className="text-xs text-destructive">{errors.password.message}</p>
               )}
             </div>
 

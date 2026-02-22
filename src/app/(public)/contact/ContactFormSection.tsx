@@ -83,7 +83,7 @@ export default function ContactFormSection() {
       setForm({ name: "", email: "", phone: "", subject: "", message: "" });
       setTimeout(() => setSent(false), 5000);
     } catch {
-      console.log("Contact form data:", form);
+      // Silently handled — toast or error UI can be added
     } finally {
       setLoading(false);
     }

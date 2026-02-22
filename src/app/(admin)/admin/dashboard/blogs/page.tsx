@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pencil, Trash2, Plus, Eye, EyeOff, Tag } from "lucide-react";
+import { toast } from "sonner";
 
 interface BlogForm {
   title: string;
@@ -35,12 +36,25 @@ const EMPTY_FORM: BlogForm = {
   isPublished: true,
 };
 
+interface Blog {
+  _id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  tags: string[];
+  image?: string;
+  isPublished: boolean;
+  date?: string;
+  createdAt?: string;
+}
+
 export default function BlogsManager() {
-  const [blogs, setBlogs] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
-  const [editingBlog, setEditingBlog] = useState<any>(null);
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [previewImage, setPreviewImage] = useState("");
   const [form, setForm] = useState<BlogForm>({ ...EMPTY_FORM });
 
@@ -79,11 +93,12 @@ export default function BlogsManager() {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (previewImage.startsWith("blob:")) URL.revokeObjectURL(previewImage);
     setForm({ ...form, image: file });
     setPreviewImage(URL.createObjectURL(file));
   }
 
-  function startEdit(blog: any) {
+  function startEdit(blog: Blog) {
     setEditingBlog(blog);
     setForm({
       title: blog.title || "",
@@ -107,12 +122,12 @@ export default function BlogsManager() {
   // ================= CREATE / UPDATE =================
   async function handleSubmit() {
     if (!form.title || !form.excerpt || !form.content) {
-      alert("Title, excerpt, and content are required");
+      toast.error("Title, excerpt, and content are required");
       return;
     }
 
     if (!editingBlog && !form.image) {
-      alert("Image is required for new blog");
+      toast.error("Image is required for new blog");
       return;
     }
 
@@ -143,7 +158,7 @@ export default function BlogsManager() {
 
       if (!res.ok) {
         const err = await res.json();
-        alert(err.message || "Failed to save blog");
+        toast.error(err.message || "Failed to save blog");
         return;
       }
 
@@ -152,7 +167,7 @@ export default function BlogsManager() {
       loadBlogs();
     } catch (err) {
       console.error("SAVE ERROR:", err);
-      alert("Failed to save blog");
+      toast.error("Failed to save blog");
     } finally {
       setSaving(false);
     }
@@ -358,7 +373,7 @@ export default function BlogsManager() {
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{blog.author || "Unknown"}</span>
                     <span>&middot;</span>
-                    <span>{formatDate(blog.date || blog.createdAt)}</span>
+                    <span>{formatDate(blog.date || blog.createdAt || "")}</span>
                   </div>
 
                   {/* Excerpt */}

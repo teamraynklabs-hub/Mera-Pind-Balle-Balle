@@ -23,14 +23,29 @@ import {
   MapPin,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
+
+interface Story {
+  _id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  name: string;
+  author: string;
+  location: string;
+  tags: string[];
+  featured: boolean;
+  isPublished: boolean;
+  image?: string;
+}
 
 export default function StoriesManager() {
-  const [stories, setStories] = useState<any[]>([]);
+  const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [open, setOpen] = useState(false);
-  const [editingStory, setEditingStory] = useState<any>(null);
+  const [editingStory, setEditingStory] = useState<Story | null>(null);
   const [previewImage, setPreviewImage] = useState("");
 
   const [form, setForm] = useState({
@@ -68,22 +83,22 @@ export default function StoriesManager() {
   }, []);
 
   /* ========================= FORM ========================= */
-  function handleChange(e: any) {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    const target = e.target;
+    const name = target.name;
+    const value = target instanceof HTMLInputElement && target.type === "checkbox" ? target.checked : target.value;
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleFileChange(e: any) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (previewImage.startsWith("blob:")) URL.revokeObjectURL(previewImage);
     setPreviewImage(URL.createObjectURL(file));
     setForm((prev) => ({ ...prev, image: file }));
   }
 
-  function startEdit(item: any) {
+  function startEdit(item: Story) {
     setEditingStory(item);
     setForm({
       title: item.title || "",
@@ -121,11 +136,11 @@ export default function StoriesManager() {
   /* ========================= SUBMIT ========================= */
   async function handleSubmit() {
     if (!form.title || !form.excerpt || !form.content) {
-      alert("Title, excerpt, and content are required");
+      toast.error("Title, excerpt, and content are required");
       return;
     }
     if (!editingStory && !form.image) {
-      alert("Image is required for new stories");
+      toast.error("Image is required for new story");
       return;
     }
 
@@ -158,7 +173,7 @@ export default function StoriesManager() {
       await loadStories();
     } catch (err) {
       console.error("STORY SAVE ERROR:", err);
-      alert("Failed to save story");
+      toast.error("Failed to save story");
     } finally {
       setSaving(false);
     }

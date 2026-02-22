@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef, type FormEvent } from "react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { MapPin, Phone, Mail, Send, Clock, Globe, Building } from "lucide-react";
 import { motion, useInView } from "motion/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
+import { ContactFormSchema, type ContactFormInput } from "@/lib/validations/contact";
 
 /* ── Types ── */
 
@@ -86,12 +90,14 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
   /* Form state */
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
+
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    reset,
+    formState: { errors: formErrors },
+  } = useForm<ContactFormInput>({
+    resolver: zodResolver(ContactFormSchema),
   });
 
   /* ── Fetch fresh data on mount for real-time updates ── */
@@ -111,20 +117,13 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
     fetchData();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (formData: ContactFormInput) => {
     setLoading(true);
     try {
       const base = getBaseUrl();
-      await axios.post(`${base}/api/contact`, form);
+      await axios.post(`${base}/api/contact`, formData);
       setSent(true);
-      setForm({ name: "", email: "", phone: "", subject: "", message: "" });
+      reset();
       setTimeout(() => setSent(false), 5000);
     } catch {
       /* silent */
@@ -136,6 +135,9 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
   const inputBase =
     "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-border text-foreground placeholder:text-muted-foreground/60 text-sm transition-all duration-300 focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20";
 
+  const inputError =
+    "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-red-500 text-foreground placeholder:text-muted-foreground/60 text-sm transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20";
+
   return (
     <>
       {/* ── PAGE HERO ── */}
@@ -145,9 +147,11 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
           {data.hero.subtitle}
         </p>
         {data.hero.image && (
-          <img
+          <Image
             src={data.hero.image}
             alt={data.hero.title}
+            width={1200}
+            height={400}
             className="mt-8 w-full max-w-4xl mx-auto rounded-2xl object-cover max-h-80"
           />
         )}
@@ -191,7 +195,7 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
                   </motion.div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={rhfHandleSubmit(onSubmit)} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-sm font-medium text-foreground/80 mb-2">
@@ -199,13 +203,13 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
                       </label>
                       <input
                         type="text"
-                        name="name"
                         placeholder="Your full name"
-                        className={inputBase}
-                        value={form.name}
-                        onChange={handleChange}
-                        required
+                        className={formErrors.name ? inputError : inputBase}
+                        {...register("name")}
                       />
+                      {formErrors.name && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.name.message}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground/80 mb-2">
@@ -213,13 +217,13 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
                       </label>
                       <input
                         type="email"
-                        name="email"
                         placeholder="you@example.com"
-                        className={inputBase}
-                        value={form.email}
-                        onChange={handleChange}
-                        required
+                        className={formErrors.email ? inputError : inputBase}
+                        {...register("email")}
                       />
+                      {formErrors.email && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.email.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -230,12 +234,13 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
                       </label>
                       <input
                         type="tel"
-                        name="phone"
                         placeholder="+91 XXXXX XXXXX"
-                        className={inputBase}
-                        value={form.phone}
-                        onChange={handleChange}
+                        className={formErrors.phone ? inputError : inputBase}
+                        {...register("phone")}
                       />
+                      {formErrors.phone && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.phone.message}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground/80 mb-2">
@@ -243,13 +248,13 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
                       </label>
                       <input
                         type="text"
-                        name="subject"
                         placeholder="What is this about?"
-                        className={inputBase}
-                        value={form.subject}
-                        onChange={handleChange}
-                        required
+                        className={formErrors.subject ? inputError : inputBase}
+                        {...register("subject")}
                       />
+                      {formErrors.subject && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.subject.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -258,14 +263,14 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
                       Message
                     </label>
                     <textarea
-                      name="message"
                       placeholder="Tell us how we can help..."
                       rows={5}
-                      className={`${inputBase} resize-none`}
-                      value={form.message}
-                      onChange={handleChange}
-                      required
+                      className={`${formErrors.message ? inputError : inputBase} resize-none`}
+                      {...register("message")}
                     />
+                    {formErrors.message && (
+                      <p className="text-xs text-destructive mt-1">{formErrors.message.message}</p>
+                    )}
                   </div>
 
                   <button

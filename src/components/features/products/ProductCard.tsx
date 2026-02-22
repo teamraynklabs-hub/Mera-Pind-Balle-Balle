@@ -19,7 +19,9 @@ interface ProductCardProps {
   };
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+import { memo } from "react";
+
+function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group bg-card border rounded-2xl overflow-hidden shadow-(--shadow-soft) hover:shadow-(--shadow-deep) hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
       {/* Image Section */}
@@ -124,3 +126,5 @@ export default function ProductCard({ product }: ProductCardProps) {
     </div>
   );
 }
+
+export default memo(ProductCard);

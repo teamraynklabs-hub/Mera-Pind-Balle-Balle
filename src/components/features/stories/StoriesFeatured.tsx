@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight } from "lucide-react";
@@ -49,12 +50,12 @@ export default function StoriesFeatured({ story }: StoriesFeaturedProps) {
           className="group"
         >
           <div className="relative rounded-2xl overflow-hidden shadow-[var(--shadow-deep)] border aspect-[4/3] bg-muted">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={story.image}
               alt={story.title}
-              className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-700"
-              loading="lazy"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </motion.div>

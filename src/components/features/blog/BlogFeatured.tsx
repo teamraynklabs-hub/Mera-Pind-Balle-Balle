@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import { motion, useInView } from "motion/react";
@@ -37,10 +38,12 @@ export default function BlogFeatured({ post }: BlogFeaturedProps) {
             <span className="absolute top-4 left-4 z-10 px-4 py-1.5 rounded-full bg-[#D4A336] text-white text-xs font-semibold tracking-wide uppercase">
               Featured
             </span>
-            <img
+            <Image
               src={post.image}
               alt={post.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
 

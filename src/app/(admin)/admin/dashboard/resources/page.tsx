@@ -25,6 +25,7 @@ import {
   Download,
   Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const CATEGORY_OPTIONS = [
   "Catalog",
@@ -50,13 +51,24 @@ function getFileIcon(fileType: string) {
   }
 }
 
+interface Resource {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  fileType: string;
+  size: string;
+  isPublished: boolean;
+  fileUrl?: string;
+}
+
 export default function ResourcesManager() {
-  const [resources, setResources] = useState<any[]>([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<Resource | null>(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -90,21 +102,20 @@ export default function ResourcesManager() {
   }, []);
 
   /* ========================= FORM ========================= */
-  function handleChange(e: any) {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    const target = e.target;
+    const name = target.name;
+    const value = target instanceof HTMLInputElement && target.type === "checkbox" ? target.checked : target.value;
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleFileChange(e: any) {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setForm((prev) => ({ ...prev, file }));
   }
 
-  function startEdit(item: any) {
+  function startEdit(item: Resource) {
     setEditing(item);
     setForm({
       title: item.title || "",
@@ -134,7 +145,7 @@ export default function ResourcesManager() {
   /* ========================= SUBMIT ========================= */
   async function handleSubmit() {
     if (!form.title.trim()) {
-      alert("Title is required");
+      toast.error("Title is required");
       return;
     }
 
@@ -164,7 +175,7 @@ export default function ResourcesManager() {
       await loadResources();
     } catch (err) {
       console.error("RESOURCE SAVE ERROR:", err);
-      alert("Failed to save resource");
+      toast.error("Failed to save resource");
     } finally {
       setSaving(false);
     }

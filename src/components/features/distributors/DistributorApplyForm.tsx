@@ -90,14 +90,6 @@ export default function DistributorApplyForm() {
         website: "", // not collected in this form
       };
 
-      /* temporary: log extra fields until backend supports them */
-      console.log("Distributor extra fields:", {
-        location: form.location,
-        businessType: form.businessType,
-        experience: form.experience,
-        about: form.about,
-      });
-
       await axios.post(`${base}/api/distributors`, payload);
 
       setSubmitted(true);
@@ -111,12 +103,10 @@ export default function DistributorApplyForm() {
         about: "",
       });
       setTimeout(() => setSubmitted(false), 6000);
-    } catch (err: any) {
-      console.error("Distributor submit error:", err);
-      setError(
-        err.response?.data?.error ||
-          "Something went wrong. Please try again."
-      );
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }

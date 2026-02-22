@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Trash2, Edit3, Save, X, Upload } from "lucide-react";
+import { PlusCircle, Trash2, Edit3, Save, X } from "lucide-react";
 import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl"; // ← assuming you have this
 
@@ -51,10 +51,10 @@ async function loadJobs() {
     const data = res.data.data || res.data;
     const jobsArray = Array.isArray(data.jobs) ? data.jobs : [];
     setJobs(jobsArray);
-  } catch (err: any) {
+  } catch (err) {
     console.error("Load jobs failed:", err);
     setError(
-      err.response?.data?.error || "Could not load job listings. Please try again."
+      (err instanceof Error ? err.message : null) || "Could not load job listings. Please try again."
     );
   } finally {
     setLoading(false);
@@ -124,9 +124,9 @@ async function loadJobs() {
 
       resetForm();
       await loadJobs(); // refresh list
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || "Operation failed");
+      setError(err instanceof Error ? err.message : "Operation failed");
     } finally {
       setLoading(false);
     }

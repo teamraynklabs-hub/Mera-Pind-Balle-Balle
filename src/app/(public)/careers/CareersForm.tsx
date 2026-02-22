@@ -1,42 +1,47 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import { motion } from "motion/react";
 import { Send } from "lucide-react";
 import ScrollReveal from "@/components/motion/ScrollReveal";
+import { careersSchema, type CareersFormInput } from "@/lib/validations/careers";
 
 const inputClasses =
   "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-border text-foreground placeholder:text-muted-foreground/60 text-sm transition-all duration-300 focus:outline-none focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)]/20";
 
-export default function CareersForm() {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    position: "",
-    message: "",
-  });
+const errorInputClasses =
+  "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-red-500 text-foreground placeholder:text-muted-foreground/60 text-sm transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20";
 
+export default function CareersForm() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  const submitForm = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CareersFormInput>({
+    resolver: zodResolver(careersSchema),
+  });
+
+  const onSubmit = async (data: CareersFormInput) => {
     setLoading(true);
-    setError(null);
+    setApiError(null);
 
     try {
       const base = getBaseUrl();
-
       const payload = {
-        name: form.name.trim(),
-        email: form.email.trim().toLowerCase(),
-        phone: form.phone.trim(),
-        position: form.position.trim(),
-        message: form.message.trim() || undefined,
+        name: data.name,
+        email: data.email,
+        phone: data.phone || undefined,
+        position: data.position,
+        message: data.message || undefined,
       };
 
       await axios.post(`${base}/api/careers`, payload, {
@@ -44,14 +49,13 @@ export default function CareersForm() {
       });
 
       setSent(true);
-      setForm({ name: "", email: "", phone: "", position: "", message: "" });
-    } catch (err: any) {
-      console.error("CAREERS FORM ERROR:", err);
+      reset();
+    } catch (err) {
       const msg =
-        err.response?.data?.error ||
-        err.message ||
-        "Failed to submit application. Please try again.";
-      setError(msg);
+        err instanceof Error
+          ? err.message
+          : "Failed to submit application. Please try again.";
+      setApiError(msg);
     } finally {
       setLoading(false);
     }
@@ -86,17 +90,17 @@ export default function CareersForm() {
               </motion.div>
             )}
 
-            {error && (
+            {apiError && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="p-4 mb-6 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-sm"
               >
-                {error}
+                {apiError}
               </motion.div>
             )}
 
-            <form onSubmit={submitForm} className="grid md:grid-cols-2 gap-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Full Name <span className="text-[var(--gold)]">*</span>
@@ -104,11 +108,12 @@ export default function CareersForm() {
                 <input
                   type="text"
                   placeholder="Your Name"
-                  required
-                  className={inputClasses}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className={errors.name ? errorInputClasses : inputClasses}
+                  {...register("name")}
                 />
+                {errors.name && (
+                  <p className="text-xs text-destructive mt-1">{errors.name.message}</p>
+                )}
               </div>
 
               <div>
@@ -118,11 +123,12 @@ export default function CareersForm() {
                 <input
                   type="email"
                   placeholder="Email Address"
-                  required
-                  className={inputClasses}
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className={errors.email ? errorInputClasses : inputClasses}
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+                )}
               </div>
 
               <div>
@@ -132,10 +138,12 @@ export default function CareersForm() {
                 <input
                   type="tel"
                   placeholder="Phone Number"
-                  className={inputClasses}
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className={errors.phone ? errorInputClasses : inputClasses}
+                  {...register("phone")}
                 />
+                {errors.phone && (
+                  <p className="text-xs text-destructive mt-1">{errors.phone.message}</p>
+                )}
               </div>
 
               <div>
@@ -146,13 +154,12 @@ export default function CareersForm() {
                 <input
                   type="text"
                   placeholder="e.g. Field Coordinator, Marketing Executive"
-                  required
-                  className={inputClasses}
-                  value={form.position}
-                  onChange={(e) =>
-                    setForm({ ...form, position: e.target.value })
-                  }
+                  className={errors.position ? errorInputClasses : inputClasses}
+                  {...register("position")}
                 />
+                {errors.position && (
+                  <p className="text-xs text-destructive mt-1">{errors.position.message}</p>
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -163,12 +170,12 @@ export default function CareersForm() {
                 <textarea
                   placeholder="Tell us about yourself, your experience, and why you'd like to join..."
                   rows={5}
-                  className={inputClasses + " resize-none"}
-                  value={form.message}
-                  onChange={(e) =>
-                    setForm({ ...form, message: e.target.value })
-                  }
+                  className={`${errors.message ? errorInputClasses : inputClasses} resize-none`}
+                  {...register("message")}
                 />
+                {errors.message && (
+                  <p className="text-xs text-destructive mt-1">{errors.message.message}</p>
+                )}
               </div>
 
               <div className="md:col-span-2 flex justify-end pt-2">

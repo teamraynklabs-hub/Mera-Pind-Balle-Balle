@@ -18,6 +18,11 @@ export const ContactFormSchema = z.object({
     .max(20, "Phone number is too long")
     .optional()
     .or(z.literal("")),
+  subject: z
+    .string()
+    .min(2, "Subject is required")
+    .max(200, "Subject is too long")
+    .trim(),
   message: z
     .string()
     .min(10, "Message must be at least 10 characters")

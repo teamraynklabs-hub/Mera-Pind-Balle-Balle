@@ -31,8 +31,8 @@ export default function ContactForm() {
         phone: "",
         message: "",
       });
-    } catch (error) {
-      console.error("CONTACT FORM ERROR:", error);
+    } catch {
+      // Silently handled — error UI can be added
     } finally {
       setLoading(false);
     }

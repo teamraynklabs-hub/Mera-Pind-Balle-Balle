@@ -1,8 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
+
+const CULTURE_IMAGE = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80";
 
 const culturePoints = [
   "Collaborative and inclusive environment",
@@ -63,12 +66,12 @@ export default function CareersCulture() {
           transition={{ duration: 0.7, delay: 0.1, ease }}
         >
           <div className="relative rounded-2xl overflow-hidden shadow-[var(--shadow-deep)] border aspect-[4/3] bg-muted">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+            <Image
+              src={CULTURE_IMAGE}
               alt="Our team culture"
-              className="w-full h-full object-cover absolute inset-0"
-              loading="lazy"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </motion.div>

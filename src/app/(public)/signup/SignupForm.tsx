@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useUserAuth } from "@/context/UserAuthContext";
 import { toast } from "sonner";
 import { motion } from "motion/react";
-
-type FieldErrors = Partial<Record<"name" | "email" | "phone" | "password" | "confirmPassword", string>>;
+import { signupSchema, type SignupFormInput } from "@/lib/validations/signup";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -19,56 +20,31 @@ export default function SignupForm() {
   const redirectTo = searchParams.get("redirect") || "/";
   const { signup, user } = useUserAuth();
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-  });
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [errors, setErrors] = useState<FieldErrors>({});
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormInput>({
+    resolver: zodResolver(signupSchema),
+  });
 
   if (user) {
     router.replace(redirectTo);
     return null;
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof FieldErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  }
-
-  function validate(): boolean {
-    const e: FieldErrors = {};
-    if (!form.name.trim()) e.name = "Full name is required";
-    if (!form.email.trim()) e.email = "Email is required";
-    if (!form.phone.trim()) e.phone = "Phone number is required";
-    else if (!/^\d{10}$/.test(form.phone.trim())) e.phone = "Enter a valid 10-digit number";
-    if (!form.password) e.password = "Password is required";
-    else if (form.password.length < 6) e.password = "Minimum 6 characters";
-    if (!form.confirmPassword) e.confirmPassword = "Confirm your password";
-    else if (form.password !== form.confirmPassword) e.confirmPassword = "Passwords do not match";
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  }
-
-  async function handleSubmit(ev: React.FormEvent) {
-    ev.preventDefault();
+  async function onSubmit(data: SignupFormInput) {
     if (submitting) return;
-    if (!validate()) return;
-
     setSubmitting(true);
     const result = await signup({
-      name: form.name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      password: form.password,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      password: data.password,
     });
     setSubmitting(false);
 
@@ -80,7 +56,7 @@ export default function SignupForm() {
     }
   }
 
-  function fieldClass(field: keyof FieldErrors) {
+  function fieldClass(field: keyof typeof errors) {
     return errors[field] ? "border-red-500 focus-visible:ring-red-500/30" : "";
   }
 
@@ -98,50 +74,44 @@ export default function SignupForm() {
             Sign up to start shopping
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name *</Label>
               <Input
                 id="name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
                 placeholder="Your full name"
                 autoComplete="name"
                 autoFocus
                 className={fieldClass("name")}
+                {...register("name")}
               />
-              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
-                name="email"
                 type="email"
-                value={form.email}
-                onChange={handleChange}
                 placeholder="you@example.com"
                 autoComplete="email"
                 className={fieldClass("email")}
+                {...register("email")}
               />
-              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+              {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="phone">Phone *</Label>
               <Input
                 id="phone"
-                name="phone"
                 type="tel"
-                value={form.phone}
-                onChange={handleChange}
                 placeholder="10-digit mobile number"
                 autoComplete="tel"
                 className={fieldClass("phone")}
+                {...register("phone")}
               />
-              {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+              {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -149,13 +119,11 @@ export default function SignupForm() {
               <div className="relative">
                 <Input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
-                  value={form.password}
-                  onChange={handleChange}
                   placeholder="Min 6 characters"
                   autoComplete="new-password"
                   className={`pr-10 ${fieldClass("password")}`}
+                  {...register("password")}
                 />
                 <button
                   type="button"
@@ -166,7 +134,7 @@ export default function SignupForm() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -174,13 +142,11 @@ export default function SignupForm() {
               <div className="relative">
                 <Input
                   id="confirmPassword"
-                  name="confirmPassword"
                   type={showConfirm ? "text" : "password"}
-                  value={form.confirmPassword}
-                  onChange={handleChange}
                   placeholder="Repeat password"
                   autoComplete="new-password"
                   className={`pr-10 ${fieldClass("confirmPassword")}`}
+                  {...register("confirmPassword")}
                 />
                 <button
                   type="button"
@@ -191,7 +157,7 @@ export default function SignupForm() {
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>}
             </div>
 
             <Button

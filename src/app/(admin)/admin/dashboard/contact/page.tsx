@@ -109,7 +109,7 @@ export default function ContactDashboard() {
             sectionTitle: json.data.contactInfo?.sectionTitle ?? "",
             sectionSubtitle: json.data.contactInfo?.sectionSubtitle ?? "",
             items: Array.isArray(json.data.contactInfo?.items)
-              ? json.data.contactInfo.items.map((item: any) => ({
+              ? json.data.contactInfo.items.map((item: ContactInfoItem) => ({
                   icon: item.icon ?? "mail",
                   title: item.title ?? "",
                   lines: Array.isArray(item.lines) ? item.lines : [],
@@ -125,7 +125,7 @@ export default function ContactDashboard() {
             sectionTitle: json.data.faqs?.sectionTitle ?? "",
             sectionSubtitle: json.data.faqs?.sectionSubtitle ?? "",
             items: Array.isArray(json.data.faqs?.items)
-              ? json.data.faqs.items.map((item: any) => ({
+              ? json.data.faqs.items.map((item: FaqItem) => ({
                   question: item.question ?? "",
                   answer: item.answer ?? "",
                 }))

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 import { FALLBACK_BANNER } from "./distributorData";
 
@@ -19,11 +20,13 @@ export default function DistributorHero({
     <section className="relative overflow-hidden">
       {/* Banner Image */}
       <div className="relative w-full h-[50vh] min-h-[320px] max-h-[480px]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={img}
           alt="Become a Distributor"
-          className="w-full h-full object-cover"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
         />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />

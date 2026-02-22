@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 import { Target } from "lucide-react";
 
@@ -31,12 +32,12 @@ export default function AboutMission({ title, description, image }: AboutMission
           transition={{ duration: 0.7, ease }}
         >
           <div className="relative rounded-2xl overflow-hidden shadow-[var(--shadow-deep)] border aspect-[4/3] bg-muted">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={img}
               alt={heading}
-              className="w-full h-full object-cover absolute inset-0"
-              loading="lazy"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </motion.div>

@@ -30,7 +30,7 @@ interface HomeData {
   allProducts: any[];
 }
 
-const POLL_INTERVAL = 30_000; // 30 seconds
+const POLL_INTERVAL = 120_000; // 2 minutes
 
 function LoadingSkeleton() {
   return (

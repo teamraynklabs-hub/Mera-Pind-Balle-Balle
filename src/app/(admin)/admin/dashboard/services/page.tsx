@@ -55,8 +55,8 @@ export default function ServicesManager() {
       }
 
       setServices(services);
-    } catch (err: any) {
-      console.error("Failed to fetch services:", err?.message || err);
+    } catch (err) {
+      console.error("Failed to fetch services:", err instanceof Error ? err.message : err);
       toast.error("Could not load services. Please try again.");
       setServices([]);
     } finally {
@@ -94,9 +94,9 @@ export default function ServicesManager() {
       } else {
         throw new Error("No URL in response");
       }
-    } catch (err: any) {
-      console.error("Image upload error:", err?.message || err);
-      toast.error(err?.message || "Failed to upload image");
+    } catch (err) {
+      console.error("Image upload error:", err instanceof Error ? err.message : err);
+      toast.error(err instanceof Error ? err.message : "Failed to upload image");
     } finally {
       setSubmitting(false);
     }
@@ -128,7 +128,7 @@ export default function ServicesManager() {
       toast.success(editing ? "Service updated" : "Service added");
       fetchServices();
       closeForm();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Save service error:", err);
       toast.error("Failed to save service");
     } finally {
@@ -146,7 +146,7 @@ export default function ServicesManager() {
 
       toast.success("Service deleted");
       fetchServices();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Delete error:", err);
       toast.error("Failed to delete service");
     }

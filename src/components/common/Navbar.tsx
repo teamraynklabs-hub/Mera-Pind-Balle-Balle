@@ -40,7 +40,7 @@ const FALLBACK: NavbarData = {
   showThemeToggle: true,
 };
 
-const POLL_INTERVAL = 30_000;
+const POLL_INTERVAL = 120_000;
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
