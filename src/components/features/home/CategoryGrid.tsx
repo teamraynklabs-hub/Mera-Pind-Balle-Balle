@@ -8,6 +8,7 @@ import ScrollReveal from "@/components/motion/ScrollReveal";
 interface CategoryWithImage {
   name: string;
   image?: string;
+  description?: string;
   productCount?: number;
 }
 
@@ -17,6 +18,25 @@ interface CategoryGridProps {
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
+// Fallback descriptions when backend doesn't provide them
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  "handwoven textiles": "Traditional handwoven fabrics crafted by rural women artisans",
+  "handcrafted jewelry": "Elegant jewelry pieces made with traditional techniques",
+  "home decor": "Artisanal home decor items bringing rural charm to your space",
+  "natural skincare": "Organic skincare products made from traditional recipes",
+  "organic food": "Pure organic food products sourced from rural farms",
+  "pottery": "Handcrafted pottery items with traditional rural designs",
+  "bamboo crafts": "Eco-friendly bamboo products handmade by skilled artisans",
+  "clothing": "Traditional clothing crafted with heritage techniques",
+};
+
+function getCategoryDescription(name: string, description?: string): string {
+  if (description) return description;
+  const key = name.toLowerCase().trim();
+  if (CATEGORY_DESCRIPTIONS[key]) return CATEGORY_DESCRIPTIONS[key];
+  return `Explore our curated ${name.toLowerCase()} collection`;
+}
+
 export default function CategoryGrid({ categories }: CategoryGridProps) {
   if (categories.length === 0) return null;
 
@@ -24,9 +44,6 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
     <section className="bg-accent/30">
       <div className="container mx-auto px-4 md:px-8 lg:px-12 py-20 md:py-28">
         <ScrollReveal className="text-center mb-14">
-          <p className="text-sm uppercase tracking-[0.2em] text-primary font-medium mb-3">
-            Collections
-          </p>
           <h2
             className="text-3xl sm:text-4xl font-bold tracking-tight"
             style={{ fontFamily: "var(--font-heading)" }}
@@ -34,7 +51,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
             Shop by Category
           </h2>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Browse our curated collections of handcrafted, sustainable products
+            Explore our curated collection of handcrafted products
           </p>
         </ScrollReveal>
 
@@ -70,16 +87,14 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
                 {/* Content at bottom */}
                 <div className="absolute inset-x-0 bottom-0 p-6">
                   <h3
-                    className="text-xl font-bold text-white mb-1"
+                    className="text-xl font-bold text-white mb-1.5"
                     style={{ fontFamily: "var(--font-heading)" }}
                   >
                     {cat.name}
                   </h3>
-                  {cat.productCount !== undefined && cat.productCount > 0 && (
-                    <p className="text-white/70 text-sm">
-                      {cat.productCount} {cat.productCount === 1 ? "Product" : "Products"}
-                    </p>
-                  )}
+                  <p className="text-white/70 text-sm leading-relaxed">
+                    {getCategoryDescription(cat.name, cat.description)}
+                  </p>
                 </div>
               </Link>
             </motion.div>

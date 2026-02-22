@@ -5,15 +5,52 @@ import Product from "@/lib/models/Product.model";
 
 import HeroSection from "@/components/features/home/HeroSection";
 import TrustSection from "@/components/features/home/TrustSection";
-import MissionSection from "@/components/features/home/MissionSection";
 import CategoryGrid from "@/components/features/home/CategoryGrid";
-import FeaturedProductsGrid from "@/components/features/home/FeaturedProductsGrid";
-import ViewAllProductsStrip from "@/components/features/home/ViewAllProductsStrip";
-import TestimonialsSection from "@/components/features/home/TestimonialsSection";
+import HomeProductsCarousel from "@/components/features/home/HomeProductsCarousel";
+import HomeFeaturedProducts from "@/components/features/home/HomeFeaturedProducts";
+import HomeTestimonials from "@/components/features/home/HomeTestimonials";
 import ClosingCTA from "@/components/features/home/ClosingCTA";
-import ScrollReveal from "@/components/motion/ScrollReveal";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
+
+/* ── Dummy / fallback data (used when backend data is empty) ── */
+
+const DUMMY_IMPACT = [
+  { label: "Women Artisans Empowered", value: "500+" },
+  { label: "Villages Reached", value: "50+" },
+  { label: "Handcrafted Products", value: "10,000+" },
+  { label: "Impact Created", value: "₹2 Crore+" },
+];
+
+const DUMMY_CATEGORIES = [
+  { name: "Handwoven Textiles", image: "", description: "Traditional handwoven fabrics crafted by rural women artisans" },
+  { name: "Handcrafted Jewelry", image: "", description: "Elegant jewelry pieces made with traditional techniques" },
+  { name: "Home Decor", image: "", description: "Artisanal home decor items bringing rural charm to your space" },
+  { name: "Natural Skincare", image: "", description: "Organic skincare products made from traditional recipes" },
+];
+
+const DUMMY_TESTIMONIALS = [
+  {
+    name: "Ananya Malhotra",
+    role: "Mumbai, Maharashtra",
+    quote: "The quality of the handwoven dupatta I received exceeded all expectations. You can feel the love and craftsmanship in every thread.",
+    avatar: "",
+  },
+  {
+    name: "Vikram Singh",
+    role: "Delhi",
+    quote: "I bought the bamboo wall hanging for my home office and it's become a conversation starter. The craftsmanship is incredible.",
+    avatar: "",
+  },
+  {
+    name: "Priya Desai",
+    role: "Bangalore, Karnataka",
+    quote: "The natural skincare products are amazing! My skin has never felt better. I love that they're made using traditional recipes.",
+    avatar: "",
+  },
+];
+
+/* ── Metadata ── */
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -50,6 +87,8 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+/* ── Page ── */
+
 export default async function HomePage() {
   await connectDB();
   const dashboard = await Dashboard.findOne({ isActive: true }).lean();
@@ -66,28 +105,30 @@ export default async function HomePage() {
     );
   }
 
+  // Dashboard data
   const impact = JSON.parse(JSON.stringify(dashboard.impact || []));
   const testimonials = JSON.parse(JSON.stringify((dashboard as any).testimonials || []));
-  const storySection = JSON.parse(JSON.stringify((dashboard as any).storySection || null));
 
   // Fetch featured products
   const featuredProducts = await Product.find({ isActive: true, isFeatured: true }).lean();
   const serializedProducts = JSON.parse(JSON.stringify(featuredProducts));
 
-  // Build categories with images from first product in each category
+  // Fetch all active products
   const allProducts = await Product.find({ isActive: true })
-    .select("category image")
+    .sort({ createdAt: -1 })
     .lean();
+  const allProductsSerialized = JSON.parse(JSON.stringify(allProducts));
 
+  // Build categories from products
   const categoryMap = new Map<string, { image?: string; count: number }>();
-  for (const p of allProducts) {
-    const cat = (p as any).category?.trim();
+  for (const p of allProductsSerialized) {
+    const cat = p.category?.trim();
     if (!cat) continue;
     const existing = categoryMap.get(cat);
     if (existing) {
       existing.count++;
     } else {
-      categoryMap.set(cat, { image: (p as any).image, count: 1 });
+      categoryMap.set(cat, { image: p.image, count: 1 });
     }
   }
 
@@ -99,79 +140,49 @@ export default async function HomePage() {
 
   const heroImage = dashboard.hero?.image || "/photo1.png";
 
+  // Use real data or fallback to dummy
+  const finalImpact = impact.length > 0 ? impact : DUMMY_IMPACT;
+  const finalCategories = categories.length > 0 ? categories : DUMMY_CATEGORIES;
+  const finalTestimonials = testimonials.length > 0 ? testimonials : DUMMY_TESTIMONIALS;
+
   return (
     <main className="flex flex-col">
 
-      {/* 1️⃣ HERO — Full Screen Story Entry */}
+      {/* 1️⃣ HERO */}
       <HeroSection
-        title={dashboard.hero?.title || "Empowering Rural Communities"}
-        subtitle={dashboard.hero?.subtitle || "Sustainable products, meaningful impact"}
+        title={dashboard.hero?.title || "Empowering Rural Women Through Traditional Crafts"}
+        subtitle={dashboard.hero?.subtitle || "Discover handcrafted treasures that tell stories of heritage, skill, and empowerment"}
         image={heroImage}
         primaryCTA={{
-          label: dashboard.hero?.primaryCTA?.label || "Explore Products",
+          label: dashboard.hero?.primaryCTA?.label || "Shop Collection",
           link: dashboard.hero?.primaryCTA?.link || "/products",
         }}
         secondaryCTA={{
-          label: dashboard.hero?.secondaryCTA?.label || "Our Initiatives",
-          link: dashboard.hero?.secondaryCTA?.link || "/services",
+          label: dashboard.hero?.secondaryCTA?.label || "Read Stories",
+          link: dashboard.hero?.secondaryCTA?.link || "/stories",
         }}
       />
 
-      {/* 2️⃣ IMPACT STATS — Trust Builder */}
-      {impact.length > 0 && (
-        <TrustSection impact={impact} />
+      {/* 2️⃣ IMPACT STATS */}
+      <TrustSection impact={finalImpact} />
+
+      {/* 3️⃣ SHOP BY CATEGORY */}
+      <CategoryGrid categories={finalCategories} />
+
+      {/* 4️⃣ OUR PRODUCTS — Horizontal Scroll */}
+      {allProductsSerialized.length > 0 && (
+        <HomeProductsCarousel products={allProductsSerialized} />
       )}
 
-      {/* 3️⃣ MISSION / STORY SPLIT */}
-      {storySection && storySection.title && (
-        <MissionSection
-          title={storySection.title}
-          description={storySection.description}
-          image={storySection.image || undefined}
-          link={storySection.link || "/stories"}
-        />
-      )}
-
-      {/* 4️⃣ SHOP BY CATEGORY */}
-      {categories.length > 0 && (
-        <CategoryGrid categories={categories} />
-      )}
-
-      {/* 5️⃣ FEATURED PRODUCTS */}
+      {/* 5️⃣ FEATURED COLLECTION */}
       {serializedProducts.length > 0 && (
-        <FeaturedProductsGrid products={serializedProducts} />
+        <HomeFeaturedProducts products={serializedProducts} />
       )}
 
-      {/* 6️⃣ VIEW ALL PRODUCTS STRIP */}
-      {serializedProducts.length > 0 && (
-        <ViewAllProductsStrip />
-      )}
+      {/* 6️⃣ CUSTOMER TESTIMONIALS */}
+      <HomeTestimonials testimonials={finalTestimonials} />
 
-      {/* 7️⃣ TESTIMONIALS — Social Proof */}
-      {testimonials.length > 0 && (
-        <section className="bg-accent/30">
-          <div className="container mx-auto px-4 md:px-8 lg:px-12 py-20 md:py-28">
-            <ScrollReveal className="text-center mb-14">
-              <p className="text-sm uppercase tracking-[0.2em] text-primary font-medium mb-3">
-                Testimonials
-              </p>
-              <h2
-                className="text-3xl sm:text-4xl font-bold tracking-tight"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                What People Say
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Hear from the communities and customers we serve
-              </p>
-            </ScrollReveal>
-
-            <TestimonialsSection testimonials={testimonials} />
-          </div>
-        </section>
-      )}
-
-      {/* 8️⃣ FINAL CTA — Conversion */}
+      {/* 7️⃣ FINAL CTA */}
       <ClosingCTA
         title={dashboard.cta?.title}
         description={dashboard.cta?.description}
