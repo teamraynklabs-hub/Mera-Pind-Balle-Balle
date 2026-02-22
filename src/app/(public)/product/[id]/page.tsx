@@ -2,15 +2,25 @@ import { connectDB } from "@/lib/db";
 import Product from "@/lib/models/Product.model";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Shield, Truck, RotateCcw } from "lucide-react";
+import {
+  Star,
+  Truck,
+  RotateCcw,
+  ShieldCheck,
+  ChevronRight,
+  Check,
+} from "lucide-react";
 import ProductActions from "@/components/features/products/ProductActions";
+import ProductImageGallery from "@/components/features/products/ProductImageGallery";
+import ProductTabs from "@/components/features/products/ProductTabs";
 import RelatedProducts from "@/components/features/products/RelatedProducts";
 import ScrollReveal from "@/components/motion/ScrollReveal";
+import { Badge } from "@/components/ui/badge";
 import { buildBreadcrumbJsonLd } from "@/lib/seo";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
+const baseUrl =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -29,9 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const productUrl = `${baseUrl}/product/${product._id}`;
 
-    const metaDescription = product.description.length > 150
-      ? product.description.slice(0, 150) + "..."
-      : product.description;
+    const metaDescription =
+      product.description.length > 150
+        ? product.description.slice(0, 150) + "..."
+        : product.description;
 
     return {
       title: `${product.name} | Mera Pind Balle Balle`,
@@ -71,17 +82,26 @@ export default async function ProductDetailPage({ params }: Props) {
   const relatedRaw = await Product.find({
     isActive: true,
     _id: { $ne: product._id },
+    ...(product.category ? { category: product.category } : {}),
   })
-    .select("name description price image")
+    .select("name description price image category stock isFeatured")
     .limit(8)
     .lean();
   const relatedProducts = JSON.parse(JSON.stringify(relatedRaw));
 
-  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+  const breadcrumbItems = [
     { name: "Home", url: baseUrl },
     { name: "Products", url: `${baseUrl}/products` },
-    { name: serialized.name, url: `${baseUrl}/product/${serialized._id}` },
-  ]);
+    ...(serialized.category
+      ? [{ name: serialized.category, url: `${baseUrl}/products` }]
+      : []),
+    {
+      name: serialized.name,
+      url: `${baseUrl}/product/${serialized._id}`,
+    },
+  ];
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems);
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -107,6 +127,25 @@ export default async function ProductDetailPage({ params }: Props) {
   };
 
   const inStock = serialized.stock !== 0;
+  const hasOriginalPrice =
+    serialized.originalPrice && serialized.originalPrice > serialized.price;
+  const discountPercent = hasOriginalPrice
+    ? Math.round(
+        ((serialized.originalPrice - serialized.price) /
+          serialized.originalPrice) *
+          100
+      )
+    : 0;
+
+  // Product details for the spec table
+  const details: { label: string; value: string }[] = [];
+  if (serialized.material)
+    details.push({ label: "Material", value: serialized.material });
+  if (serialized.color)
+    details.push({ label: "Color", value: serialized.color });
+  if (serialized.weight)
+    details.push({ label: "Weight", value: serialized.weight });
+  if (serialized.sku) details.push({ label: "SKU", value: serialized.sku });
 
   return (
     <main className="container mx-auto px-4 py-16 md:py-20">
@@ -119,88 +158,206 @@ export default async function ProductDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
-      {/* Back Link */}
-      <Link
-        href="/products"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-10 group"
-      >
-        <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-        Back to Products
-      </Link>
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-8 flex-wrap">
+        <Link
+          href="/"
+          className="hover:text-foreground transition-colors"
+        >
+          Home
+        </Link>
+        <ChevronRight size={14} />
+        <Link
+          href="/products"
+          className="hover:text-foreground transition-colors"
+        >
+          Products
+        </Link>
+        {serialized.category && (
+          <>
+            <ChevronRight size={14} />
+            <Link
+              href="/products"
+              className="hover:text-foreground transition-colors"
+            >
+              {serialized.category}
+            </Link>
+          </>
+        )}
+        <ChevronRight size={14} />
+        <span className="text-foreground font-medium truncate max-w-[200px]">
+          {serialized.name}
+        </span>
+      </nav>
 
       {/* Product Section */}
-      <div className="grid md:grid-cols-2 gap-10 lg:gap-16 items-start">
-        {/* Image */}
-        <div className="relative aspect-square w-full rounded-3xl overflow-hidden border bg-muted shadow-(--shadow-medium)">
-          <Image
-            src={serialized.image}
-            alt={serialized.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 90vw, 50vw"
-            priority
-          />
-        </div>
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-start">
+        {/* Image Gallery */}
+        <ProductImageGallery
+          mainImage={serialized.image}
+          images={serialized.images}
+          name={serialized.name}
+          discountPercent={discountPercent}
+        />
 
         {/* Info */}
         <ScrollReveal delay={0.15} y={16}>
           <div className="flex flex-col">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
+            {/* Category Badge */}
+            {serialized.category && (
+              <Badge
+                variant="outline"
+                className="w-fit mb-3 text-xs font-medium"
+              >
+                {serialized.category}
+              </Badge>
+            )}
+
+            {/* Product Name */}
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight mb-3">
               {serialized.name}
             </h1>
 
-            <div className="inline-flex items-baseline gap-2 mb-4">
+            {/* Rating */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={16}
+                    className="fill-yellow-400 text-yellow-400"
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-muted-foreground">(48 reviews)</span>
+            </div>
+
+            {/* Price */}
+            <div className="flex items-baseline gap-3 mb-4">
               <span className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">
                 ₹{serialized.price}
               </span>
+              {hasOriginalPrice && (
+                <>
+                  <span className="text-lg text-muted-foreground line-through tabular-nums">
+                    ₹{serialized.originalPrice}
+                  </span>
+                </>
+              )}
             </div>
 
-            {/* Stock Indicator */}
-            <div className="flex items-center gap-2 mb-5">
-              <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  inStock ? "bg-green-500" : "bg-destructive"
-                }`}
-              />
-              <span className={`text-sm font-medium ${
-                inStock ? "text-green-600 dark:text-green-400" : "text-destructive"
-              }`}>
-                {inStock ? "In Stock" : "Out of Stock"}
-              </span>
-            </div>
-
-            <p className="text-muted-foreground leading-relaxed mb-8 text-[15px]">
+            {/* Description */}
+            <p className="text-muted-foreground leading-relaxed mb-6 text-[15px]">
               {serialized.description}
             </p>
 
-            <ProductActions
-              product={{
-                _id: serialized._id,
-                name: serialized.name,
-                price: serialized.price,
-                image: serialized.image,
-              }}
-            />
+            {/* Product Details Table */}
+            {(details.length > 0 || inStock) && (
+              <div className="border-t pt-5 mb-6 space-y-3">
+                {details.map((detail) => (
+                  <div
+                    key={detail.label}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="text-muted-foreground">
+                      {detail.label}:
+                    </span>
+                    <span className="font-medium">{detail.value}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Availability:</span>
+                  <span
+                    className={`font-medium flex items-center gap-1.5 ${
+                      inStock
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-destructive"
+                    }`}
+                  >
+                    {inStock && <Check size={14} />}
+                    {inStock
+                      ? `${serialized.stock} in stock`
+                      : "Out of Stock"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            {inStock && (
+              <ProductActions
+                product={{
+                  _id: serialized._id,
+                  name: serialized.name,
+                  price: serialized.price,
+                  image: serialized.image,
+                  stock: serialized.stock,
+                }}
+              />
+            )}
+
+            {!inStock && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 text-center">
+                <p className="text-destructive font-medium">
+                  This product is currently out of stock
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Check back later or browse our other products
+                </p>
+              </div>
+            )}
 
             {/* Trust Badges */}
-            <div className="mt-8 pt-6 border-t grid grid-cols-3 gap-4">
-              <div className="flex flex-col items-center text-center gap-2">
-                <Shield size={20} className="text-primary" />
-                <span className="text-xs text-muted-foreground font-medium">Secure Checkout</span>
-              </div>
-              <div className="flex flex-col items-center text-center gap-2">
-                <Truck size={20} className="text-primary" />
-                <span className="text-xs text-muted-foreground font-medium">Free Shipping</span>
-              </div>
-              <div className="flex flex-col items-center text-center gap-2">
-                <RotateCcw size={20} className="text-primary" />
-                <span className="text-xs text-muted-foreground font-medium">Easy Returns</span>
+            <div className="mt-8 pt-6 border-t">
+              <div className="grid grid-cols-3 gap-4 bg-card border rounded-xl p-4">
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Truck size={18} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold">Free Shipping</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      On orders over ₹999
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <RotateCcw size={18} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold">Easy Returns</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      7-day return policy
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <ShieldCheck size={18} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold">Secure Payment</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      100% protected
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </ScrollReveal>
       </div>
 
+      {/* Product Tabs - Story, Care Instructions, Social Impact */}
+      <ProductTabs
+        story={serialized.story}
+        careInstructions={serialized.careInstructions}
+        socialImpact={serialized.socialImpact}
+        productName={serialized.name}
+      />
+
+      {/* Related Products */}
       {relatedProducts.length > 0 && (
         <RelatedProducts products={relatedProducts} />
       )}
