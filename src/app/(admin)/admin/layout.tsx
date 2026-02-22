@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import { AdminSessionProvider } from "@/components/admin/AdminSessionProvider";
+import { ModeToggle } from "@/components/ui/toggleBtn";
 import { Toaster } from "@/components/ui/sonner"
 import type { Metadata } from "next";
 
@@ -24,17 +25,6 @@ export default async function AdminLayout({
   return (
     <AdminSessionProvider>
       <div className="min-h-screen flex flex-col">
-        {/* ADMIN HEADER WITH LOGOUT */}
-        <header className="bg-black-900 text-white p-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold">Admin Dashboard</h1>
-            <p className="text-sm text-slate-400">
-              Logged in as: {session.user.email}
-            </p>
-          </div>
-          <AdminLogoutButton />
-        </header>
-
         {/* MAIN CONTENT */}
         <div className="flex-1">
           {children}

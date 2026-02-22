@@ -4,6 +4,19 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthSessionProvider } from "@/components/providers/AuthSessionProvider";
 import { CartProvider } from "@/context/CartContext";
 import { UserAuthProvider } from "@/context/UserAuthContext";
+import { Cormorant_Garamond, Inter } from 'next/font/google'
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-heading',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-body',
+})
 
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
@@ -84,7 +97,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className={`${cormorant.variable} ${inter.variable}`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

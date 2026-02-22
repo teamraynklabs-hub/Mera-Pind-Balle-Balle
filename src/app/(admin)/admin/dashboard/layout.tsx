@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ModeToggle } from "@/components/ui/toggleBtn";
+import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 
 import {
   Menu,
@@ -137,11 +139,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex-1 md:ml-64 min-w-0">
 
         {/* Mobile Topbar */}
-        <header className="sticky top-0 z-20 h-14 border-b bg-background/95 backdrop-blur flex items-center px-4 gap-4 md:hidden">
-          <button onClick={() => setOpen(true)} aria-label="Open menu">
-            <Menu size={24} />
-          </button>
-          <h1 className="font-semibold text-sm truncate">Admin Dashboard</h1>
+        <header className="sticky top-0 z-20 h-14 border-b bg-background/95 backdrop-blur flex items-center justify-between px-4 md:hidden">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setOpen(true)} aria-label="Open menu">
+              <Menu size={24} />
+            </button>
+            <h1 className="font-semibold text-sm truncate">Admin Panel</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <ModeToggle />
+            <AdminLogoutButton />
+          </div>
+        </header>
+
+        {/* Desktop Topbar */}
+        <header className="sticky top-0 z-20 h-12 border-b bg-background/95 backdrop-blur hidden md:flex items-center justify-end px-6 gap-3">
+          <ModeToggle />
+          <AdminLogoutButton />
         </header>
 
         {/* Page content */}
