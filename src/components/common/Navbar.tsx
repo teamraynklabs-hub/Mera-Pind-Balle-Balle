@@ -31,11 +31,11 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="w-full border-b bg-background/80 backdrop-blur-xl sticky top-0 z-50 shadow-xs">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="h-10 w-10 rounded-full overflow-hidden border shadow-xs">
+    <header className="w-full fixed top-0 z-50 bg-transparent backdrop-blur-md transition-all duration-300">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between relative">
+        {/* LEFT — Brand */}
+        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="h-10 w-10 rounded-full overflow-hidden border border-border/50 shadow-xs">
             <Image
               src="/logo.jpeg"
               alt="Brand Logo"
@@ -45,11 +45,16 @@ export default function Navbar() {
               suppressHydrationWarning
             />
           </div>
-          <span className="font-bold text-lg">MPBB</span>
+          <span
+            className="hidden sm:inline text-xl font-medium tracking-wide text-[#C8941F] dark:text-[#D4A336]"
+            style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+          >
+            Mera Pind Balle Balle
+          </span>
         </Link>
 
-        {/* DESKTOP MENU */}
-        <nav className="hidden md:flex items-center gap-1">
+        {/* CENTER — Navigation Links (Desktop) */}
+        <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -59,22 +64,23 @@ export default function Navbar() {
               <Link
                 key={item.title}
                 href={item.href}
-                className={`text-sm font-medium px-3 py-2 transition-colors relative after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${
+                className={`text-sm font-medium px-3 py-2 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${
                   isActive
                     ? "text-primary after:bg-primary after:scale-x-100"
-                    : "text-muted-foreground hover:text-foreground after:bg-foreground after:scale-x-0 hover:after:scale-x-100"
+                    : "text-foreground/70 hover:text-foreground after:bg-foreground after:scale-x-0 hover:after:scale-x-100"
                 }`}
               >
                 {item.title}
               </Link>
             );
           })}
+        </nav>
 
-          <div className="w-px h-6 bg-border mx-2" />
-
+        {/* RIGHT — Icons (Desktop) */}
+        <div className="hidden lg:flex items-center gap-1 shrink-0">
           <Link
             href="/cart"
-            className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+            className="relative p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
           >
             <ShoppingCart size={20} />
             {totalItems > 0 && (
@@ -87,7 +93,7 @@ export default function Navbar() {
           {user ? (
             <button
               onClick={logout}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
               title={`Logout (${user.name})`}
             >
               <LogOut size={20} />
@@ -95,7 +101,7 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+              className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
               title="Login"
             >
               <User size={20} />
@@ -103,11 +109,11 @@ export default function Navbar() {
           )}
 
           <ModeToggle />
-        </nav>
+        </div>
 
         {/* MOBILE BUTTON */}
         <button
-          className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
+          className="lg:hidden p-2 rounded-lg hover:bg-accent/50 transition-colors"
           onClick={() => setOpen(!open)}
           suppressHydrationWarning
         >
@@ -117,7 +123,7 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       {mounted && open && (
-        <div className="md:hidden bg-background border-t px-4 py-3 shadow-md">
+        <div className="lg:hidden bg-background/80 backdrop-blur-md border-t border-border/50 px-4 py-3">
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => {
               const isActive =
