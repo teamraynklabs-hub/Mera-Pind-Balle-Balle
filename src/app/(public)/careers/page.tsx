@@ -1,7 +1,12 @@
-import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
-import CareersForm from "./CareersForm";
 import { breadcrumbForPage } from "@/lib/seo";
+
+import CareersHero from "@/components/features/careers/CareersHero";
+import CareersBenefits from "@/components/features/careers/CareersBenefits";
+import CareersCulture from "@/components/features/careers/CareersCulture";
+import CareersOpenPositions from "@/components/features/careers/CareersOpenPositions";
+import CareersCTA from "@/components/features/careers/CareersCTA";
+import CareersForm from "./CareersForm";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -18,105 +23,33 @@ export const metadata: Metadata = {
   },
 };
 
-async function getCareerData() {
-  try {
-    const base = getBaseUrl();
-    const res = await fetch(`${base}/api/careers`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error(`Careers fetch failed: ${res.status}`);
-    const data = await res.json();
-    return data?.data || null;
-  } catch (err) {
-    console.error("CAREERS PAGE DATA ERROR:", err);
-    return null;
-  }
-}
-// disable caching completely
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function CareersPage() {
-  const data = await getCareerData();
-
-  if (!data) {
-    return (
-      <main className="container mx-auto px-4 py-16 text-center">
-        <p className="text-muted-foreground text-lg">
-          Unable to load careers information at the moment.
-        </p>
-      </main>
-    );
-  }
-
+export default function CareersPage() {
   return (
-    <main className="container mx-auto px-4 py-12">
+    <main className="flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Careers", "/careers")) }}
       />
 
-      {/* BANNER */}
-      {/* <section className="mb-16">
-        <img
-          src={data.bannerImage}
-          alt="Careers at Mera Pind Balle Balle"
-          className="w-full h-72 md:h-96 object-cover rounded-xl shadow-lg"
-        />
-      </section> */}
+      {/* 1 — HERO */}
+      <CareersHero />
 
-      {/* HEADER */}
-      <section className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-5">Join Our Mission</h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-          We're looking for passionate people who want to help transform rural communities
-          through skill development, women's empowerment, and sustainable opportunities.
-        </p>
-      </section>
+      {/* 2 — WHY JOIN US */}
+      <CareersBenefits />
 
-      {/* OPEN POSITIONS */}
-      <section className="mb-20">
-        <h2 className="text-3xl md:text-4xl font-semibold mb-8 text-center md:text-left">
-          Open Positions
-        </h2>
+      {/* 3 — OUR CULTURE */}
+      <CareersCulture />
 
-        {data.jobs?.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-7">
-            {data.jobs.map((job: any, index: number) => (
-              <div
-                key={index}
-                className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-lg transition-all duration-200"
-              >
-                <img
-                  src={job.image}
-                  alt={job.title}
-                  width={1200}
-                  height={630}
-                  className="w-full h-auto rounded-xl"
-                />
-                <h3 className="text-xl font-semibold mb-2">{job.title}</h3>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="text-sm px-3 py-1 bg-primary/10 text-primary rounded-full">
-                    {job.type || "Full-time"}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    📍 {job.location || "Remote / Punjab"}
-                  </span>
-                </div>
-                <p className="text-muted-foreground leading-relaxed">
-                  {job.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-12">
-            No open positions at the moment. Check back soon!
-          </p>
-        )}
-      </section>
+      {/* 4 — OPEN POSITIONS */}
+      <CareersOpenPositions />
 
-      {/* APPLICATION FORM */}
+      {/* 5 — CTA */}
+      <CareersCTA />
+
+      {/* 6 — APPLICATION FORM (existing — kept as last section) */}
       <CareersForm />
     </main>
   );

@@ -3,6 +3,12 @@
 import { useState } from "react";
 import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
+import { motion } from "motion/react";
+import { Send } from "lucide-react";
+import ScrollReveal from "@/components/motion/ScrollReveal";
+
+const inputClasses =
+  "w-full px-4 py-3.5 rounded-xl bg-background/50 border border-border text-foreground placeholder:text-muted-foreground/60 text-sm transition-all duration-300 focus:outline-none focus:border-[var(--gold)] focus:ring-2 focus:ring-[var(--gold)]/20";
 
 export default function CareersForm() {
   const [form, setForm] = useState({
@@ -52,96 +58,142 @@ export default function CareersForm() {
   };
 
   return (
-    <section className="bg-accent p-8 rounded-xl shadow mb-20">
-      <h2 className="text-2xl font-semibold mb-6">Submit Your Application</h2>
+    <section
+      id="career-application-form"
+      className="container mx-auto px-4 md:px-8 lg:px-12 py-20 md:py-28"
+    >
+      <ScrollReveal>
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-card border rounded-2xl shadow-[var(--shadow-medium)] p-8 sm:p-10 md:p-12">
+            <h2
+              className="text-2xl sm:text-3xl font-bold mb-2 text-center"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Submit Your Application
+            </h2>
+            <p className="text-muted-foreground text-center mb-8">
+              Take the first step towards a meaningful career
+            </p>
 
-      {sent && (
-        <div className="p-4 mb-6 bg-primary/10 border border-primary/20 text-primary rounded-lg">
-          Application submitted successfully! We'll get back to you soon.
-        </div>
-      )}
+            {sent && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 mb-6 bg-primary/10 border border-primary/20 text-primary rounded-xl text-sm"
+              >
+                Application submitted successfully! We&apos;ll get back to you
+                soon.
+              </motion.div>
+            )}
 
-      {error && (
-        <div className="p-4 mb-6 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
-          {error}
-        </div>
-      )}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 mb-6 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
 
-      <form onSubmit={submitForm} className="grid md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Full Name *</label>
-          <input
-            type="text"
-            placeholder="Your Name"
-            required
-            className="w-full p-3 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-        </div>
+            <form onSubmit={submitForm} className="grid md:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Full Name <span className="text-[var(--gold)]">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Your Name"
+                  required
+                  className={inputClasses}
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Email Address *</label>
-          <input
-            type="email"
-            placeholder="Email Address"
-            required
-            className="w-full p-3 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-        </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Email Address <span className="text-[var(--gold)]">*</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  required
+                  className={inputClasses}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Phone Number</label>
-          <input
-            type="tel"
-            placeholder="Phone Number"
-            className="w-full p-3 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          />
-        </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Phone Number"
+                  className={inputClasses}
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1.5">Position Applying For *</label>
-          <input
-            type="text"
-            placeholder="e.g. Field Coordinator, Marketing Executive"
-            required
-            className="w-full p-3 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            value={form.position}
-            onChange={(e) => setForm({ ...form, position: e.target.value })}
-          />
-        </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Position Applying For{" "}
+                  <span className="text-[var(--gold)]">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Field Coordinator, Marketing Executive"
+                  required
+                  className={inputClasses}
+                  value={form.position}
+                  onChange={(e) =>
+                    setForm({ ...form, position: e.target.value })
+                  }
+                />
+              </div>
 
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-1.5">
-            Cover Letter / Message (optional)
-          </label>
-          <textarea
-            placeholder="Tell us about yourself, your experience, and why you'd like to join..."
-            rows={5}
-            className="w-full p-3 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            value={form.message}
-            onChange={(e) => setForm({ ...form, message: e.target.value })}
-          />
-        </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-2">
+                  Cover Letter / Message{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </label>
+                <textarea
+                  placeholder="Tell us about yourself, your experience, and why you'd like to join..."
+                  rows={5}
+                  className={inputClasses + " resize-none"}
+                  value={form.message}
+                  onChange={(e) =>
+                    setForm({ ...form, message: e.target.value })
+                  }
+                />
+              </div>
 
-        <div className="md:col-span-2 flex justify-end">
-          <button
-            type="submit"
-            disabled={loading}
-            className={`
-              px-8 py-3 bg-primary text-primary-foreground font-medium rounded-md
-              transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary
-              disabled:opacity-60 disabled:cursor-not-allowed
-            `}
-          >
-            {loading ? "Submitting..." : "Submit Application"}
-          </button>
+              <div className="md:col-span-2 flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-[var(--gold)] text-[var(--gold-foreground)] font-semibold transition-all duration-300 hover:shadow-[0_0_24px_oklch(0.75_0.14_80/0.35)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none"
+                >
+                  {loading ? (
+                    "Submitting..."
+                  ) : (
+                    <>
+                      Submit Application
+                      <Send
+                        size={16}
+                        className="group-hover:translate-x-0.5 transition-transform duration-300"
+                      />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
+      </ScrollReveal>
     </section>
   );
 }

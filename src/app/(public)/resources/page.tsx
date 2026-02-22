@@ -1,110 +1,51 @@
-import { connectDB } from "@/lib/db";
 import type { Metadata } from "next";
-import Resources from "@/lib/models/Resource.model";
 import { breadcrumbForPage } from "@/lib/seo";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
+import ResourcesHero from "@/components/features/resources/ResourcesHero";
+import ResourcesGrid from "@/components/features/resources/ResourcesGrid";
+import ResourcesCTA from "@/components/features/resources/ResourcesCTA";
+import ResourcesNewsletter from "@/components/features/resources/ResourcesNewsletter";
+
+const baseUrl =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
 export const metadata: Metadata = {
   title: "Resources — Mera Pind Balle Balle",
   description:
-    "Access downloadable brochures, reports, policies, and important documentation from Mera Pind Balle Balle.",
+    "Download catalogs, guides, and educational materials about our products and artisan communities.",
   alternates: { canonical: `${baseUrl}/resources` },
   openGraph: {
     title: "Resources — Mera Pind Balle Balle",
-    description: "Access downloadable brochures, reports, policies, and important documentation from Mera Pind Balle Balle.",
+    description:
+      "Download catalogs, guides, and educational materials about our products and artisan communities.",
     url: `${baseUrl}/resources`,
     type: "website",
   },
 };
 
-// disable caching completely
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-export default async function ResourcesPage() {
-  await connectDB();
-
-  const data = await Resources.findOne({ isActive: true }).lean();
-
-  if (!data) {
-    return (
-      <main className="container mx-auto px-4 py-16 text-center">
-        <p className="text-muted-foreground">Unable to load resources.</p>
-      </main>
-    );
-  }
-
+export default function ResourcesPage() {
   return (
-    <main className="container mx-auto px-4 py-12">
+    <main className="flex flex-col">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Resources", "/resources")) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbForPage("Resources", "/resources")
+          ),
+        }}
       />
 
-      {/* BANNER */}
-      <section className="mb-16">
-        <img
-          src={data.bannerImage}
-          alt="Resources Banner"
-          className="w-full h-72 object-cover rounded-xl shadow"
-        />
-      </section>
+      {/* 1 — Hero */}
+      <ResourcesHero />
 
-      {/* TITLE */}
-      <section className="text-center mb-16">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">Resources</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Download official documents, brochures, product catalogues, and annual
-          impact reports.
-        </p>
-      </section>
+      {/* 2 — Filter + 3 — Resource Grid */}
+      <ResourcesGrid />
 
-      {/* DOCUMENT GRID */}
-      <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
-        {data.documents.map((doc: any, index: number) => (
-          <article
-            key={index}
-            className="p-6 bg-card border rounded-xl shadow-sm hover:shadow-md transition"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className="font-semibold text-lg">{doc.title}</span>
-              <span className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded-md">
-                {doc.type}
-              </span>
-            </div>
+      {/* 4 — Custom Resource CTA */}
+      <ResourcesCTA />
 
-            <p className="text-sm text-muted-foreground mb-4">
-              {doc.description}
-            </p>
-
-            <a
-              href={doc.link}
-              target="_blank"
-              className="text-primary text-sm font-medium hover:underline"
-            >
-              Download →
-            </a>
-          </article>
-        ))}
-      </section>
-
-      {/* CTA */}
-      <section className="py-12 text-center bg-accent rounded-xl shadow-sm">
-        <h2 className="text-2xl font-semibold mb-3">Need Additional Material?</h2>
-        <p className="text-muted-foreground max-w-xl mx-auto mb-6">
-          Contact our team if you need custom documentation, partnership papers,
-          or village impact reports.
-        </p>
-
-        <a
-          href="/contact"
-          className="px-8 py-3 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
-        >
-          Contact Us
-        </a>
-      </section>
-
+      {/* 5 — Newsletter Subscribe */}
+      <ResourcesNewsletter />
     </main>
   );
 }

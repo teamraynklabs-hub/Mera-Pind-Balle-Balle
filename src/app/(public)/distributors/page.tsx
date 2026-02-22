@@ -1,8 +1,12 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
-import Image from "next/image";
-import DistributorsForm from "./DistributorsForm";
 import { breadcrumbForPage } from "@/lib/seo";
+
+import DistributorHero from "@/components/features/distributors/DistributorHero";
+import DistributorBenefits from "@/components/features/distributors/DistributorBenefits";
+import DistributorRequirements from "@/components/features/distributors/DistributorRequirements";
+import DistributorSteps from "@/components/features/distributors/DistributorSteps";
+import DistributorApplyForm from "@/components/features/distributors/DistributorApplyForm";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -37,76 +41,27 @@ export const dynamic = "force-dynamic";
 export default async function DistributorsPage() {
   const info = await getDistributorInfo();
 
-  if (!info || info.success === false) {
-    return (
-      <main className="container mx-auto px-4 py-16 text-center">
-        <p className="text-muted-foreground">
-          Distributor information is not available at the moment. Please check back later.
-        </p>
-      </main>
-    );
-  }
-
   return (
-    <main className="container mx-auto px-4 py-12">
+    <main className="flex flex-col">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Distributors", "/distributors")) }}
       />
 
-      {/* BANNER */}
-      {info.bannerImage && info.bannerImage.trim() && (
-        <section className="mb-16 relative w-full h-72 rounded-xl overflow-hidden shadow">
-          <Image
-            src={info.bannerImage}
-            alt="Distributors"
-            fill
-            className="object-cover"
-            sizes="100vw"
-          />
-        </section>
-      )}
+      {/* 1 — HERO */}
+      <DistributorHero bannerImage={info?.bannerImage} />
 
-      {/* INTRO */}
-      <section className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">Become a Distributor</h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Join us in bringing high-quality rural products to more cities while
-          creating meaningful economic impact.
-        </p>
-      </section>
+      {/* 2 — PARTNERSHIP BENEFITS */}
+      <DistributorBenefits benefits={info?.benefits} />
 
-      {/* BENEFITS & REQUIREMENTS */}
-      <section className="grid md:grid-cols-2 gap-10 mb-20">
-        {info.benefits?.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Why Partner With Us?</h2>
-            <ul className="space-y-3 text-muted-foreground">
-              {info.benefits.map((b: string, i: number) => (
-                <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
-                  {b}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      {/* 3 — PARTNERSHIP REQUIREMENTS */}
+      <DistributorRequirements requirements={info?.requirements} />
 
-        {info.requirements?.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mb-4">Distributor Requirements</h2>
-            <ul className="space-y-3 text-muted-foreground">
-              {info.requirements.map((r: string, i: number) => (
-                <li key={i} className="p-3 bg-card border rounded-lg shadow-sm">
-                  {r}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
+      {/* 4 — HOW IT WORKS */}
+      <DistributorSteps />
 
-      {/* FORM */}
-      <DistributorsForm />
+      {/* 5 — APPLY NOW FORM */}
+      <DistributorApplyForm />
     </main>
   );
 }
