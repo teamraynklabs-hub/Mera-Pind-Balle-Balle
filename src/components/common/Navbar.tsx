@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ModeToggle } from "@/components/ui/toggleBtn";
@@ -9,25 +9,80 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useUserAuth } from "@/context/UserAuthContext";
 
+interface NavLink {
+  title: string;
+  href: string;
+  isVisible: boolean;
+}
+
+interface NavbarData {
+  brandName: string;
+  logoUrl: string;
+  navLinks: NavLink[];
+  showCart: boolean;
+  showLogin: boolean;
+  showThemeToggle: boolean;
+}
+
+const FALLBACK: NavbarData = {
+  brandName: "Mera Pind Balle Balle",
+  logoUrl: "/logo.jpeg",
+  navLinks: [
+    { title: "Home", href: "/", isVisible: true },
+    { title: "About Us", href: "/about", isVisible: true },
+    { title: "Products", href: "/products", isVisible: true },
+    { title: "Blog", href: "/blog", isVisible: true },
+    { title: "Stories", href: "/stories", isVisible: true },
+    { title: "Contact", href: "/contact", isVisible: true },
+  ],
+  showCart: true,
+  showLogin: true,
+  showThemeToggle: true,
+};
+
+const POLL_INTERVAL = 30_000;
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [navData, setNavData] = useState<NavbarData>(FALLBACK);
   const pathname = usePathname();
   const { totalItems } = useCart();
   const { user, logout } = useUserAuth();
+  const mountedRef = useRef(true);
+
+  const fetchNavbar = useCallback(async () => {
+    try {
+      const res = await fetch("/api/navbar-settings", { cache: "no-store" });
+      const json = await res.json();
+      if (!mountedRef.current) return;
+      if (json.success && json.data) {
+        setNavData(json.data);
+      }
+    } catch {
+      // Keep fallback on error
+    }
+  }, []);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    mountedRef.current = true;
+    fetchNavbar();
 
-  const navItems = [
-    { title: "Home", href: "/" },
-    { title: "About Us", href: "/about" },
-    { title: "Products", href: "/products" },
-    { title: "Blog", href: "/blog" },
-    { title: "Stories", href: "/stories" },
-    { title: "Contact", href: "/contact" },
-  ];
+    const interval = setInterval(fetchNavbar, POLL_INTERVAL);
+
+    return () => {
+      mountedRef.current = false;
+      clearInterval(interval);
+    };
+  }, [fetchNavbar]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  const visibleLinks = navData.navLinks.filter((l) => l.isVisible);
 
   return (
     <header className="w-full fixed top-0 z-50 bg-transparent backdrop-blur-md transition-all duration-300">
@@ -36,7 +91,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <div className="h-10 w-10 rounded-full overflow-hidden border border-border/50 shadow-xs">
             <Image
-              src="/logo.jpeg"
+              src={navData.logoUrl}
               alt="Brand Logo"
               width={40}
               height={40}
@@ -48,13 +103,13 @@ export default function Navbar() {
             className="hidden sm:inline text-xl font-medium tracking-wide text-[#C8941F] dark:text-[#D4A336]"
             style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
           >
-            Mera Pind Balle Balle
+            {navData.brandName}
           </span>
         </Link>
 
         {/* CENTER — Navigation Links (Desktop) */}
         <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-          {navItems.map((item) => {
+          {visibleLinks.map((item) => {
             const isActive =
               pathname === item.href ||
               (item.href !== "/" && pathname.startsWith(item.href));
@@ -77,37 +132,43 @@ export default function Navbar() {
 
         {/* RIGHT — Icons (Desktop) */}
         <div className="hidden lg:flex items-center gap-1 shrink-0">
-          <Link
-            href="/cart"
-            className="relative p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
-          >
-            <ShoppingCart size={20} />
-            {totalItems > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
-                {totalItems > 99 ? "99+" : totalItems}
-              </span>
-            )}
-          </Link>
-
-          {user ? (
-            <button
-              onClick={logout}
-              className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
-              title={`Logout (${user.name})`}
-            >
-              <LogOut size={20} />
-            </button>
-          ) : (
+          {navData.showCart && (
             <Link
-              href="/login"
-              className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
-              title="Login"
+              href="/cart"
+              className="relative p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
             >
-              <User size={20} />
+              <ShoppingCart size={20} />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-sm">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
             </Link>
           )}
 
-          <ModeToggle />
+          {navData.showLogin && (
+            <>
+              {user ? (
+                <button
+                  onClick={logout}
+                  className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
+                  title={`Logout (${user.name})`}
+                >
+                  <LogOut size={20} />
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  className="p-2 rounded-lg text-foreground/70 hover:text-foreground transition-colors"
+                  title="Login"
+                >
+                  <User size={20} />
+                </Link>
+              )}
+            </>
+          )}
+
+          {navData.showThemeToggle && <ModeToggle />}
         </div>
 
         {/* MOBILE BUTTON */}
@@ -124,7 +185,7 @@ export default function Navbar() {
       {mounted && open && (
         <div className="lg:hidden bg-background/80 backdrop-blur-md border-t border-border/50 px-4 py-3">
           <nav className="flex flex-col gap-1">
-            {navItems.map((item) => {
+            {visibleLinks.map((item) => {
               const isActive =
                 pathname === item.href ||
                 (item.href !== "/" && pathname.startsWith(item.href));
@@ -148,38 +209,46 @@ export default function Navbar() {
             <div className="h-px bg-border my-2" />
 
             <div className="flex items-center gap-2 px-1">
-              <Link
-                href="/cart"
-                onClick={() => setOpen(false)}
-                className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ShoppingCart size={20} />
-                {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                    {totalItems > 99 ? "99+" : totalItems}
-                  </span>
-                )}
-              </Link>
-              {user ? (
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    logout();
-                  }}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <LogOut size={20} />
-                </button>
-              ) : (
+              {navData.showCart && (
                 <Link
-                  href="/login"
+                  href="/cart"
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                  className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <User size={20} />
+                  <ShoppingCart size={20} />
+                  {totalItems > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                      {totalItems > 99 ? "99+" : totalItems}
+                    </span>
+                  )}
                 </Link>
               )}
-              <ModeToggle />
+
+              {navData.showLogin && (
+                <>
+                  {user ? (
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        logout();
+                      }}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <LogOut size={20} />
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => setOpen(false)}
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <User size={20} />
+                    </Link>
+                  )}
+                </>
+              )}
+
+              {navData.showThemeToggle && <ModeToggle />}
             </div>
           </nav>
         </div>

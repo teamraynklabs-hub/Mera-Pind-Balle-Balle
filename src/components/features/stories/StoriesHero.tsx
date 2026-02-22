@@ -15,9 +15,9 @@ export default function StoriesHero({
   onSearchChange,
 }: StoriesHeroProps) {
   return (
-    <section className="relative flex items-center justify-center overflow-hidden py-28 md:py-40 lg:py-48">
-      {/* Dark gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#141420] to-[#0a0a0a]" />
+    <section className="relative flex items-center justify-center overflow-hidden py-28 md:py-40 lg:py-48 bg-background">
+      {/* Theme-aware gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/50 to-background" />
       <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-[var(--gold)]/[0.03]" />
 
       {/* Content */}
@@ -43,7 +43,7 @@ export default function StoriesHero({
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease }}
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+          className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
           style={{ fontFamily: "var(--font-heading)" }}
         >
           Stories of Change
@@ -54,7 +54,7 @@ export default function StoriesHero({
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.35, ease }}
-          className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mx-auto leading-relaxed mb-10"
+          className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-10"
         >
           Meet the incredible women artisans whose lives have been transformed
           through their crafts. Every product you purchase supports their
@@ -70,14 +70,14 @@ export default function StoriesHero({
         >
           <Search
             size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/60"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search by name, location, or keyword..."
-            className="w-full pl-12 pr-4 py-4 rounded-xl bg-white/10 backdrop-blur border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-white/30 focus:bg-white/15 transition-all duration-300 text-sm sm:text-base"
+            className="w-full pl-12 pr-4 py-4 rounded-xl bg-muted/50 backdrop-blur border border-border text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/40 focus:bg-muted/70 transition-all duration-300 text-sm sm:text-base"
           />
         </motion.div>
       </div>

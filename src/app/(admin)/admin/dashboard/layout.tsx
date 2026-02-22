@@ -21,6 +21,10 @@ import {
   Layers,
   ArrowLeft,
   Wrench,
+  Shield,
+  ScrollText,
+  Navigation,
+  PanelBottom,
 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -59,6 +63,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { title: "Resources",      href: "/admin/dashboard/resources",     icon: <Layers size={18} /> },
     { title: "Contact Leads",  href: "/admin/dashboard/contact",       icon: <Mail size={18} /> },
     { title: "Distributors",   href: "/admin/dashboard/distributors",  icon: <Users size={18} /> },
+    { title: "Privacy Policy", href: "/admin/dashboard/privacy-policy", icon: <Shield size={18} /> },
+    { title: "Terms & Conditions", href: "/admin/dashboard/terms-conditions", icon: <ScrollText size={18} /> },
+    { title: "Navbar",            href: "/admin/dashboard/navbar",            icon: <Navigation size={18} /> },
+    { title: "Footer",            href: "/admin/dashboard/footer",            icon: <PanelBottom size={18} /> },
   ];
 
   const isActive = (href: string) => pathname === href;

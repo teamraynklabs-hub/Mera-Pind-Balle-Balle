@@ -1,30 +1,52 @@
-import { Schema, model, models } from "mongoose";
+import mongoose, { Schema, models } from "mongoose";
 
-const DocumentSchema = new Schema(
+const ResourceSchema = new Schema(
   {
-    title: String,
-    type: String,
-    link: String,
-    description: String,
-  }
-);
-
-const ResourcesPageSchema = new Schema(
-  {
-    bannerImage: { type: String, required: true },
-
-    documents: {
-      type: [DocumentSchema],
-      default: [],
+    title: {
+      type: String,
+      required: true,
+      trim: true,
     },
 
-    isActive: {
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    category: {
+      type: String,
+      default: "Guide",
+      trim: true,
+    },
+
+    fileType: {
+      type: String,
+      default: "pdf",
+      trim: true,
+    },
+
+    size: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    fileUrl: {
+      type: String,
+      default: "",
+    },
+
+    isPublished: {
       type: Boolean,
       default: true,
+      index: true,
     },
   },
   { timestamps: true }
 );
 
-export default models.ResourcesPage ||
-  model("ResourcesPage", ResourcesPageSchema);
+ResourceSchema.index({ isPublished: 1, createdAt: -1 });
+ResourceSchema.index({ category: 1 });
+
+export default models.Resource || mongoose.model("Resource", ResourceSchema);

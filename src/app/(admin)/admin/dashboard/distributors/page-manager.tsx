@@ -5,47 +5,71 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { toast } from "sonner";
 import axios from "axios";
 import { getBaseUrl } from "@/lib/getBaseUrl";
 
+interface BenefitItem {
+  title: string;
+  description: string;
+}
+
+interface StepItem {
+  title: string;
+  description: string;
+}
+
+interface PageData {
+  hero: { title: string; subtitle: string; bannerImage: string };
+  benefits: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    items: BenefitItem[];
+  };
+  requirements: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    image: string;
+    items: string[];
+  };
+  steps: {
+    sectionTitle: string;
+    sectionSubtitle: string;
+    items: StepItem[];
+  };
+  formSection: { title: string; subtitle: string };
+}
+
+const SUB_TABS = ["Hero", "Benefits", "Requirements", "Steps", "Form Section"] as const;
+type SubTab = (typeof SUB_TABS)[number];
+
 export default function DistributorsPageManager() {
-  const [pageData, setPageData] = useState<{
-    _id?: string;
-    bannerImage: string;
-    benefits: string[];
-    requirements: string[];
-    isActive: boolean;
-  }>({
-    bannerImage: "",
-    benefits: [],
-    requirements: [],
-    isActive: true,
+  const [pageData, setPageData] = useState<PageData>({
+    hero: { title: "", subtitle: "", bannerImage: "" },
+    benefits: { sectionTitle: "", sectionSubtitle: "", items: [] },
+    requirements: { sectionTitle: "", sectionSubtitle: "", image: "", items: [] },
+    steps: { sectionTitle: "", sectionSubtitle: "", items: [] },
+    formSection: { title: "", subtitle: "" },
   });
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string>("");
-  const [newBenefit, setNewBenefit] = useState("");
-  const [newRequirement, setNewRequirement] = useState("");
+  const [activeSubTab, setActiveSubTab] = useState<SubTab>("Hero");
 
-  // LOAD PAGE DATA
   async function loadPageData() {
     try {
       setLoading(true);
       const res = await fetch("/api/admin/distributors-page", {
         credentials: "include",
       });
-
-      if (!res.ok) throw new Error("Failed to load page data");
-
-      const data = await res.json();
-      setPageData(data);
-      setPreviewImage(data.bannerImage || "");
-    } catch (error) {
-      console.error("Load error:", error);
-      alert("Failed to load distributors page data");
+      if (!res.ok) throw new Error("Failed to load");
+      const json = await res.json();
+      if (json?.success && json.data) {
+        setPageData(json.data);
+      }
+    } catch {
+      toast.error("Failed to load distributors page data");
     } finally {
       setLoading(false);
     }
@@ -55,119 +79,156 @@ export default function DistributorsPageManager() {
     loadPageData();
   }, []);
 
-  // HANDLE BANNER IMAGE UPLOAD
-  async function handleBannerUpload(e: any) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function handleImageUpload(
+    field: "hero.bannerImage" | "requirements.image"
+  ) {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async (e: any) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    const url = URL.createObjectURL(file);
-    setPreviewImage(url);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const base = getBaseUrl();
+        const res = await axios.post(`${base}/api/upload`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
-    // Upload using the app's /api/upload endpoint (like careers page does)
-    const formData = new FormData();
-    formData.append("file", file);
+        if (!res.data.url) throw new Error("No URL returned");
 
-    try {
-      const base = getBaseUrl();
-      const res = await axios.post(`${base}/api/upload`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (!res.data.url) {
-        throw new Error("No image URL returned from upload");
+        if (field === "hero.bannerImage") {
+          setPageData((prev) => ({
+            ...prev,
+            hero: { ...prev.hero, bannerImage: res.data.url },
+          }));
+        } else {
+          setPageData((prev) => ({
+            ...prev,
+            requirements: { ...prev.requirements, image: res.data.url },
+          }));
+        }
+        toast.success("Image uploaded");
+      } catch {
+        toast.error("Failed to upload image");
       }
-
-      console.log("Image uploaded successfully:", res.data.url);
-      setPageData({ ...pageData, bannerImage: res.data.url });
-      setPreviewImage(res.data.url);
-    } catch (error) {
-      console.error("Upload error:", error);
-      alert(`Failed to upload image: ${error instanceof Error ? error.message : "Unknown error"}`);
-      // Keep the preview image visible even if upload fails
-      setPageData({ ...pageData, bannerImage: url });
-    }
+    };
+    input.click();
   }
 
-  // ADD BENEFIT
   function addBenefit() {
-    if (!newBenefit.trim()) return;
-    setPageData({
-      ...pageData,
-      benefits: [...pageData.benefits, newBenefit.trim()],
-    });
-    setNewBenefit("");
+    setPageData((prev) => ({
+      ...prev,
+      benefits: {
+        ...prev.benefits,
+        items: [...prev.benefits.items, { title: "", description: "" }],
+      },
+    }));
   }
 
-  // REMOVE BENEFIT
+  function updateBenefit(index: number, key: keyof BenefitItem, value: string) {
+    setPageData((prev) => {
+      const items = [...prev.benefits.items];
+      items[index] = { ...items[index], [key]: value };
+      return { ...prev, benefits: { ...prev.benefits, items } };
+    });
+  }
+
   function removeBenefit(index: number) {
-    setPageData({
-      ...pageData,
-      benefits: pageData.benefits.filter((_, i) => i !== index),
-    });
+    setPageData((prev) => ({
+      ...prev,
+      benefits: {
+        ...prev.benefits,
+        items: prev.benefits.items.filter((_, i) => i !== index),
+      },
+    }));
   }
 
-  // ADD REQUIREMENT
   function addRequirement() {
-    if (!newRequirement.trim()) return;
-    setPageData({
-      ...pageData,
-      requirements: [...pageData.requirements, newRequirement.trim()],
-    });
-    setNewRequirement("");
+    setPageData((prev) => ({
+      ...prev,
+      requirements: {
+        ...prev.requirements,
+        items: [...prev.requirements.items, ""],
+      },
+    }));
   }
 
-  // REMOVE REQUIREMENT
+  function updateRequirement(index: number, value: string) {
+    setPageData((prev) => {
+      const items = [...prev.requirements.items];
+      items[index] = value;
+      return { ...prev, requirements: { ...prev.requirements, items } };
+    });
+  }
+
   function removeRequirement(index: number) {
-    setPageData({
-      ...pageData,
-      requirements: pageData.requirements.filter((_, i) => i !== index),
+    setPageData((prev) => ({
+      ...prev,
+      requirements: {
+        ...prev.requirements,
+        items: prev.requirements.items.filter((_, i) => i !== index),
+      },
+    }));
+  }
+
+  function addStep() {
+    setPageData((prev) => ({
+      ...prev,
+      steps: {
+        ...prev.steps,
+        items: [...prev.steps.items, { title: "", description: "" }],
+      },
+    }));
+  }
+
+  function updateStep(index: number, key: keyof StepItem, value: string) {
+    setPageData((prev) => {
+      const items = [...prev.steps.items];
+      items[index] = { ...items[index], [key]: value };
+      return { ...prev, steps: { ...prev.steps, items } };
     });
   }
 
-  // SAVE PAGE DATA
+  function removeStep(index: number) {
+    setPageData((prev) => ({
+      ...prev,
+      steps: {
+        ...prev.steps,
+        items: prev.steps.items.filter((_, i) => i !== index),
+      },
+    }));
+  }
+
   async function savePageData() {
-    if (!pageData.bannerImage || !pageData.bannerImage.trim()) {
-      alert("Banner image is required");
-      return;
-    }
-
-    if (pageData.benefits.length === 0) {
-      alert("Add at least one benefit");
-      return;
-    }
-
-    if (pageData.requirements.length === 0) {
-      alert("Add at least one requirement");
+    if (!pageData.hero.title.trim()) {
+      toast.error("Hero title is required");
       return;
     }
 
     setSubmitting(true);
-
     try {
       const res = await fetch("/api/admin/distributors-page", {
         method: "PATCH",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bannerImage: pageData.bannerImage,
-          benefits: pageData.benefits,
-          requirements: pageData.requirements,
-          isActive: pageData.isActive,
-        }),
+        body: JSON.stringify(pageData),
       });
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || "Failed to save");
+        const err = await res.json();
+        throw new Error(err.message || "Failed to save");
       }
 
-      alert("Distributors page updated successfully!");
-      await loadPageData();
-    } catch (error) {
-      console.error("Save error:", error);
-      alert(
-        `Error: ${error instanceof Error ? error.message : "Failed to save"}`
-      );
+      const json = await res.json();
+      if (json?.success && json.data) {
+        setPageData(json.data);
+      }
+      toast.success("Distributors page updated successfully!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSubmitting(false);
     }
@@ -176,63 +237,256 @@ export default function DistributorsPageManager() {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <p className="text-muted-foreground text-lg">Loading...</p>
+        <p className="text-muted-foreground text-lg">Loading page data...</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 animate-fadeUp">
-      <h1 className="text-3xl font-bold">Distributors Page Manager</h1>
+    <div className="space-y-6">
+      {/* Sub-tab navigation */}
+      <div className="flex flex-wrap gap-2">
+        {SUB_TABS.map((tab) => (
+          <Button
+            key={tab}
+            variant={activeSubTab === tab ? "default" : "outline"}
+            size="sm"
+            onClick={() => setActiveSubTab(tab)}
+            className="cursor-pointer"
+          >
+            {tab}
+          </Button>
+        ))}
+      </div>
 
-      <p className="text-muted-foreground">
-        Manage the content displayed on the public distributors page.
-      </p>
-
-      <div className="grid gap-6">
-        {/* BANNER IMAGE SECTION */}
+      {/* HERO TAB */}
+      {activeSubTab === "Hero" && (
         <Card>
           <CardContent className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold">Banner Image</h2>
+            <h2 className="text-xl font-semibold">Hero Section</h2>
 
             <div>
-              <label className="text-sm font-medium">Upload Banner</label>
+              <label className="text-sm font-medium">Title</label>
               <Input
-                type="file"
-                accept="image/*"
-                onChange={handleBannerUpload}
-                className="cursor-pointer"
+                value={pageData.hero.title}
+                onChange={(e) =>
+                  setPageData((prev) => ({
+                    ...prev,
+                    hero: { ...prev.hero, title: e.target.value },
+                  }))
+                }
+                placeholder="Become a Distributor"
               />
             </div>
 
-            {previewImage && (
-              <div className="border rounded-lg overflow-hidden">
+            <div>
+              <label className="text-sm font-medium">Subtitle</label>
+              <Textarea
+                value={pageData.hero.subtitle}
+                onChange={(e) =>
+                  setPageData((prev) => ({
+                    ...prev,
+                    hero: { ...prev.hero, subtitle: e.target.value },
+                  }))
+                }
+                placeholder="Join our growing network..."
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Banner Image</label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  value={pageData.hero.bannerImage}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      hero: { ...prev.hero, bannerImage: e.target.value },
+                    }))
+                  }
+                  placeholder="Image URL or upload"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => handleImageUpload("hero.bannerImage")}
+                  className="cursor-pointer shrink-0"
+                >
+                  <ImageIcon size={16} className="mr-1" /> Upload
+                </Button>
+              </div>
+              {pageData.hero.bannerImage && (
                 <img
-                  src={previewImage}
-                  alt="Preview"
-                  className="w-full h-64 object-cover"
+                  src={pageData.hero.bannerImage}
+                  alt="Banner preview"
+                  className="mt-3 w-full h-48 object-cover rounded-lg border"
+                />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* BENEFITS TAB */}
+      {activeSubTab === "Benefits" && (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Benefits Section</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Section Title</label>
+                <Input
+                  value={pageData.benefits.sectionTitle}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      benefits: { ...prev.benefits, sectionTitle: e.target.value },
+                    }))
+                  }
+                  placeholder="Partnership Benefits"
                 />
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div>
+                <label className="text-sm font-medium">Section Subtitle</label>
+                <Input
+                  value={pageData.benefits.sectionSubtitle}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      benefits: { ...prev.benefits, sectionSubtitle: e.target.value },
+                    }))
+                  }
+                  placeholder="What you get when..."
+                />
+              </div>
+            </div>
 
-        {/* BENEFITS SECTION */}
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold">Benefits</h2>
-
-            <div className="space-y-2">
-              {pageData.benefits.map((benefit, index) => (
+            <div className="space-y-3">
+              {pageData.benefits.items.map((item, i) => (
                 <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                  key={i}
+                  className="flex gap-2 items-start p-3 bg-muted rounded-lg"
                 >
-                  <span>{benefit}</span>
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      value={item.title}
+                      onChange={(e) => updateBenefit(i, "title", e.target.value)}
+                      placeholder="Benefit title"
+                    />
+                    <Textarea
+                      value={item.description}
+                      onChange={(e) => updateBenefit(i, "description", e.target.value)}
+                      placeholder="Benefit description"
+                      rows={2}
+                    />
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeBenefit(index)}
+                    onClick={() => removeBenefit(i)}
+                    className="cursor-pointer mt-1"
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <Button variant="outline" onClick={addBenefit} className="cursor-pointer">
+              <Plus size={16} className="mr-1" /> Add Benefit
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* REQUIREMENTS TAB */}
+      {activeSubTab === "Requirements" && (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Requirements Section</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Section Title</label>
+                <Input
+                  value={pageData.requirements.sectionTitle}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      requirements: {
+                        ...prev.requirements,
+                        sectionTitle: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="Partnership Requirements"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Section Subtitle</label>
+                <Input
+                  value={pageData.requirements.sectionSubtitle}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      requirements: {
+                        ...prev.requirements,
+                        sectionSubtitle: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="What we look for..."
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Requirements Image</label>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  value={pageData.requirements.image}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      requirements: { ...prev.requirements, image: e.target.value },
+                    }))
+                  }
+                  placeholder="Image URL or upload"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => handleImageUpload("requirements.image")}
+                  className="cursor-pointer shrink-0"
+                >
+                  <ImageIcon size={16} className="mr-1" /> Upload
+                </Button>
+              </div>
+              {pageData.requirements.image && (
+                <img
+                  src={pageData.requirements.image}
+                  alt="Requirements preview"
+                  className="mt-3 w-full h-48 object-cover rounded-lg border"
+                />
+              )}
+            </div>
+
+            <div className="space-y-2">
+              {pageData.requirements.items.map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 p-3 bg-muted rounded-lg"
+                >
+                  <Input
+                    value={item}
+                    onChange={(e) => updateRequirement(i, e.target.value)}
+                    placeholder="Requirement text"
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeRequirement(i)}
                     className="cursor-pointer"
                   >
                     <Trash2 size={16} />
@@ -241,46 +495,75 @@ export default function DistributorsPageManager() {
               ))}
             </div>
 
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Enter a benefit..."
-                value={newBenefit}
-                onChange={(e) => setNewBenefit(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    addBenefit();
-                  }
-                }}
-              />
-              <Button
-                onClick={addBenefit}
-                variant="outline"
-                className="cursor-pointer"
-              >
-                <Plus size={18} />
-              </Button>
-            </div>
+            <Button variant="outline" onClick={addRequirement} className="cursor-pointer">
+              <Plus size={16} className="mr-1" /> Add Requirement
+            </Button>
           </CardContent>
         </Card>
+      )}
 
-        {/* REQUIREMENTS SECTION */}
+      {/* STEPS TAB */}
+      {activeSubTab === "Steps" && (
         <Card>
           <CardContent className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold">Distributor Requirements</h2>
+            <h2 className="text-xl font-semibold">Steps Section</h2>
 
-            <div className="space-y-2">
-              {pageData.requirements.map((requirement, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Section Title</label>
+                <Input
+                  value={pageData.steps.sectionTitle}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      steps: { ...prev.steps, sectionTitle: e.target.value },
+                    }))
+                  }
+                  placeholder="How It Works"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Section Subtitle</label>
+                <Input
+                  value={pageData.steps.sectionSubtitle}
+                  onChange={(e) =>
+                    setPageData((prev) => ({
+                      ...prev,
+                      steps: { ...prev.steps, sectionSubtitle: e.target.value },
+                    }))
+                  }
+                  placeholder="Simple steps to become..."
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {pageData.steps.items.map((item, i) => (
                 <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                  key={i}
+                  className="flex gap-2 items-start p-3 bg-muted rounded-lg"
                 >
-                  <span>{requirement}</span>
+                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shrink-0 mt-1">
+                    {String(i + 1).padStart(2, "0")}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <Input
+                      value={item.title}
+                      onChange={(e) => updateStep(i, "title", e.target.value)}
+                      placeholder="Step title"
+                    />
+                    <Textarea
+                      value={item.description}
+                      onChange={(e) => updateStep(i, "description", e.target.value)}
+                      placeholder="Step description"
+                      rows={2}
+                    />
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeRequirement(index)}
-                    className="cursor-pointer"
+                    onClick={() => removeStep(i)}
+                    className="cursor-pointer mt-1"
                   >
                     <Trash2 size={16} />
                   </Button>
@@ -288,38 +571,59 @@ export default function DistributorsPageManager() {
               ))}
             </div>
 
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Enter a requirement..."
-                value={newRequirement}
-                onChange={(e) => setNewRequirement(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    addRequirement();
-                  }
-                }}
+            <Button variant="outline" onClick={addStep} className="cursor-pointer">
+              <Plus size={16} className="mr-1" /> Add Step
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* FORM SECTION TAB */}
+      {activeSubTab === "Form Section" && (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <h2 className="text-xl font-semibold">Form Section</h2>
+
+            <div>
+              <label className="text-sm font-medium">Title</label>
+              <Input
+                value={pageData.formSection.title}
+                onChange={(e) =>
+                  setPageData((prev) => ({
+                    ...prev,
+                    formSection: { ...prev.formSection, title: e.target.value },
+                  }))
+                }
+                placeholder="Apply Now"
               />
-              <Button
-                onClick={addRequirement}
-                variant="outline"
-                className="cursor-pointer"
-              >
-                <Plus size={18} />
-              </Button>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Subtitle</label>
+              <Textarea
+                value={pageData.formSection.subtitle}
+                onChange={(e) =>
+                  setPageData((prev) => ({
+                    ...prev,
+                    formSection: { ...prev.formSection, subtitle: e.target.value },
+                  }))
+                }
+                placeholder="Fill out the form below..."
+                rows={3}
+              />
             </div>
           </CardContent>
         </Card>
+      )}
 
-        {/* SAVE BUTTON */}
-        <Button
-          onClick={savePageData}
-          disabled={submitting}
-          className="w-full cursor-pointer text-base py-6"
-        >
-          {submitting ? "Saving..." : "Save Distributors Page"}
-        </Button>
-      </div>
+      {/* SAVE BUTTON */}
+      <Button
+        onClick={savePageData}
+        disabled={submitting}
+        className="w-full cursor-pointer text-base py-6"
+      >
+        {submitting ? "Saving..." : "Save Distributors Page"}
+      </Button>
     </div>
   );
 }

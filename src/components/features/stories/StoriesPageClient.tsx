@@ -35,12 +35,12 @@ function normalizeStory(s: any, i: number): StoryItem {
 function LoadingSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="py-28 md:py-40 bg-gradient-to-b from-[#0a0a0a] via-[#141420] to-[#0a0a0a]">
+      <div className="py-28 md:py-40 bg-gradient-to-b from-background via-muted/50 to-background">
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <div className="h-20 w-20 rounded-full bg-white/10 mx-auto mb-8" />
-          <div className="h-12 w-72 bg-white/10 rounded mx-auto mb-6" />
-          <div className="h-6 w-96 bg-white/5 rounded mx-auto mb-10" />
-          <div className="h-12 w-full max-w-xl bg-white/10 rounded-xl mx-auto" />
+          <div className="h-20 w-20 rounded-full bg-muted/30 mx-auto mb-8" />
+          <div className="h-12 w-72 bg-muted/30 rounded mx-auto mb-6" />
+          <div className="h-6 w-96 bg-muted/20 rounded mx-auto mb-10" />
+          <div className="h-12 w-full max-w-xl bg-muted/30 rounded-xl mx-auto" />
         </div>
       </div>
       <div className="container mx-auto px-4 py-20">

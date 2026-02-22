@@ -1,196 +1,91 @@
-import { connectDB } from "@/lib/db";
-import ResourcesPage from "@/lib/models/Resource.model";
-import  cloudinary  from "@/lib/cloudinary";
-import { requireAdmin } from "@/lib/requireAdmin";
 import { NextRequest, NextResponse } from "next/server";
-import { Types } from "mongoose";
+import { connectDB } from "@/lib/db";
+import Resource from "@/lib/models/Resource.model";
+import cloudinary from "@/lib/cloudinary";
 import { deleteCloudinaryImage } from "@/lib/cloudinaryDelete";
+import { requireAdmin } from "@/lib/requireAdmin";
 
-export async function GET(
-  request: NextRequest,
+export async function PUT(
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    await connectDB();
-    const { id } = await params;
+  const { id } = await params;
 
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+  const admin = await requireAdmin();
+  if (admin instanceof Response) return admin;
+
+  await connectDB();
+
+  const formData = await req.formData();
+
+  const updateData: any = {
+    title: (formData.get("title") as string)?.trim(),
+    description: (formData.get("description") as string)?.trim() || "",
+    category: (formData.get("category") as string)?.trim() || "Guide",
+    fileType: (formData.get("fileType") as string)?.trim() || "pdf",
+    size: (formData.get("size") as string)?.trim() || "",
+    isPublished: formData.get("isPublished") !== "false",
+  };
+
+  const file = formData.get("file") as File | null;
+
+  if (file && file.size > 0) {
+    const existing = await Resource.findById(id);
+    if (existing?.fileUrl) {
+      await deleteCloudinaryImage(existing.fileUrl);
     }
 
-    const resourcesPage = await ResourcesPage.findOne();
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const upload: any = await new Promise((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          { folder: "mpbb/resources", resource_type: "auto" },
+          (err, result) => (err ? reject(err) : resolve(result))
+        )
+        .end(buffer);
+    });
+    updateData.fileUrl = upload.secure_url;
+  }
 
-    if (!resourcesPage) {
-      return NextResponse.json(
-        { error: "Resource not found" },
-        { status: 404 }
-      );
-    }
+  const updated = await Resource.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
 
-    const document = resourcesPage.documents.id(id);
-
-    if (!document) {
-      return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(document, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching resource:", error);
+  if (!updated) {
     return NextResponse.json(
-      { error: "Failed to fetch resource" },
-      { status: 500 }
+      { success: false, error: "Resource not found" },
+      { status: 404 }
     );
   }
-}
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) return adminCheck;
-
-    await connectDB();
-    const { id } = await params;
-
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
-    }
-
-    const formData = await request.formData();
-    const title = formData.get("title") as string;
-    const desc = formData.get("desc") as string;
-    const file = formData.get("fileUrl") as File | null;
-
-    const resourcesPage = await ResourcesPage.findOne();
-
-    if (!resourcesPage) {
-      return NextResponse.json(
-        { error: "Resource not found" },
-        { status: 404 }
-      );
-    }
-
-    const document = resourcesPage.documents.id(id);
-
-    if (!document) {
-      return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
-      );
-    }
-
-    let fileUrl = document.link;
-    let oldLink = document.link;
-
-    // Upload new file if provided
-    if (file) {
-      try {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const uploadResponse = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: "mpbb/resources",
-              resource_type: "auto",
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          stream.end(buffer);
-        });
-
-        const uploadResult = uploadResponse as any;
-        fileUrl = uploadResult.secure_url;
-
-        // Delete old file from Cloudinary
-        if (oldLink) {
-          await deleteCloudinaryImage(oldLink);
-        }
-      } catch (uploadError) {
-        console.error("Cloudinary upload error:", uploadError);
-        return NextResponse.json(
-          { error: "Failed to upload file" },
-          { status: 500 }
-        );
-      }
-    }
-
-    document.title = title || document.title;
-    document.description = desc || document.description;
-    if (file) {
-      document.link = fileUrl;
-      document.type = file.type;
-    }
-
-    await resourcesPage.save();
-
-    return NextResponse.json(document, { status: 200 });
-  } catch (error) {
-    console.error("Error updating resource:", error);
-    return NextResponse.json(
-      { error: "Failed to update resource" },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({ success: true, data: updated });
 }
 
 export async function DELETE(
-  request: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) return adminCheck;
+  const { id } = await params;
 
-    await connectDB();
-    const { id } = await params;
+  const admin = await requireAdmin();
+  if (admin instanceof Response) return admin;
 
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
-    }
+  await connectDB();
 
-    const resourcesPage = await ResourcesPage.findOne();
-
-    if (!resourcesPage) {
-      return NextResponse.json(
-        { error: "Resource not found" },
-        { status: 404 }
-      );
-    }
-
-    const document = resourcesPage.documents.id(id);
-
-    if (!document) {
-      return NextResponse.json(
-        { error: "Document not found" },
-        { status: 404 }
-      );
-    }
-
-    // Delete file from Cloudinary
-    if (document.link) {
-      await deleteCloudinaryImage(document.link);
-    }
-
-    // Remove document from array
-    resourcesPage.documents.id(id).deleteOne();
-    await resourcesPage.save();
-
+  const resource = await Resource.findById(id);
+  if (!resource) {
     return NextResponse.json(
-      { message: "Resource deleted successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error deleting resource:", error);
-    return NextResponse.json(
-      { error: "Failed to delete resource" },
-      { status: 500 }
+      { success: false, error: "Resource not found" },
+      { status: 404 }
     );
   }
+
+  if (resource.fileUrl) {
+    await deleteCloudinaryImage(resource.fileUrl);
+  }
+
+  await resource.deleteOne();
+
+  return NextResponse.json({ success: true, message: "Resource deleted" });
 }

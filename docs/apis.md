@@ -280,6 +280,42 @@ isPublished: true
 image: [Upload file]
 ```
 
+### POST /api/admin/resources
+
+Create a new resource. **Requires admin session. Body: FormData.**
+
+**Example seed (use form-data in Postman):**
+
+```
+title: "Product Catalog 2026"
+description: "Complete catalog of our handcrafted product collection featuring artisan-made textiles, pottery, and home decor."
+category: "Catalog"
+fileType: "pdf"
+size: "12.5 MB"
+isPublished: true
+file: [Upload file]
+```
+
+```
+title: "Women Empowerment Toolkit"
+description: "Training material and worksheets for self-help groups."
+category: "Education"
+fileType: "pdf"
+size: "4.1 MB"
+isPublished: true
+file: [Upload file]
+```
+
+```
+title: "Annual Impact Report 2025"
+description: "Comprehensive report on our social impact, sustainability metrics, and community development efforts."
+category: "Report"
+fileType: "pdf"
+size: "18.7 MB"
+isPublished: true
+file: [Upload file]
+```
+
 ---
 
 ## Public API Routes
@@ -604,7 +640,33 @@ Contact page content (hero, contact info cards, form section titles, FAQs). Fron
 
 ### GET /api/resources
 
-Downloadable resources. **Response:** `[{ "title": "...", "link": "...", "description": "..." }]`
+Published resources with optional category filter and search. Returns fresh data on every request (no caching). Frontend polls every 30 seconds for real-time updates.
+
+**Query params:** `?search=keyword&category=Guide`
+
+Search matches against title, description, and category.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "resources": [{
+      "_id": "...",
+      "title": "Product Catalog 2026",
+      "description": "Complete catalog of our handcrafted product collection.",
+      "category": "Catalog",
+      "fileType": "pdf",
+      "size": "12.5 MB",
+      "fileUrl": "https://res.cloudinary.com/...",
+      "isPublished": true,
+      "createdAt": "2026-02-22T10:00:00.000Z"
+    }],
+    "categories": ["Catalog", "Guide", "Education", "Report"],
+    "total": 12
+  }
+}
+```
 
 ### GET /api/careers
 
@@ -635,6 +697,130 @@ Submit contact form. Validated with Zod schema.
 
 ---
 
+### GET /api/distributors-page
+
+Distributors page content (hero, benefits, requirements, steps, form section). Frontend fetches on mount for real-time updates.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "hero": {
+      "title": "Become a Distributor",
+      "subtitle": "Join our growing network of distributors...",
+      "bannerImage": "https://res.cloudinary.com/..."
+    },
+    "benefits": {
+      "sectionTitle": "Partnership Benefits",
+      "sectionSubtitle": "Discover the advantages...",
+      "items": [
+        { "title": "Fair Pricing", "description": "Competitive wholesale rates..." },
+        { "title": "Quality Products", "description": "Authentic handcrafted products..." }
+      ]
+    },
+    "requirements": {
+      "sectionTitle": "Partnership Requirements",
+      "sectionSubtitle": "What we look for...",
+      "image": "https://res.cloudinary.com/...",
+      "items": [
+        "Passion for handcrafted products",
+        "Valid business registration or GST certificate"
+      ]
+    },
+    "steps": {
+      "sectionTitle": "How It Works",
+      "sectionSubtitle": "Simple steps to become our partner",
+      "items": [
+        { "title": "Apply", "description": "Submit your application" },
+        { "title": "Review", "description": "Our team reviews" },
+        { "title": "Interview", "description": "Meet our team" },
+        { "title": "Onboard", "description": "Start selling" }
+      ]
+    },
+    "formSection": {
+      "title": "Apply Now",
+      "subtitle": "Fill out the form below..."
+    }
+  }
+}
+```
+
+---
+
+### GET /api/privacy-policy-page
+
+Privacy policy page content (hero, sections, contact info). Frontend fetches on mount for real-time updates.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "hero": {
+      "title": "Privacy Policy",
+      "subtitle": "This Privacy Policy describes how Mera Pind Balle Balle collects, uses, and protects your information."
+    },
+    "lastUpdated": "2026-02-22",
+    "sections": [
+      { "title": "1. Information We Collect", "content": "We may collect the following types of information:\n\n- Personal details such as your name, email address, phone number, and shipping address\n- Messages sent through our contact or distributor forms" },
+      { "title": "2. How We Use Your Information", "content": "Your information helps us:\n\n- Process and fulfill your orders\n- Respond to your inquiries and support requests" }
+    ],
+    "contactEmail": "support@merapind.com",
+    "contactPhone": "+91 98765 43210"
+  }
+}
+```
+
+---
+
+### GET /api/footer-page
+
+Footer content (brand, links, contact info, social links, legal links). Footer component fetches on mount for real-time updates without page refresh.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "brand": {
+      "description": "Empowering rural women artisans through traditional crafts and sustainable livelihood."
+    },
+    "quickLinks": {
+      "columnTitle": "Quick Links",
+      "items": [
+        { "label": "Shop Products", "link": "/products" },
+        { "label": "Artisan Stories", "link": "/stories" }
+      ]
+    },
+    "supportLinks": {
+      "columnTitle": "Get Involved",
+      "items": [
+        { "label": "Become a Distributor", "link": "/distributors" },
+        { "label": "Careers", "link": "/careers" }
+      ]
+    },
+    "contactInfo": {
+      "columnTitle": "Contact Us",
+      "address": "123 Heritage Lane, New Delhi, India 110001",
+      "phone": "+91 12345 67890",
+      "email": "hello@merapind.com"
+    },
+    "socialLinks": [
+      { "platform": "facebook", "link": "https://facebook.com/merapindballeballe" },
+      { "platform": "instagram", "link": "https://instagram.com/merapindballeballe" }
+    ],
+    "legalLinks": [
+      { "label": "Privacy Policy", "link": "/privacy-policy" },
+      { "label": "Terms of Service", "link": "/terms-conditions" }
+    ],
+    "copyrightText": "Mera Pind Balle Balle. All rights reserved."
+  }
+}
+```
+
+---
+
 ### POST /api/distributors
 
 Submit distributor application.
@@ -647,6 +833,14 @@ Submit distributor application.
   "website": "https://punjabdist.com"
 }
 ```
+
+**Response (201):** `{ "success": true, "message": "Distributor application submitted successfully", "data": { ...distributor } }`
+
+| Code | Meaning |
+|------|---------|
+| 201 | Created |
+| 400 | Name, email, phone required |
+| 500 | Server error |
 
 ---
 
@@ -1031,17 +1225,196 @@ Update about page. Upserts — creates if none exists.
 
 Manage job postings.
 
-### GET/POST /api/admin/distributors + GET/PATCH/DELETE /api/admin/distributors/[id]
+### GET /api/admin/distributors
 
-Manage distributors.
+All distributor applications (newest first). **Requires admin session.**
 
-### GET/PATCH /api/admin/distributors-page
+**Response:** `{ "success": true, "data": [{ "_id", "name", "email", "phone", "website", "image", "publicId", "isActive", "createdAt" }] }`
 
-Manage distributors page content (benefits, requirements, banner).
+### POST /api/admin/distributors
 
-### GET/POST /api/admin/resources + DELETE /api/admin/resources/[id]
+Create distributor. **Body: FormData. Requires admin session.**
 
-Manage downloadable resources.
+| Field | Type | Required |
+|-------|------|----------|
+| name | string | Yes |
+| email | string | Yes |
+| phone | string | Yes |
+| website | string | No |
+| image | File | No |
+
+**Response (201):** `{ "success": true, "data": { ...distributor } }`
+
+### GET /api/admin/distributors/[id]
+
+Single distributor by ID. **Response:** `{ "success": true, "data": { ...distributor } }`
+
+### PATCH /api/admin/distributors/[id]
+
+Update distributor. **Body: FormData** — same fields as POST, all optional. New image replaces old (Cloudinary cleanup).
+
+**Response:** `{ "success": true, "data": { ...updated } }`
+
+### DELETE /api/admin/distributors/[id]
+
+Delete distributor and remove Cloudinary image.
+
+**Response:** `{ "success": true, "message": "Distributor deleted successfully" }`
+
+---
+
+### GET /api/admin/distributors-page
+
+Fetch distributors page content for admin editing. Returns all sections with seed defaults if no data exists.
+
+**Response:** `{ "success": true, "data": { hero, benefits, requirements, steps, formSection } }`
+
+### PATCH /api/admin/distributors-page
+
+Update distributors page content. Upserts — creates if none exists. Calls `revalidatePath("/distributors")` for instant frontend updates.
+
+**Request Body (JSON):**
+```json
+{
+  "hero": { "title": "string", "subtitle": "string", "bannerImage": "string (URL)" },
+  "benefits": {
+    "sectionTitle": "string",
+    "sectionSubtitle": "string",
+    "items": [{ "title": "string", "description": "string" }]
+  },
+  "requirements": {
+    "sectionTitle": "string",
+    "sectionSubtitle": "string",
+    "image": "string (URL)",
+    "items": ["string"]
+  },
+  "steps": {
+    "sectionTitle": "string",
+    "sectionSubtitle": "string",
+    "items": [{ "title": "string", "description": "string" }]
+  },
+  "formSection": { "title": "string", "subtitle": "string" }
+}
+```
+
+**Response:** `{ "success": true, "data": { ...updated } }`
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 400 | Hero title is required |
+| 401 | Unauthorized (not admin) |
+| 500 | Server error |
+
+### GET /api/admin/privacy-policy-page
+
+Fetch privacy policy page content for admin editing. Returns all sections with seed defaults if no data exists.
+
+**Response:** `{ "success": true, "data": { hero, lastUpdated, sections, contactEmail, contactPhone } }`
+
+### PATCH /api/admin/privacy-policy-page
+
+Update privacy policy page content. Upserts — creates if none exists. Calls `revalidatePath("/privacy-policy")` for instant frontend updates.
+
+**Request Body (JSON):**
+```json
+{
+  "hero": { "title": "string", "subtitle": "string" },
+  "lastUpdated": "2026-02-22",
+  "sections": [
+    { "title": "string", "content": "string (supports bullet points with '- ' prefix)" }
+  ],
+  "contactEmail": "string",
+  "contactPhone": "string"
+}
+```
+
+**Response:** `{ "success": true, "data": { ...updated } }`
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 400 | Page title is required |
+| 401 | Unauthorized (not admin) |
+| 500 | Server error |
+
+### GET /api/admin/footer-page
+
+Fetch footer page content for admin editing. Returns all sections with seed defaults if no data exists.
+
+**Response:** `{ "success": true, "data": { brand, quickLinks, supportLinks, contactInfo, socialLinks, legalLinks, copyrightText } }`
+
+### PATCH /api/admin/footer-page
+
+Update footer page content. Upserts — creates if none exists. Calls `revalidatePath("/", "layout")` to update footer on all pages.
+
+**Request Body (JSON):**
+```json
+{
+  "brand": { "description": "string" },
+  "quickLinks": {
+    "columnTitle": "string",
+    "items": [{ "label": "string", "link": "string" }]
+  },
+  "supportLinks": {
+    "columnTitle": "string",
+    "items": [{ "label": "string", "link": "string" }]
+  },
+  "contactInfo": {
+    "columnTitle": "string",
+    "address": "string",
+    "phone": "string",
+    "email": "string"
+  },
+  "socialLinks": [{ "platform": "facebook|instagram|twitter|youtube|linkedin", "link": "string" }],
+  "legalLinks": [{ "label": "string", "link": "string" }],
+  "copyrightText": "string"
+}
+```
+
+**Response:** `{ "success": true, "data": { ...updated } }`
+
+| Code | Meaning |
+|------|---------|
+| 200 | Success |
+| 401 | Unauthorized (not admin) |
+| 500 | Server error |
+
+---
+
+### GET /api/admin/resources
+
+Fetch all resources (published + drafts). **Requires admin session.**
+
+**Response:** `{ "success": true, "data": [{ "_id", "title", "description", "category", "fileType", "size", "fileUrl", "isPublished" }] }`
+
+### POST /api/admin/resources
+
+Create new resource. **Body: FormData. Requires admin session.**
+
+| Field | Type | Required |
+|-------|------|----------|
+| title | string | Yes |
+| description | string | No |
+| category | string | No (default "Guide") |
+| fileType | string | No (default "pdf") |
+| size | string | No (e.g. "12.5 MB") |
+| file | File | No (PDF, DOC, image, video) |
+| isPublished | "true"/"false" | No (default true) |
+
+**Response (201):** `{ "success": true, "data": { ...resource } }`
+
+### PUT /api/admin/resources/[id]
+
+Update resource. **Body: FormData** — same fields as POST, file optional.
+
+**Response:** `{ "success": true, "data": { ...updated } }`
+
+### DELETE /api/admin/resources/[id]
+
+Delete resource and remove Cloudinary file.
+
+**Response:** `{ "success": true, "message": "Resource deleted" }`
 
 ---
 

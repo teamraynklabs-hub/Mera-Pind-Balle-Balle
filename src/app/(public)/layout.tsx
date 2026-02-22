@@ -1,6 +1,10 @@
 import LayoutWrapper from "@/components/common/LayoutWrapper";
 import { connectDB } from "@/lib/db";
-import Dashboard from "@/lib/models/Dashboard.model";
+import FooterPage from "@/lib/models/FooterPage.model";
+import {
+  normalizeFooterPageData,
+  FOOTER_PAGE_SEED_DATA,
+} from "@/lib/normalizeFooterPage";
 
 export default async function PublicLayout({
   children,
@@ -8,10 +12,9 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }) {
   await connectDB();
-  const dashboardDoc = await Dashboard.findOne({ isActive: true }).lean();
-  const footer = dashboardDoc
-    ? JSON.parse(JSON.stringify((dashboardDoc as any).footer || null))
-    : null;
+  const raw = await FooterPage.findOne({ isActive: true }).lean();
+  const footerData = normalizeFooterPageData(raw) || FOOTER_PAGE_SEED_DATA;
+  const serialized = JSON.parse(JSON.stringify(footerData));
 
-  return <LayoutWrapper footer={footer}>{children}</LayoutWrapper>;
+  return <LayoutWrapper footerData={serialized}>{children}</LayoutWrapper>;
 }

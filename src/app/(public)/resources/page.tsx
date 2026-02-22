@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { breadcrumbForPage } from "@/lib/seo";
-
-import ResourcesHero from "@/components/features/resources/ResourcesHero";
-import ResourcesGrid from "@/components/features/resources/ResourcesGrid";
-import ResourcesCTA from "@/components/features/resources/ResourcesCTA";
-import ResourcesNewsletter from "@/components/features/resources/ResourcesNewsletter";
+import ResourcesPageClient from "@/components/features/resources/ResourcesPageClient";
 
 const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
@@ -35,17 +31,7 @@ export default function ResourcesPage() {
         }}
       />
 
-      {/* 1 — Hero */}
-      <ResourcesHero />
-
-      {/* 2 — Filter + 3 — Resource Grid */}
-      <ResourcesGrid />
-
-      {/* 4 — Custom Resource CTA */}
-      <ResourcesCTA />
-
-      {/* 5 — Newsletter Subscribe */}
-      <ResourcesNewsletter />
+      <ResourcesPageClient />
     </main>
   );
 }

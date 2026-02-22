@@ -20,7 +20,7 @@ export default function AboutHero({ title, subtitle, image }: AboutHeroProps) {
   const hasImage = image && image.trim() !== "";
 
   return (
-    <section className="relative flex items-center justify-center overflow-hidden py-30 md:py-44 lg:py-52">
+    <section className="relative flex items-center justify-center overflow-hidden py-30 md:py-44 lg:py-52 bg-background">
       {hasImage ? (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -33,7 +33,7 @@ export default function AboutHero({ title, subtitle, image }: AboutHeroProps) {
         </>
       ) : (
         <>
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#141420] to-[#0a0a0a]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/50 to-background" />
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-[var(--gold)]/[0.03]" />
         </>
       )}
@@ -43,7 +43,7 @@ export default function AboutHero({ title, subtitle, image }: AboutHeroProps) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease }}
-          className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+          className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${hasImage ? "text-white" : "text-foreground"}`}
           style={{ fontFamily: "var(--font-heading)" }}
         >
           {heading}
@@ -53,7 +53,7 @@ export default function AboutHero({ title, subtitle, image }: AboutHeroProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4, ease }}
-          className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mx-auto leading-relaxed"
+          className={`text-base sm:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed ${hasImage ? "text-white/60" : "text-muted-foreground"}`}
         >
           {sub}
         </motion.p>

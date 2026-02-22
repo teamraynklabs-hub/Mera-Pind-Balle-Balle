@@ -11,22 +11,24 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const adminCheck = await requireAdmin();
+    if (adminCheck instanceof NextResponse) return adminCheck;
+
     const { id } = await params;
     await connectDB();
     const distributor = await Distributor.findById(id).lean();
 
     if (!distributor) {
       return NextResponse.json(
-        { error: "Distributor not found" },
+        { success: false, message: "Distributor not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(distributor);
-  } catch (error) {
-    console.error("GET /api/admin/distributors/:id error:", error);
+    return NextResponse.json({ success: true, data: distributor });
+  } catch {
     return NextResponse.json(
-      { error: "Failed to fetch distributor" },
+      { success: false, message: "Failed to fetch distributor" },
       { status: 500 }
     );
   }
@@ -37,15 +39,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
     const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) {
-      return adminCheck;
-    }
+    if (adminCheck instanceof NextResponse) return adminCheck;
+
+    const { id } = await params;
 
     if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { error: "Invalid distributor ID" },
+        { success: false, message: "Invalid distributor ID" },
         { status: 400 }
       );
     }
@@ -65,31 +66,28 @@ export async function PATCH(
     if (phone) updateData.phone = phone.trim();
     if (website !== undefined) updateData.website = website.trim();
 
-    // Handle new image upload
     if (file && file.size > 0) {
-      // Get existing distributor to delete old image
       const existingDistributor = await Distributor.findById(id).lean();
 
-      // Delete old image from Cloudinary if exists
       if (existingDistributor?.image) {
         await deleteCloudinaryImage(existingDistributor.image);
       }
 
-      // Upload new image
       try {
         const buffer = Buffer.from(await file.arrayBuffer());
         const upload: any = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { folder: "mpbb/distributors" },
-            (err, result) => (err ? reject(err) : resolve(result))
-          ).end(buffer);
+          cloudinary.uploader
+            .upload_stream(
+              { folder: "mpbb/distributors" },
+              (err, result) => (err ? reject(err) : resolve(result))
+            )
+            .end(buffer);
         });
         updateData.image = upload.secure_url;
         updateData.publicId = upload.public_id;
-      } catch (err) {
-        console.error("Cloudinary upload error:", err);
+      } catch {
         return NextResponse.json(
-          { error: "Failed to upload image" },
+          { success: false, message: "Failed to upload image" },
           { status: 500 }
         );
       }
@@ -103,16 +101,15 @@ export async function PATCH(
 
     if (!updatedDistributor) {
       return NextResponse.json(
-        { error: "Distributor not found" },
+        { success: false, message: "Distributor not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(updatedDistributor);
-  } catch (error) {
-    console.error("PATCH /api/admin/distributors/:id error:", error);
+    return NextResponse.json({ success: true, data: updatedDistributor });
+  } catch {
     return NextResponse.json(
-      { error: "Failed to update distributor" },
+      { success: false, message: "Failed to update distributor" },
       { status: 500 }
     );
   }
@@ -123,15 +120,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
     const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) {
-      return adminCheck;
-    }
+    if (adminCheck instanceof NextResponse) return adminCheck;
+
+    const { id } = await params;
 
     if (!Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { error: "Invalid distributor ID" },
+        { success: false, message: "Invalid distributor ID" },
         { status: 400 }
       );
     }
@@ -142,21 +138,22 @@ export async function DELETE(
 
     if (!deletedDistributor) {
       return NextResponse.json(
-        { error: "Distributor not found" },
+        { success: false, message: "Distributor not found" },
         { status: 404 }
       );
     }
 
-    // 🔥 DELETE CLOUDINARY IMAGE IF EXISTS
     if (deletedDistributor.image) {
       await deleteCloudinaryImage(deletedDistributor.image);
     }
 
-    return NextResponse.json({ message: "Distributor deleted successfully" });
-  } catch (error) {
-    console.error("DELETE /api/admin/distributors/:id error:", error);
+    return NextResponse.json({
+      success: true,
+      message: "Distributor deleted successfully",
+    });
+  } catch {
     return NextResponse.json(
-      { error: "Failed to delete distributor" },
+      { success: false, message: "Failed to delete distributor" },
       { status: 500 }
     );
   }

@@ -14,19 +14,34 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const DEFAULT_QUICK_LINKS = [
-  { label: "Shop Products", link: "/products" },
-  { label: "Artisan Stories", link: "/stories" },
-  { label: "Blog", link: "/blog" },
-  { label: "About Us", link: "/about" },
-];
+/* ── Types ── */
 
-const DEFAULT_SUPPORT_LINKS = [
-  { label: "Become a Distributor", link: "/distributors" },
-  { label: "Careers", link: "/careers" },
-  { label: "Resources", link: "/resources" },
-  { label: "Contact", link: "/contact" },
-];
+interface LinkItem {
+  label: string;
+  link: string;
+}
+
+interface SocialLink {
+  platform: string;
+  link: string;
+}
+
+interface FooterData {
+  brand: { description: string };
+  quickLinks: { columnTitle: string; items: LinkItem[] };
+  supportLinks: { columnTitle: string; items: LinkItem[] };
+  contactInfo: {
+    columnTitle: string;
+    address: string;
+    phone: string;
+    email: string;
+  };
+  socialLinks: SocialLink[];
+  legalLinks: LinkItem[];
+  copyrightText: string;
+}
+
+/* ── Social icon map ── */
 
 const SOCIAL_ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
   facebook: Facebook,
@@ -36,7 +51,14 @@ const SOCIAL_ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
   linkedin: Linkedin,
 };
 
-export default function Footer({ footer }: { footer?: any }) {
+/* ── Component ── */
+
+export default function Footer({
+  initialData,
+}: {
+  initialData?: FooterData | null;
+}) {
+  const [data, setData] = useState<FooterData | null>(initialData ?? null);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
@@ -45,6 +67,24 @@ export default function Footer({ footer }: { footer?: any }) {
     setMounted(true);
   }, []);
 
+  /* Fetch fresh data on mount for real-time updates */
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("/api/footer-page", { cache: "no-store" });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json?.success && json.data) {
+          setData(json.data);
+        }
+      } catch {
+        /* keep initial data */
+      }
+    }
+    fetchData();
+  }, []);
+
+  /* Intersection observer for reveal animation */
   useEffect(() => {
     if (!footerRef.current) return;
     const observer = new IntersectionObserver(
@@ -62,19 +102,24 @@ export default function Footer({ footer }: { footer?: any }) {
 
   if (!mounted) return null;
 
-  const quickLinks =
-    footer?.quickLinks?.length > 0 ? footer.quickLinks : DEFAULT_QUICK_LINKS;
-  const supportLinks =
-    footer?.supportLinks?.length > 0
-      ? footer.supportLinks
-      : DEFAULT_SUPPORT_LINKS;
-  const legalLinks = footer?.legalLinks ?? [];
-  const socialLinks = footer?.socialLinks ?? [];
-
+  const quickLinks = data?.quickLinks?.items ?? [];
+  const supportLinks = data?.supportLinks?.items ?? [];
+  const socialLinks = data?.socialLinks ?? [];
+  const legalLinks = data?.legalLinks ?? [];
   const contactAddress =
-    footer?.contactAddress || "123 Heritage Lane, New Delhi, India 110001";
-  const contactPhone = footer?.contactPhone || "+91 12345 67890";
-  const contactEmail = footer?.contactEmail || "hello@merapind.com";
+    data?.contactInfo?.address || "123 Heritage Lane, New Delhi, India 110001";
+  const contactPhone = data?.contactInfo?.phone || "+91 12345 67890";
+  const contactEmail = data?.contactInfo?.email || "hello@merapind.com";
+  const brandDescription =
+    data?.brand?.description ||
+    "Empowering rural women artisans through traditional crafts and sustainable livelihood.";
+  const copyrightText =
+    data?.copyrightText || "Mera Pind Balle Balle. All rights reserved.";
+
+  const quickLinksTitle = data?.quickLinks?.columnTitle || "Quick Links";
+  const supportLinksTitle =
+    data?.supportLinks?.columnTitle || "Get Involved";
+  const contactTitle = data?.contactInfo?.columnTitle || "Contact Us";
 
   const currentYear = new Date().getFullYear();
 
@@ -107,18 +152,17 @@ export default function Footer({ footer }: { footer?: any }) {
             </div>
 
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-5">
-              {footer?.description ||
-                "Empowering rural women artisans through traditional crafts and sustainable livelihood."}
+              {brandDescription}
             </p>
 
             {socialLinks.length > 0 && (
               <div className="flex gap-3">
-                {socialLinks.map((item: any) => {
+                {socialLinks.map((item, i) => {
                   const Icon = SOCIAL_ICONS[item.platform];
                   if (!Icon) return null;
                   return (
                     <Link
-                      key={item.platform}
+                      key={`${item.platform}-${i}`}
                       href={item.link}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -136,11 +180,11 @@ export default function Footer({ footer }: { footer?: any }) {
           {/* COLUMN 2 — QUICK LINKS */}
           <div className="text-center sm:text-left">
             <h4 className="font-heading text-base font-semibold mb-4 text-foreground">
-              Quick Links
+              {quickLinksTitle}
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {quickLinks.map((item: any) => (
-                <li key={item.label}>
+              {quickLinks.map((item, i) => (
+                <li key={`ql-${i}`}>
                   <Link
                     href={item.link}
                     className="footer-link text-muted-foreground"
@@ -152,14 +196,14 @@ export default function Footer({ footer }: { footer?: any }) {
             </ul>
           </div>
 
-          {/* COLUMN 3 — GET INVOLVED */}
+          {/* COLUMN 3 — SUPPORT LINKS */}
           <div className="text-center sm:text-left">
             <h4 className="font-heading text-base font-semibold mb-4 text-foreground">
-              Get Involved
+              {supportLinksTitle}
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {supportLinks.map((item: any) => (
-                <li key={item.label}>
+              {supportLinks.map((item, i) => (
+                <li key={`sl-${i}`}>
                   <Link
                     href={item.link}
                     className="footer-link text-muted-foreground"
@@ -174,31 +218,37 @@ export default function Footer({ footer }: { footer?: any }) {
           {/* COLUMN 4 — CONTACT INFO */}
           <div className="text-center sm:text-left">
             <h4 className="font-heading text-base font-semibold mb-4 text-foreground">
-              Contact Us
+              {contactTitle}
             </h4>
             <ul className="space-y-3.5 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2.5 justify-center sm:justify-start">
-                <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary/70" />
-                <span className="leading-relaxed">{contactAddress}</span>
-              </li>
-              <li className="flex items-center gap-2.5 justify-center sm:justify-start">
-                <Phone className="h-4 w-4 flex-shrink-0 text-primary/70" />
-                <a
-                  href={`tel:${contactPhone.replace(/\s/g, "")}`}
-                  className="footer-link"
-                >
-                  {contactPhone}
-                </a>
-              </li>
-              <li className="flex items-center gap-2.5 justify-center sm:justify-start">
-                <Mail className="h-4 w-4 flex-shrink-0 text-primary/70" />
-                <a
-                  href={`mailto:${contactEmail}`}
-                  className="footer-link"
-                >
-                  {contactEmail}
-                </a>
-              </li>
+              {contactAddress && (
+                <li className="flex items-start gap-2.5 justify-center sm:justify-start">
+                  <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary/70" />
+                  <span className="leading-relaxed">{contactAddress}</span>
+                </li>
+              )}
+              {contactPhone && (
+                <li className="flex items-center gap-2.5 justify-center sm:justify-start">
+                  <Phone className="h-4 w-4 flex-shrink-0 text-primary/70" />
+                  <a
+                    href={`tel:${contactPhone.replace(/\s/g, "")}`}
+                    className="footer-link"
+                  >
+                    {contactPhone}
+                  </a>
+                </li>
+              )}
+              {contactEmail && (
+                <li className="flex items-center gap-2.5 justify-center sm:justify-start">
+                  <Mail className="h-4 w-4 flex-shrink-0 text-primary/70" />
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className="footer-link"
+                  >
+                    {contactEmail}
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>
@@ -208,36 +258,23 @@ export default function Footer({ footer }: { footer?: any }) {
 
         {/* BOTTOM ROW */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-muted-foreground">
-          <p>&copy; {currentYear} Mera Pind Balle Balle. All rights reserved.</p>
+          <p>
+            &copy; {currentYear} {copyrightText}
+          </p>
 
-          <div className="flex gap-5">
-            {legalLinks.length > 0 ? (
-              legalLinks.map((item: any) => (
+          {legalLinks.length > 0 && (
+            <div className="flex gap-5">
+              {legalLinks.map((item, i) => (
                 <Link
-                  key={item.label}
+                  key={`ll-${i}`}
                   href={item.link}
                   className="hover:text-primary transition-colors duration-200"
                 >
                   {item.label}
                 </Link>
-              ))
-            ) : (
-              <>
-                <Link
-                  href="/privacy-policy"
-                  className="hover:text-primary transition-colors duration-200"
-                >
-                  Privacy Policy
-                </Link>
-                <Link
-                  href="/terms-conditions"
-                  className="hover:text-primary transition-colors duration-200"
-                >
-                  Terms of Service
-                </Link>
-              </>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </footer>

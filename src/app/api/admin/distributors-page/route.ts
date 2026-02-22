@@ -1,56 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
-import DistributorsPage from "@/lib/models/DistributorsPage.model";
+import { revalidatePath } from "next/cache";
 import { connectDB } from "@/lib/db";
+import DistributorsPage from "@/lib/models/DistributorsPage.model";
 import { requireAdmin } from "@/lib/requireAdmin";
+import {
+  normalizeDistributorsPageData,
+  DISTRIBUTORS_PAGE_SEED_DATA,
+} from "@/lib/normalizeDistributorsPage";
 
 export async function GET() {
   try {
     const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) {
-      return adminCheck;
-    }
+    if (adminCheck instanceof NextResponse) return adminCheck;
 
     await connectDB();
-    
-    const data = await DistributorsPage.findOne({ isActive: true }).lean();
+    const page = await DistributorsPage.findOne({ isActive: true }).lean();
 
-    if (!data) {
-      // Return default structure if none exists
-      return NextResponse.json({
-        bannerImage: "",
-        benefits: [],
-        requirements: [],
-        isActive: true,
-      });
-    }
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error("GET /api/admin/distributors-page error:", error);
-    return NextResponse.json({ error: "Failed to fetch distributors page data" }, { status: 500 });
+    const data =
+      normalizeDistributorsPageData(page) || DISTRIBUTORS_PAGE_SEED_DATA;
+    return NextResponse.json({ success: true, data });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch distributors page data" },
+      { status: 500 }
+    );
   }
 }
 
 export async function PATCH(request: NextRequest) {
   try {
     const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) {
-      return adminCheck;
-    }
-    
+    if (adminCheck instanceof NextResponse) return adminCheck;
+
     await connectDB();
     const body = await request.json();
 
-    // Upsert pattern: update existing or create new
+    if (!body.hero?.title?.trim()) {
+      return NextResponse.json(
+        { success: false, message: "Hero title is required" },
+        { status: 400 }
+      );
+    }
+
     const updated = await DistributorsPage.findOneAndUpdate(
       { isActive: true },
       { $set: body },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
-    );
+      { new: true, upsert: true, runValidators: true }
+    ).lean();
 
-    return NextResponse.json({ success: true, data: updated });
-  } catch (error) {
-    console.error("PATCH /api/admin/distributors-page error:", error);
-    return NextResponse.json({ error: "Failed to update distributors page" }, { status: 500 });
+    revalidatePath("/distributors");
+
+    const data =
+      normalizeDistributorsPageData(updated) || DISTRIBUTORS_PAGE_SEED_DATA;
+    return NextResponse.json({ success: true, data });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Failed to update distributors page" },
+      { status: 500 }
+    );
   }
 }

@@ -6,13 +6,18 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
   try {
+    const adminCheck = await requireAdmin();
+    if (adminCheck instanceof NextResponse) return adminCheck;
+
     await connectDB();
-    const distributors = await Distributor.find({}).lean();
-    return NextResponse.json(distributors || []);
-  } catch (error) {
-    console.error("GET /api/admin/distributors error:", error);
+    const distributors = await Distributor.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return NextResponse.json({ success: true, data: distributors || [] });
+  } catch {
     return NextResponse.json(
-      { error: "Failed to fetch distributors" },
+      { success: false, message: "Failed to fetch distributors" },
       { status: 500 }
     );
   }
@@ -21,9 +26,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const adminCheck = await requireAdmin();
-    if (adminCheck instanceof NextResponse) {
-      return adminCheck;
-    }
+    if (adminCheck instanceof NextResponse) return adminCheck;
 
     await connectDB();
 
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     if (!name?.trim() || !email?.trim() || !phone?.trim()) {
       return NextResponse.json(
-        { error: "Name, email, and phone are required" },
+        { success: false, message: "Name, email, and phone are required" },
         { status: 400 }
       );
     }
@@ -44,22 +47,22 @@ export async function POST(request: NextRequest) {
     let imageUrl = "";
     let imagePublicId = "";
 
-    // Upload image to Cloudinary if provided
     if (file && file.size > 0) {
       try {
         const buffer = Buffer.from(await file.arrayBuffer());
         const upload: any = await new Promise((resolve, reject) => {
-          cloudinary.uploader.upload_stream(
-            { folder: "mpbb/distributors" },
-            (err, result) => (err ? reject(err) : resolve(result))
-          ).end(buffer);
+          cloudinary.uploader
+            .upload_stream(
+              { folder: "mpbb/distributors" },
+              (err, result) => (err ? reject(err) : resolve(result))
+            )
+            .end(buffer);
         });
         imageUrl = upload.secure_url;
         imagePublicId = upload.public_id;
-      } catch (err) {
-        console.error("Cloudinary upload error:", err);
+      } catch {
         return NextResponse.json(
-          { error: "Failed to upload image" },
+          { success: false, message: "Failed to upload image" },
           { status: 500 }
         );
       }
@@ -74,11 +77,13 @@ export async function POST(request: NextRequest) {
       publicId: imagePublicId,
     });
 
-    return NextResponse.json(newDistributor, { status: 201 });
-  } catch (error) {
-    console.error("POST /api/admin/distributors error:", error);
     return NextResponse.json(
-      { error: "Failed to create distributor" },
+      { success: true, data: newDistributor },
+      { status: 201 }
+    );
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Failed to create distributor" },
       { status: 500 }
     );
   }
