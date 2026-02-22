@@ -10,16 +10,15 @@ export async function GET() {
   try {
     await connectDB();
 
-    const [dashboard, featuredProducts, allProducts] = await Promise.all([
+    const [dashboard, allProducts] = await Promise.all([
       Dashboard.findOne({ isActive: true }).lean(),
-      Product.find({ isActive: true, isFeatured: true })
-        .select("name price image description category stock")
-        .lean(),
       Product.find({ isActive: true })
         .sort({ createdAt: -1 })
         .select("name price image description category isFeatured stock")
         .lean(),
     ]);
+
+    const featuredProducts = allProducts.filter((p: any) => p.isFeatured);
 
     if (!dashboard) {
       return NextResponse.json(
@@ -38,8 +37,8 @@ export async function GET() {
           impact: dashboard.impact || [],
           cta: dashboard.cta,
           storySection: (dashboard as any).storySection || null,
-          featuredProducts: JSON.parse(JSON.stringify(featuredProducts)),
-          allProducts: JSON.parse(JSON.stringify(allProducts)),
+          featuredProducts,
+          allProducts,
         },
       },
       {

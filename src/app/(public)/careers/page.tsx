@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { breadcrumbForPage } from "@/lib/seo";
 
 import CareersHero from "@/components/features/careers/CareersHero";
 import CareersBenefits from "@/components/features/careers/CareersBenefits";
@@ -7,6 +6,7 @@ import CareersCulture from "@/components/features/careers/CareersCulture";
 import CareersOpenPositions from "@/components/features/careers/CareersOpenPositions";
 import CareersCTA from "@/components/features/careers/CareersCTA";
 import CareersForm from "./CareersForm";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -29,10 +29,7 @@ export const revalidate = 0;
 export default function CareersPage() {
   return (
     <main className="flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Careers", "/careers")) }}
-      />
+      <Breadcrumbs items={[{ label: "Careers", href: "/careers" }]} />
 
       {/* 1 — HERO */}
       <CareersHero />

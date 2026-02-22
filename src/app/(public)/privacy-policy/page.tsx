@@ -5,8 +5,8 @@ import {
   normalizePrivacyPolicyPageData,
   PRIVACY_POLICY_PAGE_SEED_DATA,
 } from "@/lib/normalizePrivacyPolicyPage";
-import { breadcrumbForPage } from "@/lib/seo";
 import PrivacyPolicyPageClient from "@/components/features/privacy-policy/PrivacyPolicyPageClient";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
@@ -36,15 +36,7 @@ export default async function PrivacyPolicyPageRoute() {
 
   return (
     <main className="w-full">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
-            breadcrumbForPage("Privacy Policy", "/privacy-policy")
-          ),
-        }}
-      />
-
+      <Breadcrumbs items={[{ label: "Privacy Policy", href: "/privacy-policy" }]} />
       <PrivacyPolicyPageClient initialData={serialized} />
     </main>
   );

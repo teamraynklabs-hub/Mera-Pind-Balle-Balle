@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import TermsConditionsClient from "./TermsConditionsClient";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -23,6 +24,7 @@ export const revalidate = 0;
 export default function TermsConditionsPage() {
   return (
     <main>
+      <Breadcrumbs items={[{ label: "Terms & Conditions", href: "/terms-conditions" }]} />
       <TermsConditionsClient />
     </main>
   );

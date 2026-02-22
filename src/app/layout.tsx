@@ -99,6 +99,8 @@ export default function RootLayout({
                   logo: {
                     "@type": "ImageObject",
                     url: `${baseUrl}/favicon.svg`,
+                    width: 512,
+                    height: 512,
                   },
                   description:
                     "A rural women empowerment initiative providing training, sustainable products, and community development across Indian villages.",
@@ -115,8 +117,15 @@ export default function RootLayout({
                     telephone: "+91-90411-42411",
                     email: "contact@merapindballeballe.com",
                     contactType: "customer service",
+                    availableLanguage: ["English", "Hindi"],
                   },
-                  sameAs: [],
+                  sameAs: [
+                    "https://www.facebook.com/merapindballeballe",
+                    "https://www.instagram.com/merapindballeballe",
+                    "https://twitter.com/MeraPindBB",
+                    "https://www.youtube.com/@merapindballeballe",
+                    "https://www.linkedin.com/company/merapindballeballe",
+                  ],
                 },
                 {
                   "@type": "WebSite",
@@ -125,6 +134,29 @@ export default function RootLayout({
                   name: "Mera Pind Balle Balle",
                   publisher: { "@id": `${baseUrl}/#organization` },
                   inLanguage: "en-IN",
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: {
+                      "@type": "EntryPoint",
+                      urlTemplate: `${baseUrl}/products?search={search_term_string}`,
+                    },
+                    "query-input": "required name=search_term_string",
+                  },
+                },
+                {
+                  "@type": "SiteNavigationElement",
+                  "@id": `${baseUrl}/#navigation`,
+                  name: "Main Navigation",
+                  hasPart: [
+                    { "@type": "SiteNavigationElement", name: "Home", url: baseUrl },
+                    { "@type": "SiteNavigationElement", name: "About", url: `${baseUrl}/about` },
+                    { "@type": "SiteNavigationElement", name: "Products", url: `${baseUrl}/products` },
+                    { "@type": "SiteNavigationElement", name: "Blog", url: `${baseUrl}/blog` },
+                    { "@type": "SiteNavigationElement", name: "Stories", url: `${baseUrl}/stories` },
+                    { "@type": "SiteNavigationElement", name: "Contact", url: `${baseUrl}/contact` },
+                    { "@type": "SiteNavigationElement", name: "Careers", url: `${baseUrl}/careers` },
+                    { "@type": "SiteNavigationElement", name: "Distributors", url: `${baseUrl}/distributors` },
+                  ],
                 },
               ],
             }),

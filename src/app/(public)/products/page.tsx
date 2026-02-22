@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import Product from "@/lib/models/Product.model";
 import Category from "@/lib/models/Category.model";
 import Link from "next/link";
-import { breadcrumbForPage } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 import ProductsPageClient from "@/components/features/products/ProductsPageClient";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -44,10 +44,7 @@ export default async function ProductsPage() {
 
   return (
     <main className="container mx-auto px-4 py-16 md:py-20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("Products", "/products")) }}
-      />
+      <Breadcrumbs items={[{ label: "Products", href: "/products" }]} />
 
       {/* PAGE HEADER */}
       <ScrollReveal>

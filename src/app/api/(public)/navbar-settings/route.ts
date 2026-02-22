@@ -6,7 +6,9 @@ import {
   NAVBAR_SEED_DATA,
 } from "@/lib/normalizeNavbarSettings";
 
-export const dynamic = "force-dynamic";
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+};
 
 export async function GET() {
   try {
@@ -16,11 +18,7 @@ export async function GET() {
     if (!settings) {
       return NextResponse.json(
         { success: true, data: NAVBAR_SEED_DATA },
-        {
-          headers: {
-            "Cache-Control": "no-store, no-cache, must-revalidate",
-          },
-        }
+        { headers: CACHE_HEADERS }
       );
     }
 
@@ -28,11 +26,7 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, data: normalized },
-      {
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-        },
-      }
+      { headers: CACHE_HEADERS }
     );
   } catch {
     return NextResponse.json(

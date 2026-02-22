@@ -5,8 +5,8 @@ import {
   normalizeContactPageData,
   CONTACT_PAGE_SEED_DATA,
 } from "@/lib/normalizeContactPage";
-import { breadcrumbForPage } from "@/lib/seo";
 import ContactPageClient from "@/components/features/contact/ContactPageClient";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
@@ -35,13 +35,7 @@ export default async function ContactPageRoute() {
 
   return (
     <main className="w-full">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbForPage("Contact Us", "/contact")),
-        }}
-      />
-
+      <Breadcrumbs items={[{ label: "Contact", href: "/contact" }]} />
       <ContactPageClient initialData={serialized} />
     </main>
   );

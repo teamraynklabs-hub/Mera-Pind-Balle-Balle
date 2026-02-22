@@ -7,7 +7,11 @@ import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft, Shield, Truck } from "luci
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/CartContext";
 import { motion, AnimatePresence } from "motion/react";
-import CheckoutDrawer from "./CheckoutDrawer";
+import dynamic from "next/dynamic";
+
+const CheckoutDrawer = dynamic(() => import("./CheckoutDrawer"), {
+  ssr: false,
+});
 
 export default function CartPageClient() {
   const { items, updateQuantity, removeFromCart, totalPrice } = useCart();

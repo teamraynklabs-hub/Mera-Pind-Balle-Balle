@@ -160,16 +160,6 @@ export default function ContactPageClient({ initialData }: ContactPageClientProp
       {/* ── CONTACT FORM + INFO SECTION ── */}
       <div className="section-container">
         <section className="section-padding">
-          {/* Section Header */}
-          <FadeUp className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              {data.contactInfo.sectionTitle}
-            </h2>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-              {data.contactInfo.sectionSubtitle}
-            </p>
-          </FadeUp>
-
           {/* Two-Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
             {/* LEFT — Contact Form (3/5) */}

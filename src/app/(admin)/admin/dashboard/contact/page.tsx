@@ -444,34 +444,6 @@ export default function ContactDashboard() {
             <Card>
               <CardContent className="p-6 space-y-4">
                 <h2 className="text-xl font-semibold">Contact Info Section</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Section Title</label>
-                    <Input
-                      value={data.contactInfo.sectionTitle}
-                      onChange={(e) =>
-                        setData((p) => ({
-                          ...p,
-                          contactInfo: { ...p.contactInfo, sectionTitle: e.target.value },
-                        }))
-                      }
-                      placeholder="Get in Touch With Us"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-1 block">Section Subtitle</label>
-                    <Input
-                      value={data.contactInfo.sectionSubtitle}
-                      onChange={(e) =>
-                        setData((p) => ({
-                          ...p,
-                          contactInfo: { ...p.contactInfo, sectionSubtitle: e.target.value },
-                        }))
-                      }
-                      placeholder="We would love to hear from you..."
-                    />
-                  </div>
-                </div>
 
                 <div className="flex items-center justify-between mt-6">
                   <h3 className="text-lg font-medium">Contact Info Cards</h3>

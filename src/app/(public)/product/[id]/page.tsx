@@ -17,7 +17,7 @@ import ProductTabs from "@/components/features/products/ProductTabs";
 import RelatedProducts from "@/components/features/products/RelatedProducts";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 import { Badge } from "@/components/ui/badge";
-import { buildBreadcrumbJsonLd } from "@/lib/seo";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl =
   process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
@@ -89,20 +89,6 @@ export default async function ProductDetailPage({ params }: Props) {
     .lean();
   const relatedProducts = JSON.parse(JSON.stringify(relatedRaw));
 
-  const breadcrumbItems = [
-    { name: "Home", url: baseUrl },
-    { name: "Products", url: `${baseUrl}/products` },
-    ...(serialized.category
-      ? [{ name: serialized.category, url: `${baseUrl}/products` }]
-      : []),
-    {
-      name: serialized.name,
-      url: `${baseUrl}/product/${serialized._id}`,
-    },
-  ];
-
-  const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbItems);
-
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -153,42 +139,16 @@ export default async function ProductDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
 
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-8 flex-wrap">
-        <Link
-          href="/"
-          className="hover:text-foreground transition-colors"
-        >
-          Home
-        </Link>
-        <ChevronRight size={14} />
-        <Link
-          href="/products"
-          className="hover:text-foreground transition-colors"
-        >
-          Products
-        </Link>
-        {serialized.category && (
-          <>
-            <ChevronRight size={14} />
-            <Link
-              href="/products"
-              className="hover:text-foreground transition-colors"
-            >
-              {serialized.category}
-            </Link>
-          </>
-        )}
-        <ChevronRight size={14} />
-        <span className="text-foreground font-medium truncate max-w-[200px]">
-          {serialized.name}
-        </span>
-      </nav>
+      <Breadcrumbs
+        items={[
+          { label: "Products", href: "/products" },
+          ...(serialized.category
+            ? [{ label: serialized.category, href: "/products" }]
+            : []),
+          { label: serialized.name },
+        ]}
+      />
 
       {/* Product Section */}
       <div className="grid md:grid-cols-2 gap-8 lg:gap-14 items-start">

@@ -26,7 +26,7 @@ const ContactPageSchema = new Schema(
       image: { type: String, default: "" },
     },
     contactInfo: {
-      sectionTitle: { type: String, default: "Get in Touch With Us" },
+      sectionTitle: { type: String, default: "" },
       sectionSubtitle: { type: String, default: "" },
       items: [ContactInfoItemSchema],
     },

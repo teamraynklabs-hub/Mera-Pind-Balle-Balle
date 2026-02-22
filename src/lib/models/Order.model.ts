@@ -80,6 +80,13 @@ const OrderSchema = new Schema(
   { timestamps: true }
 );
 
+// Indexes for admin order listing and filtering
+OrderSchema.index({ createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
+OrderSchema.index({ paymentStatus: 1, createdAt: -1 });
+OrderSchema.index({ "customer.name": 1 });
+OrderSchema.index({ "customer.email": 1 });
+
 OrderSchema.pre("validate", function () {
   if (!this.estimatedDelivery) {
     const delivery = new Date();

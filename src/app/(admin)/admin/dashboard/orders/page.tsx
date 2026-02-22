@@ -156,7 +156,7 @@ export default function OrdersManager() {
       const json = await res.json();
 
       if (json.success && json.data.orders.length > 0) {
-        exportOrdersToExcel(json.data.orders);
+        await exportOrdersToExcel(json.data.orders);
         toast.success("Excel file downloaded");
       } else {
         toast.error("No orders to export");

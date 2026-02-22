@@ -95,17 +95,6 @@ export default function ContactFormSection() {
 
   return (
     <section className="section-padding">
-      {/* ── Section Header ── */}
-      <FadeUp className="text-center mb-12 md:mb-16">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-          Get in Touch With Us
-        </h2>
-        <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-          We would love to hear from you. Whether you have questions, partnership
-          ideas, or feedback — our team is here to help.
-        </p>
-      </FadeUp>
-
       {/* ── Two-Column Layout ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12">
         {/* LEFT — Contact Form (3/5) */}

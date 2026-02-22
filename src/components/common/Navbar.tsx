@@ -40,7 +40,7 @@ const FALLBACK: NavbarData = {
   showThemeToggle: true,
 };
 
-const POLL_INTERVAL = 120_000;
+const POLL_INTERVAL = 600_000; // 10 minutes — navbar data rarely changes
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -53,7 +53,7 @@ export default function Navbar() {
 
   const fetchNavbar = useCallback(async () => {
     try {
-      const res = await fetch("/api/navbar-settings", { cache: "no-store" });
+      const res = await fetch("/api/navbar-settings");
       const json = await res.json();
       if (!mountedRef.current) return;
       if (json.success && json.data) {

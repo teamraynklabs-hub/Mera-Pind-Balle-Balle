@@ -1,13 +1,30 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import HeroSection from "@/components/features/home/HeroSection";
 import TrustSection from "@/components/features/home/TrustSection";
-import InitiativeCards from "@/components/features/home/InitiativeCards";
-import HomeProductsCarousel from "@/components/features/home/HomeProductsCarousel";
-import HomeFeaturedProducts from "@/components/features/home/HomeFeaturedProducts";
-import HomeFeedback from "@/components/features/home/HomeFeedback";
-import ClosingCTA from "@/components/features/home/ClosingCTA";
+
+const InitiativeCards = dynamic(
+  () => import("@/components/features/home/InitiativeCards"),
+  { ssr: false }
+);
+const HomeProductsCarousel = dynamic(
+  () => import("@/components/features/home/HomeProductsCarousel"),
+  { ssr: false }
+);
+const HomeFeaturedProducts = dynamic(
+  () => import("@/components/features/home/HomeFeaturedProducts"),
+  { ssr: false }
+);
+const HomeFeedback = dynamic(
+  () => import("@/components/features/home/HomeFeedback"),
+  { ssr: false }
+);
+const ClosingCTA = dynamic(
+  () => import("@/components/features/home/ClosingCTA"),
+  { ssr: false }
+);
 
 interface HomeData {
   hero: {

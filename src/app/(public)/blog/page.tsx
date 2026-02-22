@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { breadcrumbForPage } from "@/lib/seo";
 import BlogPageClient from "@/components/features/blog/BlogPageClient";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -20,13 +20,7 @@ export const metadata: Metadata = {
 export default function BlogPage() {
   return (
     <main className="flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbForPage("Blog", "/blog")),
-        }}
-      />
-
+      <Breadcrumbs items={[{ label: "Blog", href: "/blog" }]} />
       <BlogPageClient />
     </main>
   );

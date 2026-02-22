@@ -6,9 +6,8 @@ export const CONTACT_PAGE_SEED_DATA = {
     image: "",
   },
   contactInfo: {
-    sectionTitle: "Get in Touch With Us",
-    sectionSubtitle:
-      "We would love to hear from you. Whether you have questions, partnership ideas, or feedback — our team is here to help.",
+    sectionTitle: "",
+    sectionSubtitle: "",
     items: [
       {
         icon: "map-pin",

@@ -1,7 +1,7 @@
 import { getBaseUrl } from "@/lib/getBaseUrl";
 import type { Metadata } from "next";
-import { breadcrumbForPage } from "@/lib/seo";
 import AboutPageClient from "@/components/features/about/AboutPageClient";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
@@ -38,10 +38,7 @@ export default async function AboutPage() {
 
   return (
     <main className="flex flex-col">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbForPage("About", "/about")) }}
-      />
+      <Breadcrumbs items={[{ label: "About", href: "/about" }]} />
       <AboutPageClient initialData={initialData} />
     </main>
   );

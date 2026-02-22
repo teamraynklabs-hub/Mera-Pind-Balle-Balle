@@ -4,6 +4,7 @@ import Link from "next/link";
 import { connectDB } from "@/lib/db";
 import Story from "@/lib/models/Story.model";
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/common/Breadcrumbs";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
@@ -93,6 +94,13 @@ export default async function StoryDetailPage(
 
   return (
     <article className="container mx-auto px-4 py-12 max-w-3xl">
+      <Breadcrumbs
+        items={[
+          { label: "Stories", href: "/stories" },
+          { label: story.title },
+        ]}
+      />
+
       {/* Cover Image */}
       {story.image && (
         <header className="mb-10">
