@@ -10,9 +10,9 @@ The system implements a **dual authentication architecture** with separate flows
 | Provider | CredentialsProvider | Manual implementation |
 | Token Storage | next-auth.session-token cookie | mpbb-user-token cookie |
 | Expiry | 1 hour | 7 days |
-| Database Model | AdminUser | User |
-| Roles | admin, editor | customer (implicit) |
-| Password Hashing | bcryptjs (10 rounds) | bcryptjs (10 rounds) |
+| Credential Source | Environment variables (.env) | User model (MongoDB) |
+| Roles | admin | customer (implicit) |
+| Password Verification | Direct env var comparison | bcryptjs (10 rounds) |
 
 ## Admin Authentication
 
@@ -20,64 +20,19 @@ The system implements a **dual authentication architecture** with separate flows
 
 **Files**: `src/auth.ts`, `src/auth.config.ts`
 
-```typescript
-// src/auth.ts
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: [
-    CredentialsProvider({
-      name: "Admin Login",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        await connectDB();
-        const user = await AdminUser.findOne({
-          email: credentials.email,
-          isActive: true,
-        });
-        if (!user) return null;
+Admin credentials are configured via environment variables in `.env.local`:
+- `ADMIN_EMAIL` — admin login email
+- `ADMIN_PASSWORD` — admin login password
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
-
-        return { id: user._id, name: user.name, email: user.email, role: user.role };
-      },
-    }),
-  ],
-  session: { strategy: "jwt", maxAge: 60 * 60 },
-  pages: { signIn: "/admin-login" },
-});
-```
-
-### JWT Callbacks
-
-```typescript
-// src/auth.config.ts — Edge-safe
-jwt({ token, user }) {
-  if (user) {
-    token.role = user.role;
-    token.id = user.id;
-  }
-  return token;
-}
-
-session({ session, token }) {
-  session.user.role = token.role;
-  session.user.id = token.id;
-  return session;
-}
-```
+To change admin credentials, update these values in `.env.local` and restart the server.
 
 ### Admin Login Flow
 
 ```
 POST /api/auth/[...nextauth] (via signIn("credentials"))
   → CredentialsProvider.authorize()
-    → connectDB()
-    → AdminUser.findOne({ email, isActive: true })
-    → bcrypt.compare(password, hash)
-    → Return user object or null
+    → Compare credentials against ADMIN_EMAIL and ADMIN_PASSWORD env vars
+    → Return admin user object or null
   → JWT token created
   → Cookie set: next-auth.session-token
   → Redirect to /admin/dashboard
@@ -195,9 +150,9 @@ Used at the top of every admin API route handler.
 ## Security Measures
 
 - HTTP-only cookies prevent XSS token theft
-- bcryptjs with 10 salt rounds for password hashing
+- bcryptjs with 10 salt rounds for user password hashing
 - JWT tokens are signed, not encrypted (payload is base64, not secret)
 - Admin sessions expire after 1 hour for security
 - User tokens expire after 7 days for convenience
-- Database queries filter by `isActive: true` for admin users
+- Admin credentials stored securely in environment variables (never committed to repo)
 - No token refresh mechanism — user must re-login after expiry

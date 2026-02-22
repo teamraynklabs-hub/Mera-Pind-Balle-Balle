@@ -20,9 +20,8 @@ signIn("credentials", { email, password })
     ▼
 NextAuth CredentialsProvider.authorize()
     │
-    ├── connectDB()
-    ├── AdminUser.findOne({ email, isActive: true })
-    ├── bcryptjs.compare(password, user.password)
+    ├── Compare email against ADMIN_EMAIL env var
+    ├── Compare password against ADMIN_PASSWORD env var
     │
     ▼
 JWT Token Created (1 hour expiry)
@@ -177,7 +176,8 @@ Redirect to /login
 
 ## Security Measures
 
-- Passwords hashed with bcryptjs (10 salt rounds)
+- Admin credentials stored in environment variables (never in code or docs)
+- User passwords hashed with bcryptjs (10 salt rounds)
 - JWT tokens in HTTP-only cookies (not accessible via JavaScript)
 - Admin session expires after 1 hour
 - User tokens expire after 7 days

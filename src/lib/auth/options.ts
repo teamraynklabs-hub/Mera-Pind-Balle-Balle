@@ -1,8 +1,5 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { connectDB } from "@/lib/db";
-import AdminUser from "@/lib/models/AdminUser.model";
-import { verifyPassword } from "@/lib/auth/hash";
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
@@ -16,27 +13,23 @@ export const authConfig = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        await connectDB();
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
 
-        const user = await AdminUser.findOne({
-          email: credentials.email,
-          isActive: true,
-        }).lean();
+        if (!adminEmail || !adminPassword) {
+          console.error("[AUTH] ADMIN_EMAIL or ADMIN_PASSWORD not set in environment variables");
+          return null;
+        }
 
-        if (!user) return null;
-
-        // Cast both passwords to string to satisfy type requirements
-        const inputPassword = String(credentials.password);
-        const passwordHash = String(user.password);
-        const isValid = await verifyPassword(inputPassword, passwordHash);
-
-        if (!isValid) return null;
+        if (credentials.email !== adminEmail || credentials.password !== adminPassword) {
+          return null;
+        }
 
         return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
+          id: "admin-env",
+          name: "Admin",
+          email: adminEmail,
+          role: "admin",
         };
       },
     }),

@@ -126,7 +126,7 @@ screenshots/
 | Distributors | `/distributors` | `/admin/dashboard/distributors` | Distributor |
 | Resources | `/resources` | `/admin/dashboard/resources` | Resource |
 | About | `/about` | `/admin/dashboard/about` | About |
-| Auth | `/login`, `/signup` | `/admin-login` | User, AdminUser |
+| Auth | `/login`, `/signup` | `/admin-login` | User |
 
 ---
 
@@ -136,11 +136,12 @@ screenshots/
 
 | Domain | Method | Token | Expiry |
 |--------|--------|-------|--------|
-| Admin | NextAuth.js v5 (Credentials) | Session cookie | 1 hour |
+| Admin | NextAuth.js v5 (Credentials via .env) | Session cookie | 1 hour |
 | Customer | Custom JWT | HTTP-only cookie | 7 days |
 
+- Admin credentials configured via `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env.local`
 - Admin routes protected by Edge middleware + API route guards
-- Passwords hashed with bcryptjs (10 salt rounds)
+- Customer passwords hashed with bcryptjs (10 salt rounds)
 - JWT tokens stored in HTTP-only cookies (XSS-safe)
 - Middleware runs at Edge runtime for fast route protection
 
@@ -214,6 +215,8 @@ CLOUDINARY_API_SECRET=<api_secret>
 AUTH_SECRET=<random-secret-string>
 JWT_SECRET=<random-secret-string>
 ADMIN_API_KEY=<admin-api-key>
+ADMIN_EMAIL=<admin-login-email>
+ADMIN_PASSWORD=<admin-login-password>
 
 # URLs
 NEXT_PUBLIC_BASE_URL=http://localhost:3000

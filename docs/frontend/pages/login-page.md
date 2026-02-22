@@ -122,16 +122,23 @@ signupSchema = z.object({
 ## Admin Login Page
 
 ### Page Purpose
-Separate login portal for admin/editor users.
+Separate login portal for admin users. Credentials are configured via environment variables (`ADMIN_EMAIL`, `ADMIN_PASSWORD` in `.env.local`).
 
 ### Route Path
 `/admin-login`
 
 ### Components Used
-- Admin login form using NextAuth `signIn("credentials")` method
+- Admin login form with client-side validation (email format, password minimum length)
+- Password visibility toggle (eye icon)
+- Loading state during authentication
 
 ### API Calls
-- NextAuth `[...nextauth]` handler for authentication
+- NextAuth `[...nextauth]` handler for authentication (validates against `.env` credentials)
+
+### Validation
+- Email: required, must be valid email format
+- Password: required, minimum 6 characters
+- Inline error messages on blur and submit
 
 ### Error Handling
 - Invalid credentials show error message

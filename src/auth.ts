@@ -4,9 +4,6 @@ export const runtime = "nodejs";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import authConfig from "./auth.config"; // import the edge-safe part
-import { connectDB } from "@/lib/db";
-import AdminUser from "@/lib/models/AdminUser.model";
-import { verifyPassword } from "@/lib/auth/hash";
 import jwt from 'jsonwebtoken';
 
 export const {
@@ -31,20 +28,23 @@ export const {
           return null;
         }
 
-        await connectDB();
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
 
-        const user = await AdminUser.findOne({ email, isActive: true }).lean();
+        if (!adminEmail || !adminPassword) {
+          console.error("email or password wrong ");
+          return null;
+        }
 
-        if (!user) return null;
-
-        const valid = await verifyPassword(password, user.password);
-        if (!valid) return null;
+        if (email !== adminEmail || password !== adminPassword) {
+          return null;
+        }
 
         return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role,
+          id: "admin-env",
+          name: "Admin",
+          email: adminEmail,
+          role: "admin",
         };
       },
     }),
