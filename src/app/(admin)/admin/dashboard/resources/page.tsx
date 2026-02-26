@@ -228,7 +228,7 @@ export default function ResourcesManager() {
               {/* Title */}
               <div className="grid gap-2">
                 <Label>
-                  Title <span className="text-red-500">*</span>
+                  Title <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   name="title"
@@ -326,7 +326,7 @@ export default function ResourcesManager() {
                   className="w-4 h-4 accent-primary"
                 />
                 {form.isPublished ? (
-                  <Eye size={16} className="text-green-500" />
+                  <Eye size={16} className="text-primary" />
                 ) : (
                   <EyeOff size={16} className="text-muted-foreground" />
                 )}
@@ -382,7 +382,7 @@ export default function ResourcesManager() {
                       {item.title}
                     </h3>
                     {item.isPublished ? (
-                      <Eye size={14} className="text-green-500 shrink-0" />
+                      <Eye size={14} className="text-primary shrink-0" />
                     ) : (
                       <EyeOff
                         size={14}

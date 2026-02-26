@@ -146,7 +146,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
             <h1 className="font-semibold text-sm truncate">Admin Panel</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <ModeToggle />
             <AdminLogoutButton />
           </div>

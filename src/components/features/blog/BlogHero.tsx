@@ -48,7 +48,7 @@ export default function BlogHero({
           className="text-4xl sm:text-5xl md:text-6xl font-bold mb-5"
           style={{ fontFamily: "var(--font-heading)" }}
         >
-          <span className="text-[#D4A336] italic">Stories from the Heart</span>
+          <span className="text-gold italic">Stories from the Heart</span>
         </motion.h1>
 
         {/* Subtitle */}

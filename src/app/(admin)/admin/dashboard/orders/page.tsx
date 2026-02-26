@@ -244,7 +244,7 @@ export default function OrdersManager() {
             setStatusFilter(e.target.value);
             setPage(1);
           }}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
+          className="h-9 rounded-md border bg-background text-foreground px-3 text-sm"
         >
           <option value="">All Statuses</option>
           {ORDER_STATUSES.map((s) => (
@@ -261,7 +261,7 @@ export default function OrdersManager() {
             setPaymentStatusFilter(e.target.value);
             setPage(1);
           }}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
+          className="h-9 rounded-md border bg-background text-foreground px-3 text-sm"
         >
           <option value="">All Payment</option>
           {PAYMENT_STATUSES.map((s) => (
@@ -278,7 +278,7 @@ export default function OrdersManager() {
             setPaymentMethodFilter(e.target.value);
             setPage(1);
           }}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
+          className="h-9 rounded-md border bg-background text-foreground px-3 text-sm"
         >
           <option value="">All Methods</option>
           <option value="COD">COD</option>

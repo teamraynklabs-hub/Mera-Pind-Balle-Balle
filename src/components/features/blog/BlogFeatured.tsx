@@ -35,7 +35,7 @@ export default function BlogFeatured({ post }: BlogFeaturedProps) {
         >
           {/* Image */}
           <div className="relative aspect-[4/3] lg:aspect-auto lg:h-full overflow-hidden">
-            <span className="absolute top-4 left-4 z-10 px-4 py-1.5 rounded-full bg-[#D4A336] text-white text-xs font-semibold tracking-wide uppercase">
+            <span className="absolute top-4 left-4 z-10 px-4 py-1.5 rounded-full bg-gold text-gold-foreground text-xs font-semibold tracking-wide uppercase">
               Featured
             </span>
             <Image
@@ -63,7 +63,7 @@ export default function BlogFeatured({ post }: BlogFeaturedProps) {
 
             {/* Title */}
             <h2
-              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight text-[#D4A336] group-hover:opacity-90 transition-opacity"
+              className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight text-gold group-hover:opacity-90 transition-opacity"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               {post.title}

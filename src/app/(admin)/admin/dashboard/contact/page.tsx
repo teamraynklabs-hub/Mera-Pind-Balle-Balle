@@ -721,8 +721,8 @@ export default function ContactDashboard() {
                       <Badge
                         className={
                           lead.isResolved
-                            ? "bg-green-600 text-white"
-                            : "bg-yellow-500 text-black"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-secondary-foreground"
                         }
                       >
                         {lead.isResolved ? "Resolved" : "Pending"}

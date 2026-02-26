@@ -222,7 +222,7 @@ export default function StoriesManager() {
               <div className="grid gap-2">
                 <Label>
                   Upload Image{" "}
-                  {!editingStory && <span className="text-red-500">*</span>}
+                  {!editingStory && <span className="text-destructive">*</span>}
                 </Label>
                 <Input
                   type="file"
@@ -243,7 +243,7 @@ export default function StoriesManager() {
               {/* Title */}
               <div className="grid gap-2">
                 <Label>
-                  Title <span className="text-red-500">*</span>
+                  Title <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   name="title"
@@ -289,7 +289,7 @@ export default function StoriesManager() {
               {/* Excerpt */}
               <div className="grid gap-2">
                 <Label>
-                  Excerpt <span className="text-red-500">*</span>
+                  Excerpt <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
                   name="excerpt"
@@ -303,7 +303,7 @@ export default function StoriesManager() {
               {/* Content */}
               <div className="grid gap-2">
                 <Label>
-                  Content (HTML) <span className="text-red-500">*</span>
+                  Content (HTML) <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
                   name="content"
@@ -348,7 +348,7 @@ export default function StoriesManager() {
                     className="w-4 h-4 accent-primary"
                   />
                   {form.isPublished ? (
-                    <Eye size={16} className="text-green-500" />
+                    <Eye size={16} className="text-primary" />
                   ) : (
                     <EyeOff size={16} className="text-muted-foreground" />
                   )}
@@ -410,7 +410,7 @@ export default function StoriesManager() {
                       <Star size={14} className="text-yellow-500 fill-yellow-500" />
                     )}
                     {story.isPublished ? (
-                      <Eye size={14} className="text-green-500" />
+                      <Eye size={14} className="text-primary" />
                     ) : (
                       <EyeOff size={14} className="text-muted-foreground" />
                     )}

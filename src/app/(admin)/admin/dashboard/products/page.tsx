@@ -599,12 +599,12 @@ export default function ProductsManager() {
                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   <div className="absolute top-2 right-2 flex gap-1.5">
                     {item.isFeatured && (
-                      <span className="px-2 py-0.5 rounded-full bg-yellow-500/90 text-white text-xs font-medium flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-full bg-gold text-gold-foreground text-xs font-medium flex items-center gap-1">
                         <Star size={10} /> Featured
                       </span>
                     )}
                     {!item.isActive && (
-                      <span className="px-2 py-0.5 rounded-full bg-red-500/90 text-white text-xs font-medium">Inactive</span>
+                      <span className="px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground text-xs font-medium">Inactive</span>
                     )}
                   </div>
                   {item.category && (

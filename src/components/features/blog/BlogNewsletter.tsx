@@ -35,7 +35,7 @@ export default function BlogNewsletter() {
           className="text-3xl sm:text-4xl font-bold mb-4"
           style={{ fontFamily: "var(--font-heading)" }}
         >
-          <span className="text-[#D4A336] italic">Stay Inspired</span>
+          <span className="text-gold italic">Stay Inspired</span>
         </h2>
 
         <p className="text-muted-foreground text-base sm:text-lg mb-8 max-w-lg mx-auto">
@@ -57,7 +57,7 @@ export default function BlogNewsletter() {
           />
           <button
             type="submit"
-            className="px-8 py-3.5 rounded-xl bg-[#D4A336] hover:bg-[#c4932e] text-white font-semibold text-sm tracking-wide transition-all duration-300 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-medium)] flex items-center justify-center gap-2"
+            className="px-8 py-3.5 rounded-xl bg-gold hover:bg-gold/85 text-gold-foreground font-semibold text-sm tracking-wide transition-all duration-300 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-medium)] flex items-center justify-center gap-2"
           >
             <Send size={16} />
             Subscribe

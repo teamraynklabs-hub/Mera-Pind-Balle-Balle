@@ -70,7 +70,7 @@ export default function HeroSection({
           {secondLine && (
             <>
               <br />
-              <span className="text-[#D4A336] italic">{secondLine}</span>
+              <span className="text-gold italic">{secondLine}</span>
             </>
           )}
         </h1>

@@ -272,15 +272,15 @@ export default function HomepageManagerPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Homepage Manager</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Homepage Manager</h1>
           <p className="text-muted-foreground mt-1">Manage all home page content and data</p>
         </div>
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="flex items-center gap-2 px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white rounded-lg font-medium transition"
+          className="flex items-center gap-2 px-6 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg font-medium transition"
         >
           {loading ? (
             <>
@@ -298,25 +298,25 @@ export default function HomepageManagerPage() {
 
       {/* Alerts */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive">
           {error}
         </div>
       )}
       {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700">
+        <div className="p-4 bg-primary/10 border border-primary/30 rounded-lg text-primary">
           {success}
         </div>
       )}
 
       {/* Tabs */}
       <div className="border rounded-lg bg-card">
-        <div className="flex border-b">
+        <div className="flex overflow-x-auto border-b">
           {['hero', 'initiatives', 'feedback', 'impact', 'cta'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 font-medium transition-colors ${activeTab === tab
-                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  ? 'border-b-2 border-primary text-primary'
                   : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
@@ -335,7 +335,7 @@ export default function HomepageManagerPage() {
                   type="text"
                   value={formData.hero.title}
                   onChange={e => handleInputChange(e, 'hero.title')}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                   placeholder="Enter hero title"
                 />
               </div>
@@ -346,7 +346,7 @@ export default function HomepageManagerPage() {
                   value={formData.hero.subtitle}
                   onChange={e => handleInputChange(e, 'hero.subtitle')}
                   rows={3}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                   placeholder="Enter hero subtitle"
                 />
               </div>
@@ -358,10 +358,10 @@ export default function HomepageManagerPage() {
                     type="text"
                     value={formData.hero.image}
                     onChange={e => handleInputChange(e, 'hero.image')}
-                    className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="/hero.png"
                   />
-                  <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
+                  <label className="px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:bg-primary/90">
                     <Upload className="w-4 h-4 inline mr-2" />
                     Upload
                     <input
@@ -375,21 +375,21 @@ export default function HomepageManagerPage() {
               </div>
 
               {/* CTAs */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
                 <div>
                   <h3 className="font-semibold mb-3">Primary CTA</h3>
                   <input
                     type="text"
                     value={formData.hero.primaryCTA.label}
                     onChange={e => handleInputChange(e, 'hero.primaryCTA.label')}
-                    className="w-full px-3 py-2 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Label"
                   />
                   <input
                     type="text"
                     value={formData.hero.primaryCTA.link}
                     onChange={e => handleInputChange(e, 'hero.primaryCTA.link')}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Link"
                   />
                 </div>
@@ -400,14 +400,14 @@ export default function HomepageManagerPage() {
                     type="text"
                     value={formData.hero.secondaryCTA.label}
                     onChange={e => handleInputChange(e, 'hero.secondaryCTA.label')}
-                    className="w-full px-3 py-2 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Label"
                   />
                   <input
                     type="text"
                     value={formData.hero.secondaryCTA.link}
                     onChange={e => handleInputChange(e, 'hero.secondaryCTA.link')}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Link"
                   />
                 </div>
@@ -426,7 +426,7 @@ export default function HomepageManagerPage() {
                       <button
                         type="button"
                         onClick={() => removeArrayItem('initiatives', index)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-destructive hover:text-destructive/80"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -437,7 +437,7 @@ export default function HomepageManagerPage() {
                     type="text"
                     value={initiative.title}
                     onChange={e => handleArrayChange(e.target.value, 'initiatives', index, 'title')}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Title"
                   />
 
@@ -445,7 +445,7 @@ export default function HomepageManagerPage() {
                     value={initiative.description}
                     onChange={e => handleArrayChange(e.target.value, 'initiatives', index, 'description')}
                     rows={3}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Description"
                   />
 
@@ -456,10 +456,10 @@ export default function HomepageManagerPage() {
                         type="text"
                         value={initiative.image || '/photo1.png'}
                         onChange={e => handleArrayChange(e.target.value, 'initiatives', index, 'image')}
-                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder="/photo1.png"
                       />
-                      <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 flex items-center gap-1">
+                      <label className="px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:bg-primary/90 flex items-center gap-1">
                         <Upload className="w-4 h-4" />
                         Upload
                         <input
@@ -477,7 +477,7 @@ export default function HomepageManagerPage() {
               <button
                 type="button"
                 onClick={() => addArrayItem('initiatives', { title: '', description: '', image: '/photo1.png' })}
-                className="w-full py-2 border-2 border-dashed rounded-lg text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-2"
+                className="w-full py-2 border-2 border-dashed rounded-lg text-primary hover:bg-primary/10 flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Add Initiative
@@ -496,21 +496,21 @@ export default function HomepageManagerPage() {
                       <button
                         type="button"
                         onClick={() => removeArrayItem('feedback', index)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-destructive hover:text-destructive/80"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">Name</label>
                       <input
                         type="text"
                         value={item.name}
                         onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'name')}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder="Person's name"
                       />
                     </div>
@@ -520,7 +520,7 @@ export default function HomepageManagerPage() {
                         type="text"
                         value={item.role}
                         onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'role')}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder="e.g. Artisan, Ludhiana"
                       />
                     </div>
@@ -532,7 +532,7 @@ export default function HomepageManagerPage() {
                       value={item.quote}
                       onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'quote')}
                       rows={3}
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                       placeholder="Their feedback quote..."
                     />
                   </div>
@@ -544,10 +544,10 @@ export default function HomepageManagerPage() {
                         type="text"
                         value={item.avatar}
                         onChange={e => handleArrayChange(e.target.value, 'feedback', index, 'avatar')}
-                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                         placeholder="Avatar image URL (optional)"
                       />
-                      <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 flex items-center gap-1">
+                      <label className="px-4 py-2 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:bg-primary/90 flex items-center gap-1">
                         <Upload className="w-4 h-4" />
                         Upload
                         <input
@@ -565,7 +565,7 @@ export default function HomepageManagerPage() {
               <button
                 type="button"
                 onClick={() => addArrayItem('feedback', { name: '', role: '', quote: '', avatar: '' })}
-                className="w-full py-2 border-2 border-dashed rounded-lg text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-2"
+                className="w-full py-2 border-2 border-dashed rounded-lg text-primary hover:bg-primary/10 flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Add Feedback
@@ -577,12 +577,12 @@ export default function HomepageManagerPage() {
           {activeTab === 'impact' && (
             <div className="space-y-4">
               {formData.impact.map((stat, index) => (
-                <div key={index} className="p-4 border rounded-lg grid grid-cols-2 gap-3">
+                <div key={index} className="p-4 border rounded-lg grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
                     value={stat.label}
                     onChange={e => handleArrayChange(e.target.value, 'impact', index, 'label')}
-                    className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Label"
                   />
 
@@ -591,14 +591,14 @@ export default function HomepageManagerPage() {
                       type="text"
                       value={stat.value}
                       onChange={e => handleArrayChange(e.target.value, 'impact', index, 'value')}
-                      className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                       placeholder="Value"
                     />
                     {formData.impact.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeArrayItem('impact', index)}
-                        className="px-3 text-red-600 hover:text-red-700"
+                        className="px-3 text-destructive hover:text-destructive/80"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -610,7 +610,7 @@ export default function HomepageManagerPage() {
               <button
                 type="button"
                 onClick={() => addArrayItem('impact', { label: '', value: '' })}
-                className="w-full py-2 border-2 border-dashed rounded-lg text-blue-600 hover:bg-blue-50 flex items-center justify-center gap-2"
+                className="w-full py-2 border-2 border-dashed rounded-lg text-primary hover:bg-primary/10 flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 Add Statistic
@@ -627,7 +627,7 @@ export default function HomepageManagerPage() {
                   type="text"
                   value={formData.cta.title}
                   onChange={e => handleInputChange(e, 'cta.title')}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                   placeholder="Title"
                 />
               </div>
@@ -638,19 +638,19 @@ export default function HomepageManagerPage() {
                   value={formData.cta.description}
                   onChange={e => handleInputChange(e, 'cta.description')}
                   rows={3}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                   placeholder="Description"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Button Text</label>
                   <input
                     type="text"
                     value={formData.cta.buttonText}
                     onChange={e => handleInputChange(e, 'cta.buttonText')}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Button text"
                   />
                 </div>
@@ -661,7 +661,7 @@ export default function HomepageManagerPage() {
                     type="text"
                     value={formData.cta.link}
                     onChange={e => handleInputChange(e, 'cta.link')}
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Button link"
                   />
                 </div>
@@ -670,18 +670,18 @@ export default function HomepageManagerPage() {
           )}
 
           {/* Submit Button */}
-          <div className="flex gap-4 pt-6 border-t">
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-500 text-white rounded-lg font-medium transition"
+              className="flex-1 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-lg font-medium transition"
             >
               {loading ? 'Saving...' : 'Save All Changes'}
             </button>
             <button
               type="button"
               onClick={() => setFormData(INITIAL_DATA)}
-              className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+              className="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition"
             >
               Reset
             </button>

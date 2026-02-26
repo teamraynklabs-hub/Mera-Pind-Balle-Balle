@@ -405,13 +405,13 @@ export default function BlogsManager() {
                   <div className="flex items-center gap-1.5 text-xs">
                     {blog.isPublished ? (
                       <>
-                        <Eye size={13} className="text-green-500" />
-                        <span className="text-green-600">Published</span>
+                        <Eye size={13} className="text-primary" />
+                        <span className="text-primary">Published</span>
                       </>
                     ) : (
                       <>
-                        <EyeOff size={13} className="text-yellow-500" />
-                        <span className="text-yellow-600">Draft</span>
+                        <EyeOff size={13} className="text-muted-foreground" />
+                        <span className="text-muted-foreground">Draft</span>
                       </>
                     )}
                   </div>

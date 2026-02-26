@@ -536,7 +536,7 @@ export default function FooterManager() {
                     onChange={(e) =>
                       updateSocialLink(i, "platform", e.target.value)
                     }
-                    className="h-9 rounded-md border border-input bg-background px-3 text-sm min-w-[130px]"
+                    className="h-9 rounded-md border border-input bg-background text-foreground px-3 text-sm min-w-[130px]"
                   >
                     {PLATFORM_OPTIONS.map((p) => (
                       <option key={p} value={p}>

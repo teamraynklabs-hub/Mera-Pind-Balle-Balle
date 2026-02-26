@@ -307,7 +307,7 @@ export default function NavbarManager() {
                         title={link.isVisible ? "Hide link" : "Show link"}
                       >
                         {link.isVisible ? (
-                          <Eye size={16} className="text-green-500" />
+                          <Eye size={16} className="text-primary" />
                         ) : (
                           <EyeOff size={16} className="text-muted-foreground" />
                         )}

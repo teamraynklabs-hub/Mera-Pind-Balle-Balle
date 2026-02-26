@@ -97,10 +97,11 @@ export default function Navbar() {
               height={40}
               priority
               suppressHydrationWarning
+              className="object-cover w-full h-full"
             />
           </div>
           <span
-            className="hidden sm:inline text-xl font-medium tracking-wide text-[#C8941F] dark:text-[#D4A336]"
+            className="hidden sm:inline text-xl font-medium tracking-wide text-gold"
             style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
           >
             {navData.brandName}

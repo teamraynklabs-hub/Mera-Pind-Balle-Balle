@@ -49,10 +49,10 @@ export function AdminLogoutButton() {
 
   return (
     <Button
-      variant="destructive"
+      variant="outline"
       onClick={handleLogout}
       disabled={isLoading}
-      className="flex gap-2 cursor-pointer"
+      className="flex gap-2 cursor-pointer text-destructive border-destructive/30 hover:bg-destructive hover:text-destructive-foreground"
     >
       <LogOut size={18} />
       {isLoading ? "Logging out..." : "Logout"}

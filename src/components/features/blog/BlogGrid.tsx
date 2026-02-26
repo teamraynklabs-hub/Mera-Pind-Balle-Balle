@@ -73,7 +73,7 @@ function BlogCard({ post, index }: { post: BlogPost; index: number }) {
 
             {/* Title */}
             <h3
-              className="text-lg sm:text-xl font-bold mb-2 leading-snug text-[#D4A336] line-clamp-2"
+              className="text-lg sm:text-xl font-bold mb-2 leading-snug text-gold line-clamp-2"
               style={{ fontFamily: "var(--font-heading)" }}
             >
               {post.title}
