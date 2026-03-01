@@ -66,14 +66,7 @@ export default function ClosingCTA({
                   <ArrowRight size={18} className="ml-2" />
                 </Link>
               </Button>
-              <Button
-                variant="outline"
-                asChild
-                size="lg"
-                className="text-base px-10 py-6"
-              >
-                <Link href="/contact">Get in Touch</Link>
-              </Button>
+             
             </div>
           </ScrollReveal>
         </div>

@@ -101,10 +101,11 @@ export default function Navbar() {
             />
           </div>
           <span
-            className="hidden sm:inline text-xl font-medium tracking-wide text-gold"
+            className="hidden sm:inline text-xl font-medium tracking-wide text-[#C8941F] dark:text-[#C8941F]"
             style={{ fontFamily: "var(--font-heading), Georgia, serif" }}
+            suppressHydrationWarning
           >
-            {navData.brandName}
+            {mounted ? navData.brandName : "Mera Pind Balle Balle"}
           </span>
         </Link>
 
@@ -119,11 +120,10 @@ export default function Navbar() {
               <Link
                 key={item.title}
                 href={item.href}
-                className={`text-sm font-medium px-3 py-2 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${
-                  isActive
-                    ? "text-primary after:bg-primary after:scale-x-100"
-                    : "text-foreground/70 hover:text-foreground after:bg-foreground after:scale-x-0 hover:after:scale-x-100"
-                }`}
+                className={`text-sm font-medium px-3 py-2 transition-colors duration-200 relative after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:transition-all after:duration-200 ${isActive
+                  ? "text-primary after:bg-primary after:scale-x-100"
+                  : "text-foreground/70 hover:text-foreground after:bg-foreground after:scale-x-0 hover:after:scale-x-100"
+                  }`}
               >
                 {item.title}
               </Link>
@@ -196,11 +196,10 @@ export default function Navbar() {
                   key={item.title}
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`text-sm py-2.5 px-3 font-medium transition-colors border-l-2 ${
-                    isActive
-                      ? "text-primary border-primary"
-                      : "text-muted-foreground hover:text-foreground border-transparent hover:border-foreground"
-                  }`}
+                  className={`text-sm py-2.5 px-3 font-medium transition-colors border-l-2 ${isActive
+                    ? "text-primary border-primary"
+                    : "text-muted-foreground hover:text-foreground border-transparent hover:border-foreground"
+                    }`}
                 >
                   {item.title}
                 </Link>

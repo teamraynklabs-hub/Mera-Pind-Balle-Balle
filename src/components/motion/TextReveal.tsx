@@ -20,6 +20,11 @@ export default function TextReveal({
   duration = 0.4,
   once = true,
 }: TextRevealProps) {
+  const [mounted, setMounted] = (require("react").useState)(false);
+  (require("react").useEffect)(() => {
+    setMounted(true);
+  }, []);
+
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once, amount: 0.3 });
 
@@ -31,9 +36,9 @@ export default function TextReveal({
       {words.map((word, i) => (
         <motion.span
           key={i}
-          className="inline-block"
-          initial={{ opacity: 0, y: 12 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
+          className="inline-block transition-none"
+          initial={false}
+          animate={mounted && isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           transition={{
             duration,
             delay: i * staggerDelay,

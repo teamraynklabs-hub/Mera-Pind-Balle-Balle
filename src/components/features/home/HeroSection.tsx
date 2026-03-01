@@ -27,7 +27,10 @@ export default function HeroSection({
   const secondLine = titleParts.length > 1 ? titleParts.slice(1).join(" ") : "";
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section
+      suppressHydrationWarning
+      className="relative h-screen flex items-center justify-center overflow-hidden"
+    >
       {/* Parallax Background */}
       <div className="absolute inset-0 z-0">
         <ParallaxImage

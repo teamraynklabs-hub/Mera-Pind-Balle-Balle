@@ -1,5 +1,4 @@
-"use client";
-
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import ScrollReveal from "@/components/motion/ScrollReveal";
@@ -17,6 +16,11 @@ interface InitiativeCardsProps {
 const ease = [0.16, 1, 0.3, 1] as const;
 
 export default function InitiativeCards({ initiatives }: InitiativeCardsProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const visible = initiatives.filter(
     (item) => item.title && item.title.trim() !== ""
   );
@@ -44,10 +48,15 @@ export default function InitiativeCards({ initiatives }: InitiativeCardsProps) {
           {visible.map((item, i) => (
             <motion.div
               key={i}
+              suppressHydrationWarning
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: i * 0.08, ease }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{
+                duration: 0.7,
+                delay: i * 0.12,
+                ease
+              }}
             >
               <div className="group relative block rounded-2xl overflow-hidden aspect-[4/5] border shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-deep)] transition-shadow duration-500">
                 {/* Background Image */}

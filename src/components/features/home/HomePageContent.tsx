@@ -1,30 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import dynamic from "next/dynamic";
 import HeroSection from "@/components/features/home/HeroSection";
 import TrustSection from "@/components/features/home/TrustSection";
-
-const InitiativeCards = dynamic(
-  () => import("@/components/features/home/InitiativeCards"),
-  { ssr: false }
-);
-const HomeProductsCarousel = dynamic(
-  () => import("@/components/features/home/HomeProductsCarousel"),
-  { ssr: false }
-);
-const HomeFeaturedProducts = dynamic(
-  () => import("@/components/features/home/HomeFeaturedProducts"),
-  { ssr: false }
-);
-const HomeFeedback = dynamic(
-  () => import("@/components/features/home/HomeFeedback"),
-  { ssr: false }
-);
-const ClosingCTA = dynamic(
-  () => import("@/components/features/home/ClosingCTA"),
-  { ssr: false }
-);
+import HomeProductsCarousel from "@/components/features/home/HomeProductsCarousel";
+import HomeFeaturedProducts from "@/components/features/home/HomeFeaturedProducts";
+import InitiativeCards from "@/components/features/home/InitiativeCards";
+import HomeFeedback from "@/components/features/home/HomeFeedback";
+import ClosingCTA from "@/components/features/home/ClosingCTA";
 
 interface HomeData {
   hero: {
@@ -49,48 +32,25 @@ interface HomeData {
 
 const POLL_INTERVAL = 120_000; // 2 minutes
 
-function LoadingSkeleton() {
+function ProductsSkeleton() {
   return (
-    <div className="animate-pulse">
-      {/* Hero skeleton */}
-      <div className="h-screen bg-muted/30" />
-
-      {/* Impact stats skeleton */}
-      <div className="container mx-auto px-4 py-20">
-        <div className="h-8 w-48 bg-muted/40 rounded mx-auto mb-10" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-40 rounded-2xl bg-muted/30" />
-          ))}
-        </div>
-      </div>
-
-      {/* Initiatives skeleton */}
-      <div className="container mx-auto px-4 py-20 bg-accent/30">
-        <div className="h-8 w-40 bg-muted/40 rounded mx-auto mb-10" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="aspect-[4/5] rounded-2xl bg-muted/30" />
-          ))}
-        </div>
-      </div>
-
-      {/* Feedback skeleton */}
-      <div className="container mx-auto px-4 py-20">
-        <div className="h-8 w-56 bg-muted/40 rounded mx-auto mb-10" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-64 rounded-2xl bg-muted/30" />
-          ))}
-        </div>
+    <div className="container mx-auto px-4 py-20 animate-pulse">
+      <div className="h-8 w-48 bg-muted/40 rounded mx-auto mb-10" />
+      <div className="flex gap-6 overflow-hidden">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="w-[300px] shrink-0 aspect-[3/4] rounded-2xl bg-muted/30" />
+        ))}
       </div>
     </div>
   );
 }
 
-export default function HomePageContent() {
-  const [data, setData] = useState<HomeData | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function HomePageContent({ initialData }: { initialData?: HomeData }) {
+  const [data, setData] = useState<HomeData | null>(initialData || null);
+  // Match SSR data presence exactly to avoid hydration mismatches.
+  // We'll still use loadingProducts for the specialized "extra time" delay.
+  const [loading, setLoading] = useState(!initialData);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [error, setError] = useState(false);
   const mountedRef = useRef(true);
 
@@ -111,28 +71,40 @@ export default function HomePageContent() {
       if (isInitial && mountedRef.current) {
         setError(true);
       }
-    } finally {
-      if (isInitial && mountedRef.current) {
-        setLoading(false);
-      }
     }
   }, []);
 
   useEffect(() => {
     mountedRef.current = true;
-    fetchData(true);
+
+    let heroTimer: NodeJS.Timeout;
+    let productsTimer: NodeJS.Timeout;
+
+    heroTimer = setTimeout(() => {
+      if (!mountedRef.current) return;
+      setLoading(false);
+
+      productsTimer = setTimeout(() => {
+        if (!mountedRef.current) return;
+        setLoadingProducts(false);
+      }, 800);
+    }, 400);
+
+    if (!initialData) {
+      fetchData(true);
+    }
 
     const interval = setInterval(() => fetchData(false), POLL_INTERVAL);
 
     return () => {
       mountedRef.current = false;
+      if (heroTimer) clearTimeout(heroTimer);
+      if (productsTimer) clearTimeout(productsTimer);
       clearInterval(interval);
     };
-  }, [fetchData]);
+  }, [fetchData, initialData]);
 
-  if (loading) return <LoadingSkeleton />;
-
-  if (error || !data) {
+  if (error || (!data && !loading)) {
     return (
       <div className="py-20 text-center">
         <p className="text-muted-foreground">
@@ -142,10 +114,13 @@ export default function HomePageContent() {
     );
   }
 
+  // To avoid hydration mismatch, we NO LONGER return a separate LoadingSkeleton component here.
+  // Instead, we render the main tree and handle individual section loading.
+
   return (
-    <>
-      {/* HERO */}
-      {data.hero && (
+    <div className="flex flex-col">
+      {/* HERO — SSR compatible toggle */}
+      {data?.hero ? (
         <HeroSection
           title={data.hero.title}
           subtitle={data.hero.subtitle}
@@ -159,33 +134,41 @@ export default function HomePageContent() {
             link: data.hero.secondaryCTA?.link || "/stories",
           }}
         />
+      ) : (
+        <div className="h-screen bg-muted/30 animate-pulse" />
       )}
 
-      {/* IMPACT STATS */}
-      {data.impact?.length > 0 && <TrustSection impact={data.impact} />}
-
-      {/* OUR INITIATIVES */}
-      {data.initiatives?.length > 0 && (
-        <InitiativeCards initiatives={data.initiatives} />
-      )}
-
-      {/* OUR PRODUCTS — Horizontal Scroll */}
-      {data.allProducts?.length > 0 && (
-        <HomeProductsCarousel products={data.allProducts} />
-      )}
+      {/* OUR PRODUCTS — Granular loading for user's requested delay */}
+      {data?.allProducts && data.allProducts.length > 0 ? (
+        loadingProducts ? (
+          <ProductsSkeleton />
+        ) : (
+          <HomeProductsCarousel products={data.allProducts} />
+        )
+      ) : null}
 
       {/* FEATURED COLLECTION */}
-      {data.featuredProducts?.length > 0 && (
+      {!loading && data?.featuredProducts && data.featuredProducts.length > 0 && (
         <HomeFeaturedProducts products={data.featuredProducts} />
       )}
 
+      {/* IMPACT STATS */}
+      {!loading && data?.impact && data.impact.length > 0 && (
+        <TrustSection impact={data.impact} />
+      )}
+
+      {/* OUR INITIATIVES */}
+      {!loading && data?.initiatives && data.initiatives.length > 0 && (
+        <InitiativeCards initiatives={data.initiatives} />
+      )}
+
       {/* CUSTOMER FEEDBACK */}
-      {data.feedback?.length > 0 && (
+      {!loading && data?.feedback && data.feedback.length > 0 && (
         <HomeFeedback feedbacks={data.feedback} />
       )}
 
       {/* FINAL CTA */}
-      {data.cta && (
+      {!loading && data?.cta && (
         <ClosingCTA
           title={data.cta.title}
           description={data.cta.description}
@@ -193,6 +176,6 @@ export default function HomePageContent() {
           link={data.cta.link || "/products"}
         />
       )}
-    </>
+    </div>
   );
 }

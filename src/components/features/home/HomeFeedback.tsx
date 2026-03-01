@@ -1,5 +1,4 @@
-"use client";
-
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Star, Quote, MapPin, User, MessageCircle } from "lucide-react";
 import { motion } from "motion/react";
@@ -42,6 +41,11 @@ function StarRating({ rating = 5 }: { rating?: number }) {
 }
 
 export default function HomeFeedback({ feedbacks }: HomeFeedbackProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const visible = feedbacks.filter((f) => f.name && f.name.trim() !== "");
   if (visible.length === 0) return null;
 
@@ -77,10 +81,15 @@ export default function HomeFeedback({ feedbacks }: HomeFeedbackProps) {
             return (
               <motion.div
                 key={i}
+                suppressHydrationWarning
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: i * 0.12, ease }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{
+                  duration: 0.7,
+                  delay: i * 0.12,
+                  ease
+                }}
                 className="group relative flex flex-col rounded-2xl border bg-card overflow-hidden shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-deep)] hover:-translate-y-1.5 transition-all duration-500"
               >
                 {/* Top — User Image Banner */}

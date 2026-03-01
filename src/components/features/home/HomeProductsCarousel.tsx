@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/features/products/ProductCard";
+import { motion } from "motion/react";
 import ScrollReveal from "@/components/motion/ScrollReveal";
 
 interface Product {
@@ -28,6 +29,11 @@ export default function HomeProductsCarousel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const visible = products.filter((p) => p.name && p.name.trim() !== "");
   if (visible.length === 0) return null;
@@ -66,26 +72,24 @@ export default function HomeProductsCarousel({
   return (
     <section className="py-20 md:py-28">
       <div className="container mx-auto px-4 md:px-8 lg:px-12">
-        {/* Header with arrows */}
+        {/* Header - Centered */}
         <ScrollReveal>
-          <div className="flex items-end justify-between mb-10">
-            <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-primary font-medium mb-3">
-                Our Store
-              </p>
-              <h2
-                className="text-3xl sm:text-4xl font-bold tracking-tight"
-                style={{ fontFamily: "var(--font-heading)" }}
-              >
-                Our Products
-              </h2>
-              <p className="mt-3 text-muted-foreground text-lg max-w-xl">
-                Handcrafted with love by rural artisans across India
-              </p>
-            </div>
+          <div className="text-center mb-12 relative flex flex-col items-center">
+            <p className="text-sm uppercase tracking-[0.2em] text-primary font-medium mb-3">
+              Our Store
+            </p>
+            <h2
+              className="text-3xl sm:text-4xl font-bold tracking-tight"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Our Products
+            </h2>
+            <p className="mt-3 text-muted-foreground text-lg max-w-xl mx-auto">
+              Handcrafted with love by rural artisans across India
+            </p>
 
-            {/* Desktop arrows + View All */}
-            <div className="hidden sm:flex items-center gap-3">
+            {/* Desktop arrows - Now absolute to sides or kept integrated */}
+            <div className="hidden sm:flex items-center gap-3 mt-8">
               <button
                 onClick={() => scroll("left")}
                 disabled={!canScrollLeft}
@@ -106,34 +110,40 @@ export default function HomeProductsCarousel({
           </div>
         </ScrollReveal>
 
-        {/* Horizontal Scroll Track */}
+        {/* Horizontal Scroll Track with Snapping and Animation */}
         <div className="relative">
           <div
             ref={scrollRef}
-            className="flex gap-6 overflow-x-auto scroll-smooth pb-4 -mb-4 scrollbar-hide"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
+            suppressHydrationWarning
+            className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mb-4 xl:px-[10%] lg:px-[10%] scrollbar-hide"
           >
-            {visible.map((product) => (
-              <div
+            {visible.map((product, i) => (
+              <motion.div
                 key={product._id}
-                className="w-[280px] sm:w-[300px] lg:w-[310px] shrink-0"
+                suppressHydrationWarning
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{
+                  duration: 0.7,
+                  delay: i * 0.12, // Increased stagger for "loading" effect
+                  ease: [0.16, 1, 0.3, 1]
+                }}
+                className="w-[280px] sm:w-[300px] lg:w-[310px] shrink-0 snap-center"
               >
                 <ProductCard product={product} />
-              </div>
+              </motion.div>
             ))}
           </div>
 
           {/* Left fade edge */}
           {canScrollLeft && (
-            <div className="absolute left-0 top-0 bottom-4 w-12 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
+            <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
           )}
 
           {/* Right fade edge */}
           {canScrollRight && (
-            <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+            <div className="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
           )}
         </div>
 

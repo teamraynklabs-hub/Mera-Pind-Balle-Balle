@@ -22,6 +22,11 @@ export default function StaggerContainer({
   once = true,
   amount = 0.15,
 }: StaggerContainerProps) {
+  const [mounted, setMounted] = (require("react").useState)(false);
+  (require("react").useEffect)(() => {
+    setMounted(true);
+  }, []);
+
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once, amount });
 
@@ -29,8 +34,9 @@ export default function StaggerContainer({
     <div ref={ref} className={className}>
       {React.Children.map(children, (child, index) => (
         <motion.div
-          initial={{ opacity: 0, y }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+          suppressHydrationWarning
+          initial={false}
+          animate={mounted && isInView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
           transition={{
             duration,
             delay: index * staggerDelay,

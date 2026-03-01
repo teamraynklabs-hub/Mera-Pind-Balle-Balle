@@ -22,6 +22,11 @@ export default function ScrollReveal({
   once = true,
   amount = 0.2,
 }: ScrollRevealProps) {
+  const [mounted, setMounted] = (require("react").useState)(false);
+  (require("react").useEffect)(() => {
+    setMounted(true);
+  }, []);
+
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once, amount });
 
@@ -29,8 +34,8 @@ export default function ScrollReveal({
     <motion.div
       ref={ref}
       className={className}
-      initial={{ opacity: 0, y }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
+      initial={false}
+      animate={mounted && isInView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
       transition={{ duration, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}

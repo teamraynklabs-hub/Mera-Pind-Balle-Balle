@@ -111,10 +111,15 @@ export default function TrustSection({ impact }: TrustSectionProps) {
             return (
               <motion.div
                 key={i}
+                suppressHydrationWarning
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{
+                  duration: 0.7,
+                  delay: i * 0.12,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
                 className="text-center p-8 md:p-10 rounded-2xl bg-card border shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-deep)] transition-all duration-500 group"
               >
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary/10 text-primary mb-5 group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-500">
