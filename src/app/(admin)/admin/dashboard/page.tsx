@@ -18,6 +18,7 @@ import {
   Shield,
   Gauge,
   PanelTop,
+  Settings,
 } from "lucide-react";
 
 const cards = [
@@ -32,6 +33,7 @@ const cards = [
   { title: "Resources",     href: "/admin/dashboard/resources",     icon: Layers,            color: "from-orange-500/20 to-orange-600/5" },
   { title: "Services",      href: "/admin/dashboard/services",      icon: Wrench,            color: "from-rose-500/20 to-rose-600/5" },
   { title: "About Page",    href: "/admin/dashboard/about",         icon: Info,              color: "from-violet-500/20 to-violet-600/5" },
+  { title: "Settings",      href: "/admin/settings",                icon: Settings,          color: "from-slate-500/20 to-slate-600/5" },
 ];
 
 const tips = [

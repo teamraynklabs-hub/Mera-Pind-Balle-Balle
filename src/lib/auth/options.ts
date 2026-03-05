@@ -1,6 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
+import { connectDB } from "../db";
+import AdminUser from "../models/AdminUser.model";
+import { verifyPassword } from "../auth/hash";
 
 export const authConfig = {
   providers: [
@@ -10,28 +13,51 @@ export const authConfig = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        async authorize(credentials) {
+          const email = credentials?.email;
+          const password = credentials?.password;
+          if (typeof email !== "string" || typeof password !== "string" || !email || !password) return null;
 
-        const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
+          // Try DB admin first
+          try {
+            await connectDB();
+            const admin = await AdminUser.findOne({ email: email, isActive: true }).lean();
+            if (admin) {
+              const ok = await verifyPassword(password, (admin as any).password);
+              if (ok) {
+                return {
+                  id: (admin as any)._id.toString(),
+                  name: (admin as any).name,
+                  email: (admin as any).email,
+                  role: (admin as any).role || "admin",
+                };
+              }
+              return null;
+            }
+          } catch (err) {
+            console.error("[AUTH] DB check failed, falling back to env auth", err);
+          }
 
-        if (!adminEmail || !adminPassword) {
-          console.error("[AUTH] ADMIN_EMAIL or ADMIN_PASSWORD not set in environment variables");
-          return null;
-        }
+          // Fallback to env-based admin
+          const adminEmail = process.env.ADMIN_EMAIL;
+          const adminPassword = process.env.ADMIN_PASSWORD;
 
-        if (credentials.email !== adminEmail || credentials.password !== adminPassword) {
-          return null;
-        }
+          if (!adminEmail || !adminPassword) {
+            console.error("[AUTH] ADMIN_EMAIL or ADMIN_PASSWORD not set in environment variables");
+            return null;
+          }
 
-        return {
-          id: "admin-env",
-          name: "Admin",
-          email: adminEmail,
-          role: "admin",
-        };
-      },
+          if (email !== adminEmail || password !== adminPassword) {
+            return null;
+          }
+
+          return {
+            id: "admin-env",
+            name: "Admin",
+            email: adminEmail,
+            role: "admin",
+          };
+        },
     }),
   ],
 

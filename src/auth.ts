@@ -5,6 +5,9 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import authConfig from "./auth.config"; // import the edge-safe part
 import jwt from 'jsonwebtoken';
+import { connectDB } from "./lib/db";
+import AdminUser from "./lib/models/AdminUser.model";
+import { verifyPassword } from "./lib/auth/hash";
 
 export const {
   handlers: { GET, POST },
@@ -25,21 +28,54 @@ export const {
         const password = credentials?.password;
 
         if (typeof email !== "string" || typeof password !== "string" || !email || !password) {
+          console.warn("[AUTH] Missing or invalid credentials");
           return null;
         }
 
+        // First try DB-based admin (preferred)
+        try {
+          await connectDB();
+          const admin = await AdminUser.findOne({ email, isActive: true }).lean();
+          if (admin) {
+            console.log("[AUTH] Found admin in DB:", email);
+            const ok = await verifyPassword(password, (admin as any).password);
+            if (ok) {
+              console.log("[AUTH] Password verified for DB admin");
+              return {
+                id: (admin as any)._id.toString(),
+                name: (admin as any).name,
+                email: (admin as any).email,
+                role: (admin as any).role || "admin",
+              };
+            }
+            console.warn("[AUTH] Password verification failed for DB admin:", email);
+            return null;
+          }
+          console.log("[AUTH] No DB admin found with email:", email);
+        } catch (err) {
+          console.error("[AUTH] DB check failed, falling back to env auth:", err);
+        }
+
+        // Fallback to env-based admin (legacy / quick setup)
         const adminEmail = process.env.ADMIN_EMAIL;
         const adminPassword = process.env.ADMIN_PASSWORD;
 
         if (!adminEmail || !adminPassword) {
-          console.error("email or password wrong ");
+          console.error("[AUTH] Environment admin credentials not configured");
           return null;
         }
 
-        if (email !== adminEmail || password !== adminPassword) {
+        if (email !== adminEmail) {
+          console.warn("[AUTH] Email mismatch. Expected:", adminEmail, "Got:", email);
           return null;
         }
 
+        if (password !== adminPassword) {
+          console.warn("[AUTH] Password mismatch for env admin");
+          return null;
+        }
+
+        console.log("[AUTH] Env-based admin authenticated");
         return {
           id: "admin-env",
           name: "Admin",

@@ -15,21 +15,30 @@ import AdminUser from "../src/lib/models/AdminUser.model";
 import { hashPassword } from "../src/lib/auth/hash";
 
 async function createAdmin() {
-  console.log("Loaded MONGODB_URI:", process.env.MONGODB_URI); 
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@mpbb.com";
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    console.error(" Error: ADMIN_PASSWORD not set in .env.local");
+    process.exit(1);
+  }
+
+  console.log("Loaded MONGODB_URI:", process.env.MONGODB_URI);
+  console.log("Creating admin with email:", adminEmail);
 
   await connectDB();
 
-  const exists = await AdminUser.findOne({ email: "admin@mpbb.com" });
+  const exists = await AdminUser.findOne({ email: adminEmail });
 
   if (exists) {
-    console.log(" Admin already exists");
+    console.log(" Admin already exists with email:", adminEmail);
     process.exit(0);
   }
 
   await AdminUser.create({
     name: "Super Admin",
-    email: "admin@mpbb.com",
-    password: await hashPassword("admin123"),
+    email: adminEmail,
+    password: await hashPassword(adminPassword),
     role: "admin",
   });
 

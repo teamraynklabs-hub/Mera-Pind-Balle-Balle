@@ -27,6 +27,7 @@ import {
   ScrollText,
   Navigation,
   PanelBottom,
+  Settings,
 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -69,6 +70,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { title: "Terms & Conditions", href: "/admin/dashboard/terms-conditions", icon: <ScrollText size={18} /> },
     { title: "Navbar",            href: "/admin/dashboard/navbar",            icon: <Navigation size={18} /> },
     { title: "Footer",            href: "/admin/dashboard/footer",            icon: <PanelBottom size={18} /> },
+    { title: "Settings",          href: "/admin/settings",                    icon: <Settings size={18} /> },
   ];
 
   const isActive = (href: string) => pathname === href;
