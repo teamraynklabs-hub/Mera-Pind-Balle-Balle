@@ -6,6 +6,10 @@ import HomePageContent from "@/components/features/home/HomePageContent";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://merapindballeballe.com";
 
+// Force dynamic rendering to prevent caching
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 /* ── Metadata ── */
 export async function generateMetadata(): Promise<Metadata> {
   try {

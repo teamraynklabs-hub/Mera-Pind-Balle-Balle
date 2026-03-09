@@ -124,7 +124,7 @@ export default function HomePageContent({ initialData }: { initialData?: HomeDat
         <HeroSection
           title={data.hero.title}
           subtitle={data.hero.subtitle}
-          image={data.hero.image || "/photo1.png"}
+          image={data.hero.image || "./hero.png"}
           primaryCTA={{
             label: data.hero.primaryCTA?.label || "Shop Collection",
             link: data.hero.primaryCTA?.link || "/products",

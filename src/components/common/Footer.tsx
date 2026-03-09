@@ -94,7 +94,7 @@ export default function Footer({
           observer.disconnect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
     observer.observe(footerRef.current);
     return () => observer.disconnect();
@@ -107,7 +107,7 @@ export default function Footer({
   const socialLinks = data?.socialLinks ?? [];
   const legalLinks = data?.legalLinks ?? [];
   const contactAddress =
-    data?.contactInfo?.address || "123 Heritage Lane, New Delhi, India 110001";
+    data?.contactInfo?.address;
   const contactPhone = data?.contactInfo?.phone || "+91 12345 67890";
   const contactEmail = data?.contactInfo?.email || "hello@merapind.com";
   const brandDescription =
@@ -117,17 +117,13 @@ export default function Footer({
     data?.copyrightText || "Mera Pind Balle Balle. All rights reserved.";
 
   const quickLinksTitle = data?.quickLinks?.columnTitle || "Quick Links";
-  const supportLinksTitle =
-    data?.supportLinks?.columnTitle || "Get Involved";
+  const supportLinksTitle = data?.supportLinks?.columnTitle || "Get Involved";
   const contactTitle = data?.contactInfo?.columnTitle || "Contact Us";
 
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer
-      ref={footerRef}
-      className="w-full bg-card border-t border-border"
-    >
+    <footer ref={footerRef} className="w-full bg-card border-t border-border">
       <div
         className={`section-container py-14 md:py-16 transition-all duration-700 ease-out ${
           visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
@@ -224,7 +220,32 @@ export default function Footer({
               {contactAddress && (
                 <li className="flex items-start gap-2.5 justify-center sm:justify-start">
                   <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0 text-primary/70" />
-                  <span className="leading-relaxed">{contactAddress}</span>
+                  <div className="leading-relaxed space-y-3">
+                    {(
+                      <>
+                        <p>
+                          <strong>Delhi Office:</strong>
+                          <br />
+                          Jiriko Ventures Pvt. Ltd. A-702, Mahindra Apartments,
+                          Vikaspuri, New Delhi - 110018
+                        </p>
+
+                        <p>
+                          <strong>Haryana Office:</strong>
+                          <br />
+                          Jiriko Ventures Pvt. Ltd. D-125 SF, BPTP Astoria,
+                          Sector 102, Gurgaon, Haryana - 122006
+                        </p>
+
+                        <p>
+                          <strong>Punjab Office:</strong>
+                          <br />
+                          Jiriko Ventures Pvt. Ltd. Opp. Nalash Road, NH-44,
+                          Bharat Colony, Main Road, Rajpura, Punjab - 140401
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </li>
               )}
               {contactPhone && (
@@ -241,10 +262,7 @@ export default function Footer({
               {contactEmail && (
                 <li className="flex items-center gap-2.5 justify-center sm:justify-start">
                   <Mail className="h-4 w-4 flex-shrink-0 text-primary/70" />
-                  <a
-                    href={`mailto:${contactEmail}`}
-                    className="footer-link"
-                  >
+                  <a href={`mailto:${contactEmail}`} className="footer-link">
                     {contactEmail}
                   </a>
                 </li>
